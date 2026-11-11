@@ -24,10 +24,7 @@ export default function RunsPage() {
       <nav aria-label="Breadcrumb" className="text-sm text-dim">
         Projects <span className="text-faint">/</span> Bookwell <span className="text-faint">/</span> Runs
       </nav>
-      <h1 className="mt-3 text-2xl font-medium">Runs</h1>
-      <p className="mb-4 mt-1 text-sm text-dim">
-        How the agent runs behind the board are orchestrated: every step recorded, failures recovered, many runs at once.
-      </p>
+      <h1 className="mb-4 mt-3 text-2xl font-medium">Runs</h1>
 
       <nav aria-label="Sections" className="-mx-4 overflow-x-auto border-b border-edge px-4 sm:mx-0 sm:px-0">
         <ul className="flex gap-4 whitespace-nowrap text-sm">
@@ -44,7 +41,6 @@ export default function RunsPage() {
       <Section
         id="record"
         title="Run record: BW-142, Build"
-        lead="One run of the coding agent, step by step, as the orchestrator stored it. Every model call, tool result, rule decision and approval is a row with its cost and artifacts, so the run can be audited, billed and resumed."
       >
         <RunRecord />
       </Section>

@@ -41,7 +41,7 @@ export function Section({
 }: {
   id: string;
   title: string;
-  lead: string;
+  lead?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -49,7 +49,7 @@ export function Section({
       <h2 id={`${id}-h`} className="text-lg font-semibold">
         {title}
       </h2>
-      <p className="mt-1 max-w-3xl text-sm text-dim">{lead}</p>
+      {lead && <p className="mt-1 max-w-3xl text-sm text-dim">{lead}</p>}
       <div className="mt-4">{children}</div>
     </section>
   );
