@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/*
+ * One dark look for the whole app. Colours that carry meaning are tokens:
+ * - model tiers: small (teal), medium (violet), large (amber); people are pink;
+ *   the pipeline itself (CI, scripts) is grey.
+ * - speed metrics are blue, quality metrics are green.
+ * - red and green are test and gate results.
+ */
+@theme {
+  --color-bg: #0a0e13;
+  --color-panel: #10161e;
+  --color-panel-2: #151d27;
+  --color-edge: #222c38;
+  --color-edge-2: #2e3a48;
+  --color-ink: #e6edf3;
+  --color-dim: #9aa7b4;
+  --color-faint: #6b7886;
+
+  --color-small: #2dd4bf;
+  --color-medium: #a78bfa;
+  --color-large: #f5b544;
+  --color-human: #f472b6;
+  --color-system: #94a3b8;
+
+  --color-speed: #60a5fa;
+  --color-quality: #34d399;
+  --color-fail: #f87171;
+  --color-pass: #34d399;
+  --color-warn: #fbbf24;
+}
+
+html {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  color-scheme: dark;
+}
+
+body {
+  min-height: 100dvh;
+  background:
+    radial-gradient(1200px 500px at 15% -10%, rgb(96 165 250 / 0.08), transparent 60%),
+    radial-gradient(900px 500px at 95% 0%, rgb(167 139 250 / 0.07), transparent 60%),
+    var(--color-bg);
+}
+
+::selection {
+  background: rgb(96 165 250 / 0.35);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-speed);
+  outline-offset: 2px;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+@keyframes feed-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dash-flow {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+.feed-line {
+  animation: feed-in 260ms ease-out both;
+}
+
+.pulse-ring {
+  animation: pulse-ring 1.6s ease-out infinite;
+}
+
+.dash-flow {
+  animation: dash-flow 1.2s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feed-line,
+  .pulse-ring,
+  .dash-flow {
+    animation: none;
+  }
+}
