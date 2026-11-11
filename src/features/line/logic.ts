@@ -1,5 +1,5 @@
 import { COMPUTE_USD_PER_MINUTE, STATIONS, TIERS } from "./stations";
-import { STATION_IDS, type ActorId, type StationId, type TestKind, type Ticket, type TicketStep, type Tier, type Usage } from "./types";
+import { STATION_IDS, type ActorId, type LogLine, type StationId, type TestKind, type Ticket, type TicketStep, type Tier, type Usage } from "./types";
 
 /** Where playback is: which station, and how many of its log lines are showing. */
 export interface Cursor {
@@ -59,6 +59,74 @@ export function tickAll(tickets: Ticket[], cursors: Record<string, Cursor>): Rec
     next[ticket.id] = c;
   }
   return moved ? next : null;
+}
+
+/**
+ * The order tickets take turns in when the board plays one event at a time.
+ * A ticket with pace 2 gets two turns per round, spread out.
+ */
+export function turnOrder(tickets: Ticket[]): string[] {
+  const rounds = Math.max(1, ...tickets.map((t) => t.pace ?? 1));
+  const order: string[] = [];
+  for (let r = 0; r < rounds; r++) for (const t of tickets) if ((t.pace ?? 1) > r) order.push(t.id);
+  return order;
+}
+
+/** What changed for one ticket in one event, so the screen can point at it. */
+export interface BoardEvent {
+  seq: number;
+  ticketId: string;
+  before: Cursor;
+  after: Cursor;
+  moved: boolean;
+  line: LogLine | null;
+  tests: TestKind[];
+  assigneeChanged: boolean;
+}
+
+export function describeChange(ticket: Ticket, before: Cursor, after: Cursor, seq: number): BoardEvent {
+  const moved = before.station !== after.station;
+  const line = !moved && after.shown > before.shown ? (stepAt(ticket, after.station).log[after.shown - 1] ?? null) : null;
+  const tests = (Object.keys(ticket.tests) as TestKind[]).filter(
+    (k) => testState(ticket, k, before) !== testState(ticket, k, after),
+  );
+  return {
+    seq,
+    ticketId: ticket.id,
+    before,
+    after,
+    moved,
+    line,
+    tests,
+    assigneeChanged: assigneeAt(ticket, before) !== assigneeAt(ticket, after),
+  };
+}
+
+/**
+ * One event for the whole board: the next ticket in turn that is not finished
+ * takes one step. Returns null once every ticket is finished.
+ */
+export function stepOne(
+  tickets: Ticket[],
+  cursors: Record<string, Cursor>,
+  turn: number,
+  seq: number,
+): { cursors: Record<string, Cursor>; turn: number; event: BoardEvent } | null {
+  const order = turnOrder(tickets);
+  for (let k = 0; k < order.length; k++) {
+    const pos = (turn + k) % order.length;
+    const ticket = tickets.find((t) => t.id === order[pos])!;
+    const before = cursors[ticket.id] ?? START;
+    const after = tick(ticket, before);
+    if (after) {
+      return {
+        cursors: { ...cursors, [ticket.id]: after },
+        turn: pos + 1,
+        event: describeChange(ticket, before, after, seq),
+      };
+    }
+  }
+  return null;
 }
 
 /** Who has the ticket right now: whoever wrote the latest line, or the station's first worker. */

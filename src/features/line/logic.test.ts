@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   assigneeAt,
+  describeChange,
+  stepOne,
   tickAll,
+  turnOrder,
   formatMinutes,
   formatUsd,
   isFinished,
@@ -111,6 +114,44 @@ describe("the whole board", () => {
   it("assigns the ticket to whoever spoke last, or the station's first worker", () => {
     expect(assigneeAt(feature, { station: 1, shown: 0 })).toBe("planner");
     expect(assigneeAt(feature, { station: 1, shown: 2 })).toBe("owner");
+  });
+});
+
+describe("one event at a time", () => {
+  const start = () => Object.fromEntries(TICKETS.map((t) => [t.id, START]));
+
+  it("gives the fast-lane ticket two turns per round", () => {
+    expect(turnOrder(TICKETS)).toEqual(["feature", "bug", "performance", "bug"]);
+  });
+
+  it("moves exactly one ticket per event, in turn", () => {
+    const a = stepOne(TICKETS, start(), 0, 1)!;
+    expect(a.event.ticketId).toBe("feature");
+    expect(a.cursors.bug).toEqual(START);
+    const b = stepOne(TICKETS, a.cursors, a.turn, 2)!;
+    expect(b.event.ticketId).toBe("bug");
+  });
+
+  it("skips finished tickets and stops when all are done", () => {
+    const cursors = { ...Object.fromEntries(TICKETS.map((t) => [t.id, jumpTo(t, LAST_STATION)])), performance: START };
+    expect(stepOne(TICKETS, cursors, 0, 1)!.event.ticketId).toBe("performance");
+    const done = Object.fromEntries(TICKETS.map((t) => [t.id, jumpTo(t, LAST_STATION)]));
+    expect(stepOne(TICKETS, done, 0, 1)).toBeNull();
+  });
+
+  it("describes a move to a new column, and the tests it turned red", () => {
+    const before = jumpTo(feature, 1);
+    const ev = describeChange(feature, before, { station: 2, shown: 0 }, 7);
+    expect(ev.moved).toBe(true);
+    expect(ev.line).toBeNull();
+    expect(ev.tests).toContain("unit");
+  });
+
+  it("describes a new log line and who said it", () => {
+    const ev = describeChange(feature, { station: 1, shown: 1 }, { station: 1, shown: 2 }, 8);
+    expect(ev.moved).toBe(false);
+    expect(ev.line?.who).toBe("owner");
+    expect(ev.assigneeChanged).toBe(true);
   });
 });
 

@@ -3,7 +3,7 @@
 An animated walk through an AI-native software delivery line, and the numbers that show whether an AI
 transformation is working.
 
-The **Board** is a project-tracker board with one column per station. Press Start and three tickets move across it at their own pace; pick a card to see its status, tests, time, model spend and activity feed. The ten stations:
+The **Board** is a project-tracker board with one column per station. Press Start and the three tickets take turns, one event every few seconds; whatever changed (the card, its column, the assignee, a test, the newest comment) is highlighted, and with Follow activity on, the issue view follows the ticket that moved. The ten stations:
 
 | Lane  | Station         | What happens                                                                                  |
 | ----- | --------------- | --------------------------------------------------------------------------------------------- |
@@ -23,6 +23,8 @@ starts as an alert (fast lane), and a performance problem (the load test is writ
 
 The **Reports** page is a dashboard that plays a year of a rollout: every speed metric paired with the quality metric that
 keeps it honest, the decision rules that fire when one moves the wrong way, and what the models cost.
+
+The **Dashboard** is a stakeholder view: gadgets for token spend, velocity, cycle time, deploys, uptime and error budget, delivery health, AI adoption and decision rules. Gadgets can be added, removed, resized and dragged into a new order; the layout is saved in your browser.
 
 **Everything here is sample data.** Bookwell is a made-up business-travel booking app. No ticket, log line, cost or
 metric was measured.

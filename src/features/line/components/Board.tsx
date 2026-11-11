@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { assigneeAt, isStationDone, testState, type Cursor } from "../logic";
+import { assigneeAt, isStationDone, testState, type BoardEvent, type Cursor } from "../logic";
 import { STATIONS, TEST_KINDS } from "../stations";
 import type { Ticket } from "../types";
 import { Avatar, IssueTypeIcon, PriorityIcon } from "./jira";
@@ -17,11 +17,13 @@ export function Board({
   cursors,
   selectedId,
   onSelect,
+  event,
 }: {
   tickets: Ticket[];
   cursors: Record<string, Cursor>;
   selectedId: string;
   onSelect: (id: string) => void;
+  event: BoardEvent | null;
 }) {
   const scroller = useRef<HTMLDivElement>(null);
   const selectedStation = cursors[selectedId]?.station ?? 0;
@@ -47,8 +49,11 @@ export function Board({
               key={station.id}
               data-col={i}
               aria-label={`${station.name}, ${here.length} ${here.length === 1 ? "ticket" : "tickets"}`}
-              className={`flex w-[152px] shrink-0 flex-col rounded-md bg-column ${LANE_START.has(i) && i > 0 ? "ml-2" : ""}`}
+              className={`relative flex w-[152px] shrink-0 flex-col rounded-md bg-column ${LANE_START.has(i) && i > 0 ? "ml-2" : ""}`}
             >
+              {event?.moved && event.after.station === i && (
+                <span key={event.seq} aria-hidden className="flash-ring pointer-events-none absolute inset-0 rounded-md" />
+              )}
               <header className="px-2 pb-1 pt-2.5" title={`Stops the line: ${station.gate}`}>
                 <div className="text-[10px] font-semibold uppercase tracking-wide text-faint">{station.lane}</div>
                 <div className="flex items-center gap-1.5 text-xs font-semibold uppercase text-dim">
@@ -58,7 +63,14 @@ export function Board({
               </header>
               <div className="flex min-h-[280px] flex-col gap-1.5 p-1.5">
                 {here.map((t) => (
-                  <Card key={`${t.id}-${i}`} ticket={t} cursor={cursors[t.id]} selected={t.id === selectedId} onSelect={onSelect} />
+                  <Card
+                    key={`${t.id}-${i}`}
+                    ticket={t}
+                    cursor={cursors[t.id]}
+                    selected={t.id === selectedId}
+                    onSelect={onSelect}
+                    flashKey={event?.ticketId === t.id ? event.seq : null}
+                  />
                 ))}
               </div>
             </section>
@@ -74,11 +86,14 @@ function Card({
   cursor,
   selected,
   onSelect,
+  flashKey,
 }: {
   ticket: Ticket;
   cursor: Cursor;
   selected: boolean;
   onSelect: (id: string) => void;
+  /** Set when this card just changed: a ring fades out around it. */
+  flashKey: number | null;
 }) {
   const step = ticket.steps[cursor.station];
   const done = isStationDone(ticket, cursor);
@@ -93,10 +108,13 @@ function Card({
       type="button"
       onClick={() => onSelect(ticket.id)}
       aria-pressed={selected}
-      className={`card-in flex flex-col gap-2 rounded-[3px] p-2.5 text-left shadow-card transition-colors ${
+      className={`card-in relative flex flex-col gap-2 rounded-[3px] p-2.5 text-left shadow-card transition-colors ${
         selected ? "bg-selected outline-2 outline-brand" : "bg-card hover:bg-panel-2"
       }`}
     >
+      {flashKey !== null && (
+        <span key={flashKey} aria-hidden className="flash-ring pointer-events-none absolute inset-0 rounded-[3px]" />
+      )}
       <span className="line-clamp-3 text-[13px] leading-snug text-ink">{ticket.title}</span>
       <span className="flex flex-wrap gap-1">
         {step.mode !== "full" && (

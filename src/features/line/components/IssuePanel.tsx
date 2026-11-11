@@ -10,6 +10,7 @@ import {
   testState,
   totalsAt,
   totalsFor,
+  type BoardEvent,
   type Cursor,
   type TestState,
 } from "../logic";
@@ -34,11 +35,18 @@ export function IssuePanel({
   ticket,
   cursor,
   onJump,
+  event,
 }: {
   ticket: Ticket;
   cursor: Cursor;
   onJump: (station: number) => void;
+  /** The change that just happened to this ticket, if any: what it touched is highlighted. */
+  event: BoardEvent | null;
 }) {
+  const seq = event?.seq ?? 0;
+  /** A yellow wash on an element that just changed; the key restarts it on every event. */
+  const hlKey = (field: string, changed: boolean | undefined) => (event && changed ? `${field}-${seq}` : field);
+  const hlClass = (changed: boolean | undefined) => (event && changed ? "flash rounded-[3px]" : "");
   const station = STATIONS[cursor.station];
   const done = isStationDone(ticket, cursor);
   const now = totalsAt(ticket, cursor);
@@ -56,9 +64,11 @@ export function IssuePanel({
     <dl className="grid grid-cols-[110px_minmax(0,1fr)] content-start gap-x-3 gap-y-2.5 rounded-md border border-edge p-3 text-sm">
       <dt className="col-span-2 -mx-3 -mt-3 mb-1 border-b border-edge px-3 py-2 font-semibold">Details</dt>
       <dt className="text-dim">Assignee</dt>
-      <dd className="flex items-center gap-2">
+      <dd key={hlKey("assignee", event?.assigneeChanged)} className={hlClass(event?.assigneeChanged)}>
+        <span className="flex items-center gap-2">
         <Avatar id={assigneeAt(ticket, cursor)} />
         <span className="truncate">{ACTORS[assigneeAt(ticket, cursor)].name}</span>
+        </span>
       </dd>
       <dt className="text-dim">Reporter</dt>
       <dd>{ticket.source}</dd>
@@ -68,9 +78,10 @@ export function IssuePanel({
         {ticket.priority === "P1" ? "Highest" : "High"}
       </dd>
       <dt className="text-dim">Environment</dt>
-      <dd>{station.environment}</dd>
+      <dd key={hlKey("environment", event?.moved)} className={hlClass(event?.moved)}>{station.environment}</dd>
       <dt className="text-dim">Time tracking</dt>
-      <dd className="flex flex-col gap-1">
+      <dd key={hlKey("time", true)} className={hlClass(true)}>
+        <span className="flex flex-col gap-1">
         <span className="h-1.5 overflow-hidden rounded-full bg-neutral-bg">
           <span
             className="block h-full bg-brand transition-[width] duration-500"
@@ -80,9 +91,10 @@ export function IssuePanel({
         <span className="text-xs text-faint">
           {formatMinutes(now.wallMinutes)} logged · people {formatMinutes(now.humanMinutes)}
         </span>
+        </span>
       </dd>
       <dt className="text-dim">Model spend</dt>
-      <dd>
+      <dd key={hlKey("spend", true)} className={hlClass(true)}>
         {formatUsd(now.aiUsd)} <span className="text-xs text-faint">of {formatUsd(all.aiUsd)}</span>
       </dd>
     </dl>
@@ -101,13 +113,18 @@ export function IssuePanel({
       <h2 className="text-xl font-medium leading-snug text-ink sm:text-2xl">{ticket.title}</h2>
 
       <div className="flex flex-wrap items-center gap-2">
-        <StatusMenu current={cursor.station} finished={finished} onJump={onJump} />
+        <span className="relative">
+          <StatusMenu current={cursor.station} finished={finished} onJump={onJump} />
+          {event?.moved && (
+            <span key={seq} aria-hidden className="flash-ring pointer-events-none absolute inset-0 rounded-[3px]" />
+          )}
+        </span>
         <span className="text-xs text-faint">Exit: {station.gate}</span>
       </div>
 
       <div className="xl:hidden">{details}</div>
 
-      <Activity ticket={ticket} cursor={cursor} />
+      <Activity ticket={ticket} cursor={cursor} seq={event ? seq : null} />
 
       <section className="flex flex-col gap-2">
         <div className="flex items-baseline justify-between">
@@ -124,7 +141,11 @@ export function IssuePanel({
           {tests.map(({ k, state, t }) => {
             const l = TEST_LOZENGE[state as Exclude<TestState, "na">];
             return (
-              <li key={k.id} className="flex items-center gap-2 px-3 py-1.5 text-sm" title={k.proves}>
+              <li
+                key={event?.tests.includes(k.id) ? `${k.id}-${seq}` : k.id}
+                className={`flex items-center gap-2 px-3 py-1.5 text-sm ${event?.tests.includes(k.id) ? "flash" : ""}`}
+                title={k.proves}
+              >
                 <span className="min-w-0 flex-1 truncate">{k.name}</span>
                 <span className="text-xs text-faint">
                   {t?.count} {t?.unit}
@@ -205,7 +226,7 @@ interface Entry {
 }
 
 /** Status changes and comments, newest first, as they happen. */
-function Activity({ ticket, cursor }: { ticket: Ticket; cursor: Cursor }) {
+function Activity({ ticket, cursor, seq }: { ticket: Ticket; cursor: Cursor; seq: number | null }) {
   const entries: Entry[] = [];
   for (let i = 0; i <= cursor.station; i++) {
     const step = stepAt(ticket, i);
@@ -222,9 +243,12 @@ function Activity({ ticket, cursor }: { ticket: Ticket; cursor: Cursor }) {
         <span className="rounded-[3px] bg-selected px-2 py-0.5 text-xs font-medium text-brand">All</span>
       </div>
       <ol className="flex max-h-[300px] flex-col gap-3 overflow-y-auto pr-1" aria-live="polite">
-        {entries.map((e) =>
+        {entries.map((e, idx) =>
           e.kind === "status" ? (
-            <li key={`${ticket.id}-${e.key}`} className="feed-line flex items-center gap-2 rounded px-1 text-xs text-dim">
+            <li
+              key={`${ticket.id}-${e.key}${idx === 0 && seq !== null ? `-${seq}` : ""}`}
+              className={`flex items-center gap-2 rounded px-1 py-0.5 text-xs text-dim ${idx === 0 && seq !== null ? "flash" : ""}`}
+            >
               <Avatar id="ci" size={20} />
               <span>Automation moved it</span>
               <Lozenge tone="neutral">{STATIONS[e.station - 1].name}</Lozenge>
@@ -232,7 +256,10 @@ function Activity({ ticket, cursor }: { ticket: Ticket; cursor: Cursor }) {
               <Lozenge tone="info">{STATIONS[e.station].name}</Lozenge>
             </li>
           ) : (
-            <li key={`${ticket.id}-${e.key}`} className="feed-line flex gap-2 rounded px-1">
+            <li
+              key={`${ticket.id}-${e.key}${idx === 0 && seq !== null ? `-${seq}` : ""}`}
+              className={`flex gap-2 rounded px-1 py-0.5 ${idx === 0 && seq !== null ? "flash" : ""}`}
+            >
               <Avatar id={e.who} size={28} />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-x-2 text-xs">

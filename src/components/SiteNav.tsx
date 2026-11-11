@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const LINKS = [
   { href: "/", label: "Board", icon: BoardIcon },
   { href: "/metrics", label: "Reports", icon: ReportsIcon },
+  { href: "/dashboard", label: "Dashboard", icon: DashboardIcon },
 ];
 
 function useActive() {
@@ -39,7 +40,7 @@ export function TopBar() {
           </Link>
         ))}
       </nav>
-      <span className="ml-auto rounded-[3px] bg-warn-bg px-1.5 text-[11px] font-bold uppercase text-warn">Sample data</span>
+      <span className="ml-auto hidden rounded-[3px] bg-warn-bg sm:inline px-1.5 text-[11px] font-bold uppercase text-warn">Sample data</span>
     </header>
   );
 }
@@ -86,6 +87,17 @@ function BoardIcon() {
       <rect x="1.5" y="2" width="3.5" height="12" rx="1" fill="none" stroke="currentColor" strokeWidth="1.4" />
       <rect x="6.25" y="2" width="3.5" height="8" rx="1" fill="none" stroke="currentColor" strokeWidth="1.4" />
       <rect x="11" y="2" width="3.5" height="10" rx="1" fill="none" stroke="currentColor" strokeWidth="1.4" />
+    </svg>
+  );
+}
+
+function DashboardIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-4 w-4" aria-hidden>
+      <rect x="1.5" y="1.5" width="5.5" height="7" rx="1" fill="none" stroke="currentColor" strokeWidth="1.4" />
+      <rect x="9" y="1.5" width="5.5" height="4" rx="1" fill="none" stroke="currentColor" strokeWidth="1.4" />
+      <rect x="1.5" y="10.5" width="5.5" height="4" rx="1" fill="none" stroke="currentColor" strokeWidth="1.4" />
+      <rect x="9" y="7.5" width="5.5" height="7" rx="1" fill="none" stroke="currentColor" strokeWidth="1.4" />
     </svg>
   );
 }

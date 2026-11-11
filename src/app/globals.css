@@ -43,6 +43,8 @@
   --j-system: #626f86;
   --j-shadow: 0 1px 1px #091e4240, 0 0 1px #091e424f;
   --j-shadow-raised: 0 8px 12px #091e4226, 0 0 1px #091e424f;
+  --j-flash: #fff1b8;
+  --j-flash-ring: #f5cd47;
   color-scheme: light;
 }
 
@@ -82,6 +84,8 @@
     --j-system: #8c9bab;
     --j-shadow: 0 0 0 1px #bcd6f00a, 0 1px 1px #03040442, 0 0 1px #03040480;
     --j-shadow-raised: 0 8px 12px #0304045c, 0 0 1px #03040480;
+    --j-flash: #533f04;
+    --j-flash-ring: #cf9f02;
     color-scheme: dark;
   }
 }
@@ -191,6 +195,50 @@ body {
   animation: card-in 280ms ease-out both;
 }
 
+/* Highlights for whatever just changed: a yellow wash that fades, or a ring that fades. */
+@keyframes flash-bg {
+  0%,
+  35% {
+    background-color: var(--j-flash);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@keyframes flash-ring {
+  0%,
+  40% {
+    box-shadow: 0 0 0 3px var(--j-flash-ring);
+  }
+  100% {
+    box-shadow: 0 0 0 3px transparent;
+  }
+}
+
+@keyframes flag-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.flash {
+  animation: flash-bg 2.8s ease-out;
+}
+
+.flash-ring {
+  animation: flash-ring 2.8s ease-out;
+}
+
+.flag-in {
+  animation: flag-in 240ms ease-out both;
+}
+
 .feed-line {
   animation: feed-in 600ms ease-out both;
 }
@@ -205,6 +253,15 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .flash {
+    animation: none;
+    background-color: var(--j-flash);
+  }
+  .flash-ring {
+    animation: none;
+    box-shadow: 0 0 0 3px var(--j-flash-ring);
+  }
+  .flag-in,
   .card-in,
   .feed-line,
   .dash-flow,
