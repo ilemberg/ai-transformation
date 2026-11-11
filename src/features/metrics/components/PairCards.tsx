@@ -6,7 +6,7 @@ import { DeltaText, KIND_TEXT, KindTag, SectionHeading, VerdictChip } from "./ui
 const CARD_BORDER: Record<Verdict, string> = {
   Healthy: "border-edge",
   Watch: "border-warn/40",
-  Regression: "border-fail/60 shadow-[0_0_0_1px_rgb(248_113_113/0.25),0_0_32px_-8px_rgb(248_113_113/0.45)]",
+  Regression: "border-fail/60 ring-1 ring-fail/30",
 };
 
 function MetricRow({ metric, month }: { metric: Metric; month: number }) {
@@ -48,12 +48,12 @@ export function PairCards({ month }: { month: number }) {
         {PAIRS.map((pair) => {
           const speed = metricById(pair.speed);
           const quality = metricById(pair.quality);
-          const { verdict, reason } = pairVerdict(speed, quality, month);
+          const { verdict } = pairVerdict(speed, quality, month);
           return (
             <article
               key={pair.id}
               aria-label={`${speed.short} with ${quality.short}: ${verdict}`}
-              className={`rounded-xl border bg-panel p-4 motion-safe:transition-[border-color,box-shadow] motion-safe:duration-500 sm:p-5 ${CARD_BORDER[verdict]}`}
+              className={`rounded-md border bg-panel p-4 motion-safe:transition-[border-color,box-shadow] motion-safe:duration-500 sm:p-5 ${CARD_BORDER[verdict]}`}
             >
               <header className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -65,7 +65,6 @@ export function PairCards({ month }: { month: number }) {
                     <span className="sr-only"> with </span>
                     <span className="text-quality">{quality.short}</span>
                   </h3>
-                  <p className="mt-1 text-xs text-dim">{pair.why}</p>
                 </div>
                 <VerdictChip verdict={verdict} />
               </header>
@@ -73,7 +72,6 @@ export function PairCards({ month }: { month: number }) {
                 <MetricRow metric={speed} month={month} />
                 <MetricRow metric={quality} month={month} />
               </div>
-              <p className="mt-2 border-t border-edge pt-3 text-xs text-dim">{reason}</p>
             </article>
           );
         })}

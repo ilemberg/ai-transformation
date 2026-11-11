@@ -39,7 +39,7 @@ export function CostSection({ month }: { month: number }) {
       </SectionHeading>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_300px]">
-        <figure className="rounded-xl border border-edge bg-panel p-4 sm:p-5">
+        <figure className="rounded-md border border-edge bg-panel p-4 sm:p-5">
           <figcaption className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-dim">
             <span className="font-medium text-ink">Token share by model tier</span>
             {TIERS.map((t) => (
@@ -137,7 +137,7 @@ export function CostSection({ month }: { month: number }) {
         </figure>
 
         <div className="flex flex-col gap-4">
-          <div className="rounded-xl border border-edge bg-panel p-4">
+          <div className="rounded-md border border-edge bg-panel p-4">
             <p className="text-xs text-dim">AI spend per merged change, month {month}</p>
             <p className="mt-1 font-mono text-3xl font-semibold tabular-nums">{formatValue(spend, spendNow)}</p>
             <p className="mt-1 text-xs text-faint">
@@ -174,7 +174,7 @@ export function CostSection({ month }: { month: number }) {
               </p>
             </div>
           </div>
-          <div className="rounded-xl border border-edge bg-panel-2/60 p-4 text-xs leading-relaxed text-dim">
+          <div className="rounded-md border border-edge bg-panel-2/60 p-4 text-xs leading-relaxed text-dim">
             <p className="font-medium text-ink">The levers</p>
             <p className="mt-1">{LEVERS.join(" · ")}.</p>
           </div>

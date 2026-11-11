@@ -27,7 +27,7 @@ export function Scrubber({ month, playing, verdicts, onMonthChange, onTogglePlay
   const watches = count("Watch");
 
   return (
-    <div className="sticky top-14 z-20 -mx-4 border-y border-edge/80 bg-bg/85 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-xl sm:border sm:px-5">
+    <div className="sticky top-14 z-20 -mx-4 border-y border-edge/80 bg-bg/85 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-md sm:border sm:px-5">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <div className="flex items-center gap-1.5">
           <button
@@ -109,7 +109,7 @@ export function Scrubber({ month, playing, verdicts, onMonthChange, onTogglePlay
             value={month}
             onChange={(e) => onMonthChange(Number(e.target.value))}
             aria-valuetext={`Month ${month}, ${phase.name}`}
-            className="relative h-7 w-full cursor-pointer appearance-none bg-transparent [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-bg [&::-moz-range-thumb]:bg-ink [&::-moz-range-track]:bg-transparent [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-bg [&::-webkit-slider-thumb]:bg-ink [&::-webkit-slider-thumb]:shadow-[0_0_0_3px_rgb(96_165_250/0.45)]"
+            className="relative h-7 w-full cursor-pointer appearance-none bg-transparent [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-bg [&::-moz-range-thumb]:bg-ink [&::-moz-range-track]:bg-transparent [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-bg [&::-webkit-slider-thumb]:bg-ink [&::-webkit-slider-thumb]:ring-2 ring-accent/40"
           />
         </div>
 

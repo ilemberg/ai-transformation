@@ -85,29 +85,34 @@ export function MetricsView({ month }: { month: number }) {
   const verdicts = PAIRS.map((p) => pairVerdict(metricById(p.speed), metricById(p.quality), month).verdict);
 
   return (
-    <div className="space-y-12 sm:space-y-16">
-      <div className="space-y-4">
-        <Scrubber
-          month={month}
-          playing={playing}
-          verdicts={verdicts}
-          onMonthChange={changeMonth}
-          onTogglePlay={togglePlay}
-        />
-        <StoryPanel month={month} />
-      </div>
+    <div className="space-y-8">
+      <Scrubber
+        month={month}
+        playing={playing}
+        verdicts={verdicts}
+        onMonthChange={changeMonth}
+        onTogglePlay={togglePlay}
+      />
       <PairCards month={month} />
       <RulesPanel month={month} />
       <CostSection month={month} />
-      <Scorecard month={month} />
-      <NotMeasured />
+      <details className="group rounded-md border border-edge">
+        <summary className="cursor-pointer select-none bg-panel-2 px-4 py-2.5 text-sm font-semibold">
+          Full scorecard and timeline
+        </summary>
+        <div className="space-y-8 p-4">
+          <StoryPanel month={month} />
+          <Scorecard month={month} />
+          <NotMeasured />
+        </div>
+      </details>
     </div>
   );
 }
 
 function NotMeasured() {
   return (
-    <section aria-labelledby="not-measured-heading" className="rounded-xl border border-dashed border-edge-2 p-4 sm:p-6">
+    <section aria-labelledby="not-measured-heading" className="rounded-md border border-dashed border-edge-2 p-4 sm:p-6">
       <h2 id="not-measured-heading" className="font-semibold">
         Deliberately not measured
       </h2>

@@ -62,14 +62,14 @@ export function DeltaText({ delta, text, className = "" }: { delta: Delta; text:
   );
 }
 
-export function SectionHeading({ id, kicker, title, children }: { id: string; kicker: string; title: string; children?: React.ReactNode }) {
+/**
+ * A plain section title. The kicker and intro text are kept in the callers'
+ * code but no longer shown: the page is meant to be read from its numbers.
+ */
+export function SectionHeading({ id, title }: { id: string; kicker: string; title: string; children?: React.ReactNode }) {
   return (
-    <div className="mb-5 max-w-3xl">
-      <p className="font-mono text-xs uppercase tracking-widest text-faint">{kicker}</p>
-      <h2 id={id} className="mt-1 text-xl font-semibold tracking-tight sm:text-2xl">
-        {title}
-      </h2>
-      {children && <div className="mt-2 text-sm leading-relaxed text-dim">{children}</div>}
-    </div>
+    <h2 id={id} className="mb-3 border-b border-edge pb-2 text-base font-semibold">
+      {title}
+    </h2>
   );
 }

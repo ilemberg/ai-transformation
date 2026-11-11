@@ -77,7 +77,7 @@ export function RulesPanel({ month }: { month: number }) {
           return (
             <li
               key={rule.id}
-              className={`rounded-xl border p-4 motion-safe:transition-colors motion-safe:duration-500 ${
+              className={`rounded-md border p-4 motion-safe:transition-colors motion-safe:duration-500 ${
                 status.state === "active"
                   ? "border-fail/50 bg-fail/[0.06]"
                   : status.state === "cleared"

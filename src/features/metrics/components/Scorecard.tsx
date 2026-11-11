@@ -26,7 +26,7 @@ export function Scorecard({ month }: { month: number }) {
         </span>{" "}
         are on target.
       </SectionHeading>
-      <div className="overflow-x-auto rounded-xl border border-edge bg-panel" tabIndex={0} role="region" aria-labelledby="scorecard-heading">
+      <div className="overflow-x-auto rounded-md border border-edge bg-panel" tabIndex={0} role="region" aria-labelledby="scorecard-heading">
         <table className="w-full min-w-[820px] border-collapse text-left text-sm">
           <caption className="sr-only">Scorecard at month {month}: baseline, current value, target and status for each metric</caption>
           <thead>

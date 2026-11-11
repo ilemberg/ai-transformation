@@ -13,7 +13,7 @@ export function StoryPanel({ month }: { month: number }) {
 
   return (
     <section aria-labelledby="story-heading" className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-      <div className="rounded-xl border border-edge bg-panel p-4 sm:p-5">
+      <div className="rounded-md border border-edge bg-panel p-4 sm:p-5">
         <h2 id="story-heading" className="font-mono text-xs uppercase tracking-widest text-faint">
           Phase {PHASES.indexOf(phase) + 1} of {PHASES.length}
         </h2>
@@ -47,7 +47,7 @@ export function StoryPanel({ month }: { month: number }) {
         </ol>
       </div>
 
-      <div className="rounded-xl border border-edge bg-panel p-4 sm:p-5">
+      <div className="rounded-md border border-edge bg-panel p-4 sm:p-5">
         <h3 className="font-mono text-xs uppercase tracking-widest text-faint">What happened, up to month {month}</h3>
         <ol className="mt-3 max-h-80 space-y-3 overflow-y-auto pr-1">
           {seen.map((e) => {
