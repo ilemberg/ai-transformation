@@ -3,7 +3,7 @@ import { Sidebar, TopBar } from "@/components/SiteNav";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Ticket to Production · an AI-native delivery board",
+  title: "adevsworld · an AI-native delivery board",
   description:
     "An animated AI-native software workflow: tests and evals first, agents building, other models reviewing, gates, load and break-it testing, release, monitoring and the bug loop. With the metrics that show whether it works.",
 };

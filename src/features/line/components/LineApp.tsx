@@ -18,7 +18,7 @@ import { TICKETS } from "../tickets";
 import { TOUR, TOUR_STOP_MS } from "../tour";
 import { Board } from "./Board";
 import { IssuePanel } from "./IssuePanel";
-import { Avatar } from "./jira";
+import { Avatar, IssueTypeIcon } from "./jira";
 
 const SPEEDS = [1, 2, 4] as const;
 type Speed = (typeof SPEEDS)[number];
@@ -269,7 +269,32 @@ export function LineApp({ initialTicketId, initialStep }: { initialTicketId: str
         <span className="text-dim">{station.brief}</span>
       </p>
 
-      <IssuePanel ticket={ticket} cursor={cursor} onJump={jumpStation} event={event?.ticketId === ticket.id ? event : null} />
+      <section aria-label="Ticket details" className="overflow-hidden rounded-md border-2 border-brand shadow-raised">
+        <header className="flex flex-wrap items-center gap-x-3 gap-y-2 bg-selected px-4 py-2.5">
+          <h2 className="text-xs font-bold uppercase tracking-wide text-brand">Ticket details</h2>
+          <div className="flex flex-wrap gap-1" role="tablist" aria-label="Ticket">
+            {TICKETS.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                role="tab"
+                aria-selected={t.id === ticket.id}
+                onClick={() => select(t.id)}
+                className={`flex h-7 items-center gap-1.5 rounded-[3px] px-2 text-xs font-semibold ${
+                  t.id === ticket.id ? "bg-brand text-white" : "bg-card text-dim shadow-card hover:text-ink"
+                }`}
+              >
+                <IssueTypeIcon kind={t.kind} className="h-3.5 w-3.5" />
+                {t.key}
+              </button>
+            ))}
+          </div>
+          <span className="ml-auto hidden text-xs text-dim sm:inline">
+            The card outlined on the board. Click any card or tab to switch.
+          </span>
+        </header>
+        <IssuePanel ticket={ticket} cursor={cursor} onJump={jumpStation} event={event?.ticketId === ticket.id ? event : null} />
+      </section>
 
       {mode === "run" && event && <Flag event={event} />}
     </main>

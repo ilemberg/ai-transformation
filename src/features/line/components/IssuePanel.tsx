@@ -105,7 +105,7 @@ export function IssuePanel({
   );
 
   return (
-    <article className="grid gap-6 rounded-md border border-edge bg-panel p-4 sm:p-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+    <article className="grid gap-6 bg-panel p-4 sm:p-5 xl:grid-cols-[minmax(0,1fr)_320px]">
       <div className="flex min-w-0 flex-col gap-5">
       <div className="flex items-center gap-2 text-sm text-dim">
         <IssueTypeIcon kind={ticket.kind} />

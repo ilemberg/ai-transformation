@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { DEFAULT_MONTH, Dashboard, DashboardView } from "@/features/dashboard/components/Dashboard";
 
 export const metadata: Metadata = {
-  title: "Executive dashboard · Ticket to Production",
+  title: "Executive dashboard · adevsworld",
   description:
     "Bookwell's AI rollout for stakeholders: AI spend, delivery speed and stability for any month of the year, as gadgets you can add, remove and rearrange.",
 };

@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { DEFAULT_MONTH, MetricsDashboard, MetricsView } from "@/features/metrics/components/MetricsDashboard";
 
 export const metadata: Metadata = {
-  title: "Engineering reports · Ticket to Production",
+  title: "Engineering reports · adevsworld",
   description:
     "Bookwell's AI rollout month by month: every speed metric paired with the quality metric it could hurt, the decision rules that act on them, and cost by model size.",
 };

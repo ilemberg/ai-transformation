@@ -25,8 +25,10 @@ export function TopBar() {
         ))}
       </span>
       <Link href="/" className="flex items-center gap-2 font-semibold text-ink">
-        <span className="grid h-6 w-6 place-items-center rounded bg-brand text-[11px] font-bold text-white">T</span>
-        <span className="hidden sm:inline">Ticket to Production</span>
+        <Logo />
+        <span className="hidden text-base tracking-tight sm:inline">
+          adevs<span className="text-brand">world</span>
+        </span>
       </Link>
       <nav className="ml-2 flex gap-1 lg:hidden">
         {LINKS.map((l) => (
@@ -80,6 +82,21 @@ export function Sidebar() {
         );
       })}
     </aside>
+  );
+}
+
+/** The mark: a stick figure coding at a laptop. */
+export function Logo({ className = "h-7 w-7" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} role="img" aria-label="adevsworld">
+      <rect width="24" height="24" rx="5" className="fill-brand" />
+      <g fill="none" stroke="white" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="8" cy="6" r="2.2" />
+        <path d="M8 8.4v6.1h4.2V19" />
+        <path d="M8 10.6l5 1.6" />
+        <path d="M13.2 13.6h6.3l1.4-5.4" />
+      </g>
+    </svg>
   );
 }
 
