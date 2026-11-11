@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  assigneeAt,
+  tickAll,
   formatMinutes,
   formatUsd,
   isFinished,
@@ -81,6 +83,34 @@ describe("playback", () => {
   it("clamps jumps to the line", () => {
     expect(jumpTo(feature, -3).station).toBe(0);
     expect(jumpTo(feature, 99).station).toBe(LAST_STATION);
+  });
+});
+
+describe("the whole board", () => {
+  it("moves every unfinished ticket one tick per beat", () => {
+    const start = Object.fromEntries(TICKETS.map((t) => [t.id, START]));
+    const next = tickAll(TICKETS, start)!;
+    expect(next.feature).toEqual({ station: 0, shown: 1 });
+    expect(next.performance).toEqual({ station: 0, shown: 1 });
+  });
+
+  it("moves a fast-lane ticket more than one tick per beat", () => {
+    const start = Object.fromEntries(TICKETS.map((t) => [t.id, START]));
+    expect(tickAll(TICKETS, start)!.bug).toEqual({ station: 0, shown: 2 });
+  });
+
+  it("leaves finished tickets where they are and stops when all are done", () => {
+    const done = Object.fromEntries(TICKETS.map((t) => [t.id, jumpTo(t, LAST_STATION)]));
+    expect(tickAll(TICKETS, done)).toBeNull();
+    const oneLeft = { ...done, bug: START };
+    const next = tickAll(TICKETS, oneLeft)!;
+    expect(next.feature).toEqual(done.feature);
+    expect(next.bug).toEqual({ station: 0, shown: 2 });
+  });
+
+  it("assigns the ticket to whoever spoke last, or the station's first worker", () => {
+    expect(assigneeAt(feature, { station: 1, shown: 0 })).toBe("planner");
+    expect(assigneeAt(feature, { station: 1, shown: 2 })).toBe("owner");
   });
 });
 

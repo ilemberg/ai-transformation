@@ -132,6 +132,8 @@ export interface Ticket {
   source: string;
   priority: string;
   summary: string;
+  /** Steps taken per beat when the whole board plays. A P1 on the fast lane moves quicker. */
+  pace?: number;
   tests: Partial<Record<TestKind, TicketTests>>;
   steps: TicketStep[];
 }

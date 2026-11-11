@@ -1,122 +1,174 @@
 @import "tailwindcss";
 
 /*
- * GitHub-style look, light and dark following the system setting.
+ * Jira-style look, light and dark following the system setting.
  * Colours that carry meaning are tokens:
- * - model sizes: small (teal), medium (purple), large (orange); people pink;
- *   automation grey.
- * - speed metrics are blue (accent), quality metrics green.
- * - pass green, fail red, warn yellow-brown, in progress amber.
+ * - model sizes: small (teal), medium (purple), large (orange); people
+ *   magenta; automation grey.
+ * - speed metrics are blue (brand), quality metrics green.
+ * - lozenges: neutral, blue (in progress), green (done), red, yellow, purple.
  */
 :root {
-  --gh-bg: #ffffff;
-  --gh-panel: #ffffff;
-  --gh-panel-2: #f6f8fa;
-  --gh-edge: #d1d9e0;
-  --gh-edge-2: #afb8c1;
-  --gh-ink: #1f2328;
-  --gh-dim: #59636e;
-  --gh-faint: #818b98;
-  --gh-accent: #0969da;
-  --gh-pass: #1a7f37;
-  --gh-fail: #d1242f;
-  --gh-warn: #9a6700;
-  --gh-running: #bf8700;
-  --gh-small: #1b7c83;
-  --gh-medium: #8250df;
-  --gh-large: #bc4c00;
-  --gh-human: #bf3989;
-  --gh-system: #59636e;
-  --gh-primary: #1f883d;
-  --gh-primary-hover: #1c8139;
-  --gh-log: #f6f8fa;
+  --j-bg: #ffffff;
+  --j-panel: #ffffff;
+  --j-panel-2: #f7f8f9;
+  --j-column: #f1f2f4;
+  --j-card: #ffffff;
+  --j-edge: #dcdfe4;
+  --j-edge-2: #b3b9c4;
+  --j-ink: #172b4d;
+  --j-dim: #44546f;
+  --j-faint: #626f86;
+  --j-brand: #0c66e4;
+  --j-brand-hover: #0055cc;
+  --j-selected: #e9f2ff;
+  --j-hover: #091e420f;
+  --j-pass: #1f845a;
+  --j-pass-bg: #dcfff1;
+  --j-pass-text: #216e4e;
+  --j-fail: #c9372c;
+  --j-fail-bg: #ffeceb;
+  --j-fail-text: #ae2e24;
+  --j-warn: #a54800;
+  --j-warn-bg: #fff7d6;
+  --j-info-bg: #e9f2ff;
+  --j-info-text: #0055cc;
+  --j-purple: #6e5dc6;
+  --j-purple-bg: #f3f0ff;
+  --j-neutral-bg: #091e420f;
+  --j-small: #1d7f8c;
+  --j-medium: #6e5dc6;
+  --j-large: #c25100;
+  --j-human: #ae4787;
+  --j-system: #626f86;
+  --j-shadow: 0 1px 1px #091e4240, 0 0 1px #091e424f;
+  --j-shadow-raised: 0 8px 12px #091e4226, 0 0 1px #091e424f;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --gh-bg: #0d1117;
-    --gh-panel: #0d1117;
-    --gh-panel-2: #151b23;
-    --gh-edge: #3d444d;
-    --gh-edge-2: #656c76;
-    --gh-ink: #f0f6fc;
-    --gh-dim: #9198a1;
-    --gh-faint: #6e7681;
-    --gh-accent: #4493f8;
-    --gh-pass: #3fb950;
-    --gh-fail: #f85149;
-    --gh-warn: #d29922;
-    --gh-running: #d29922;
-    --gh-small: #39c5cf;
-    --gh-medium: #ab7df8;
-    --gh-large: #db6d28;
-    --gh-human: #db61a2;
-    --gh-system: #9198a1;
-    --gh-primary: #238636;
-    --gh-primary-hover: #29903b;
-    --gh-log: #010409;
+    --j-bg: #1d2125;
+    --j-panel: #1d2125;
+    --j-panel-2: #22272b;
+    --j-column: #161a1d;
+    --j-card: #22272b;
+    --j-edge: #a6c5e229;
+    --j-edge-2: #738496;
+    --j-ink: #b6c2cf;
+    --j-dim: #9fadbc;
+    --j-faint: #8c9bab;
+    --j-brand: #579dff;
+    --j-brand-hover: #85b8ff;
+    --j-selected: #1c2b41;
+    --j-hover: #a1bdd914;
+    --j-pass: #4bce97;
+    --j-pass-bg: #1c3329;
+    --j-pass-text: #7ee2b8;
+    --j-fail: #f87168;
+    --j-fail-bg: #42221f;
+    --j-fail-text: #fd9891;
+    --j-warn: #f5cd47;
+    --j-warn-bg: #332e1b;
+    --j-info-bg: #1c2b41;
+    --j-info-text: #85b8ff;
+    --j-purple: #9f8fef;
+    --j-purple-bg: #2b273f;
+    --j-neutral-bg: #a1bdd914;
+    --j-small: #6cc3e0;
+    --j-medium: #b8acf6;
+    --j-large: #fea362;
+    --j-human: #f797d2;
+    --j-system: #8c9bab;
+    --j-shadow: 0 0 0 1px #bcd6f00a, 0 1px 1px #03040442, 0 0 1px #03040480;
+    --j-shadow-raised: 0 8px 12px #0304045c, 0 0 1px #03040480;
     color-scheme: dark;
   }
 }
 
 @theme inline {
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 
-  --color-bg: var(--gh-bg);
-  --color-panel: var(--gh-panel);
-  --color-panel-2: var(--gh-panel-2);
-  --color-edge: var(--gh-edge);
-  --color-edge-2: var(--gh-edge-2);
-  --color-ink: var(--gh-ink);
-  --color-dim: var(--gh-dim);
-  --color-faint: var(--gh-faint);
-  --color-log: var(--gh-log);
+  --color-bg: var(--j-bg);
+  --color-panel: var(--j-panel);
+  --color-panel-2: var(--j-panel-2);
+  --color-column: var(--j-column);
+  --color-card: var(--j-card);
+  --color-edge: var(--j-edge);
+  --color-edge-2: var(--j-edge-2);
+  --color-ink: var(--j-ink);
+  --color-dim: var(--j-dim);
+  --color-faint: var(--j-faint);
+  --color-log: var(--j-panel-2);
+  --color-selected: var(--j-selected);
+  --color-hover: var(--j-hover);
 
-  --color-small: var(--gh-small);
-  --color-medium: var(--gh-medium);
-  --color-large: var(--gh-large);
-  --color-human: var(--gh-human);
-  --color-system: var(--gh-system);
+  --color-brand: var(--j-brand);
+  --color-brand-hover: var(--j-brand-hover);
+  --color-accent: var(--j-brand);
+  --color-speed: var(--j-brand);
+  --color-primary: var(--j-brand);
+  --color-primary-hover: var(--j-brand-hover);
 
-  --color-speed: var(--gh-accent);
-  --color-accent: var(--gh-accent);
-  --color-quality: var(--gh-pass);
-  --color-pass: var(--gh-pass);
-  --color-fail: var(--gh-fail);
-  --color-warn: var(--gh-warn);
-  --color-running: var(--gh-running);
-  --color-primary: var(--gh-primary);
-  --color-primary-hover: var(--gh-primary-hover);
+  --color-quality: var(--j-pass);
+  --color-pass: var(--j-pass);
+  --color-pass-bg: var(--j-pass-bg);
+  --color-pass-text: var(--j-pass-text);
+  --color-fail: var(--j-fail);
+  --color-fail-bg: var(--j-fail-bg);
+  --color-fail-text: var(--j-fail-text);
+  --color-warn: var(--j-warn);
+  --color-warn-bg: var(--j-warn-bg);
+  --color-running: var(--j-brand);
+  --color-info-bg: var(--j-info-bg);
+  --color-info-text: var(--j-info-text);
+  --color-purple: var(--j-purple);
+  --color-purple-bg: var(--j-purple-bg);
+  --color-neutral-bg: var(--j-neutral-bg);
+
+  --color-small: var(--j-small);
+  --color-medium: var(--j-medium);
+  --color-large: var(--j-large);
+  --color-human: var(--j-human);
+  --color-system: var(--j-system);
+
+  --shadow-card: var(--j-shadow);
+  --shadow-raised: var(--j-shadow-raised);
 }
 
 html {
-  background: var(--gh-bg);
-  color: var(--gh-ink);
+  background: var(--j-bg);
+  color: var(--j-ink);
   font-size: 14px;
 }
 
 body {
   min-height: 100dvh;
-  background: var(--gh-bg);
-  line-height: 1.5;
+  background: var(--j-bg);
+  line-height: 1.43;
 }
 
 :focus-visible {
-  outline: 2px solid var(--gh-accent);
-  outline-offset: -2px;
+  outline: 2px solid var(--j-brand);
+  outline-offset: 1px;
 }
 
-@keyframes spin {
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
   to {
-    transform: rotate(360deg);
+    opacity: 1;
+    transform: none;
   }
 }
 
 @keyframes feed-in {
   from {
     opacity: 0;
+    background: var(--j-selected);
   }
   to {
     opacity: 1;
@@ -129,8 +181,22 @@ body {
   }
 }
 
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.card-in {
+  animation: card-in 280ms ease-out both;
+}
+
 .feed-line {
-  animation: feed-in 200ms ease-out both;
+  animation: feed-in 600ms ease-out both;
+}
+
+.dash-flow {
+  animation: dash-flow 1.2s linear infinite;
 }
 
 .spin {
@@ -138,14 +204,11 @@ body {
   transform-origin: center;
 }
 
-.dash-flow {
-  animation: dash-flow 1.2s linear infinite;
-}
-
 @media (prefers-reduced-motion: reduce) {
+  .card-in,
   .feed-line,
-  .spin,
-  .dash-flow {
+  .dash-flow,
+  .spin {
     animation: none;
   }
 }

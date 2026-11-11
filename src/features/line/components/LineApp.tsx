@@ -1,71 +1,63 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { formatMinutes, formatUsd, isFinished, jumpTo, LAST_STATION, START, tick, totalsAt, type Cursor } from "../logic";
+import { isFinished, jumpTo, LAST_STATION, START, tickAll, type Cursor } from "../logic";
 import { TICKETS } from "../tickets";
-import type { Ticket, TicketKind } from "../types";
-import { StatusIcon } from "./icons";
-import { JobLog } from "./JobLog";
-import { TestStrip } from "./TestStrip";
-import { WorkflowGraph } from "./WorkflowGraph";
+import { Board } from "./Board";
+import { IssuePanel } from "./IssuePanel";
 
 const SPEEDS = [1, 2, 4] as const;
 type Speed = (typeof SPEEDS)[number];
+const BEAT_MS = 1300;
 
-const KIND_LABEL: Record<TicketKind, string> = { feature: "Feature", bug: "Bug", performance: "Performance" };
-
-function ticketById(id: string): Ticket {
-  return TICKETS.find((t) => t.id === id) ?? TICKETS[0];
+function startCursors(selectedId: string, station: number | null): Record<string, Cursor> {
+  return Object.fromEntries(
+    TICKETS.map((t) => [t.id, station !== null && t.id === selectedId ? jumpTo(t, station) : START]),
+  );
 }
 
 export function LineApp({ initialTicketId, initialStation }: { initialTicketId: string; initialStation: number | null }) {
-  const [ticketId, setTicketId] = useState(initialTicketId);
-  const ticket = ticketById(ticketId);
-  const [cursor, setCursor] = useState<Cursor>(() =>
-    initialStation === null ? START : jumpTo(ticketById(initialTicketId), initialStation),
-  );
+  const [selectedId, setSelectedId] = useState(initialTicketId);
+  const [cursors, setCursors] = useState(() => startCursors(initialTicketId, initialStation));
   const [playing, setPlaying] = useState(initialStation === null);
   const [speed, setSpeed] = useState<Speed>(1);
 
-  // Playback: reveal one log line per beat, with a short pause on arriving at a job.
+  const ticket = TICKETS.find((t) => t.id === selectedId) ?? TICKETS[0];
+  const cursor = cursors[ticket.id] ?? START;
+  const allDone = TICKETS.every((t) => isFinished(t, cursors[t.id] ?? START));
+
+  // Every beat, each unfinished ticket on the board moves on by one step.
   useEffect(() => {
     if (!playing) return;
-    const delay = (cursor.shown === 0 ? 600 : 1400) / speed;
     const timer = window.setTimeout(() => {
-      const next = tick(ticket, cursor);
-      if (next) setCursor(next);
+      const next = tickAll(TICKETS, cursors);
+      if (next) setCursors(next);
       else setPlaying(false);
-    }, delay);
+    }, BEAT_MS / speed);
     return () => window.clearTimeout(timer);
-  }, [playing, cursor, speed, ticket]);
+  }, [playing, cursors, speed]);
 
-  // The address bar carries the ticket and job, so a link opens at the same place.
+  // The address bar carries the selected ticket and its column.
   useEffect(() => {
     window.history.replaceState(window.history.state, "", `?t=${ticket.id}&s=${cursor.station + 1}`);
   }, [ticket.id, cursor.station]);
 
-  const pickTicket = (id: string) => {
-    setTicketId(id);
-    setCursor(START);
-    setPlaying(true);
-  };
-
-  const goTo = useCallback(
+  const jump = useCallback(
     (station: number) => {
       setPlaying(false);
-      setCursor(jumpTo(ticket, station));
+      setCursors((c) => ({ ...c, [ticket.id]: jumpTo(ticket, Math.max(0, Math.min(LAST_STATION, station))) }));
     },
     [ticket],
   );
 
-  const togglePlay = useCallback(() => {
-    if (isFinished(ticket, cursor)) {
-      setCursor(START);
+  const toggle = useCallback(() => {
+    if (allDone) {
+      setCursors(startCursors(selectedId, null));
       setPlaying(true);
       return;
     }
     setPlaying((p) => !p);
-  }, [ticket, cursor]);
+  }, [allDone, selectedId]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -73,81 +65,37 @@ export function LineApp({ initialTicketId, initialStation }: { initialTicketId: 
       if (target && /^(INPUT|TEXTAREA|SELECT|BUTTON|A)$/.test(target.tagName)) return;
       if (e.key === " ") {
         e.preventDefault();
-        togglePlay();
-      } else if (e.key === "ArrowRight") {
-        goTo(Math.min(LAST_STATION, cursor.station + 1));
-      } else if (e.key === "ArrowLeft") {
-        goTo(Math.max(0, cursor.station - 1));
-      }
+        toggle();
+      } else if (e.key === "ArrowRight") jump(cursor.station + 1);
+      else if (e.key === "ArrowLeft") jump(cursor.station - 1);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [togglePlay, goTo, cursor.station]);
-
-  const finished = isFinished(ticket, cursor);
-  const totals = totalsAt(ticket, cursor);
+  }, [toggle, jump, cursor.station]);
 
   return (
-    <main className="mx-auto flex max-w-[1280px] flex-col gap-4 px-4 pt-5 sm:px-6">
-      {/* Ticket picker */}
-      <div className="flex flex-wrap gap-2" role="group" aria-label="Ticket">
-        {TICKETS.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            onClick={() => pickTicket(t.id)}
-            aria-pressed={t.id === ticket.id}
-            className={`h-8 rounded-md border px-3 text-sm font-medium ${
-              t.id === ticket.id ? "border-accent bg-accent/10 text-accent" : "border-edge bg-panel-2 text-ink hover:bg-edge/40"
-            }`}
-          >
-            {KIND_LABEL[t.kind]} <span className="font-mono text-xs opacity-70">{t.key}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* Run header */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-edge pb-4">
-        <div className="flex w-full min-w-0 items-center gap-2 lg:w-auto lg:flex-1">
-          <StatusIcon status={finished ? "success" : "running"} className="h-5 w-5" />
-          <h1 className="min-w-0 text-lg font-normal leading-snug sm:text-2xl lg:truncate">
-            {ticket.title} <span className="text-faint">#{ticket.key.split("-")[1]}</span>
-          </h1>
-        </div>
-        <div className="flex items-center gap-2">
+    <main className="flex flex-col gap-4 px-4 pb-10 pt-4 sm:px-6">
+      <nav aria-label="Breadcrumb" className="text-sm text-dim">
+        Projects <span className="text-faint">/</span> Bookwell
+      </nav>
+      <div className="flex flex-wrap items-center gap-3">
+        <h1 className="text-2xl font-medium text-ink">Delivery board</h1>
+        <div className="ml-auto flex items-center gap-2">
           <button
             type="button"
-            onClick={() => goTo(Math.max(0, cursor.station - 1))}
-            disabled={cursor.station === 0}
-            aria-label="Previous job"
-            className="h-8 w-8 rounded-md border border-edge bg-panel-2 text-dim hover:bg-edge/40 disabled:opacity-40"
+            onClick={toggle}
+            className="h-8 min-w-24 rounded-[3px] bg-brand px-3 text-sm font-medium text-white hover:bg-brand-hover"
           >
-            ‹
+            {playing ? "Pause" : allDone ? "Start over" : "Start"}
           </button>
-          <button
-            type="button"
-            onClick={togglePlay}
-            className="h-8 min-w-20 rounded-md bg-primary px-3 text-sm font-medium text-white hover:bg-primary-hover"
-          >
-            {playing ? "Pause" : finished ? "Re-run" : "Run"}
-          </button>
-          <button
-            type="button"
-            onClick={() => goTo(Math.min(LAST_STATION, cursor.station + 1))}
-            disabled={cursor.station === LAST_STATION}
-            aria-label="Next job"
-            className="h-8 w-8 rounded-md border border-edge bg-panel-2 text-dim hover:bg-edge/40 disabled:opacity-40"
-          >
-            ›
-          </button>
-          <div className="flex overflow-hidden rounded-md border border-edge" role="group" aria-label="Speed">
+          <div className="flex rounded-[3px] bg-neutral-bg p-0.5" role="group" aria-label="Speed">
             {SPEEDS.map((s) => (
               <button
                 key={s}
                 type="button"
                 onClick={() => setSpeed(s)}
                 aria-pressed={speed === s}
-                className={`h-8 px-2 text-xs ${speed === s ? "bg-edge/60 font-semibold text-ink" : "bg-panel-2 text-dim"}`}
+                className={`h-7 rounded-[3px] px-2 text-xs font-medium ${speed === s ? "bg-card text-brand shadow-card" : "text-dim"}`}
               >
                 {s}×
               </button>
@@ -156,30 +104,9 @@ export function LineApp({ initialTicketId, initialStation }: { initialTicketId: 
         </div>
       </div>
 
-      {/* Summary */}
-      <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-md border border-edge bg-edge text-sm sm:grid-cols-4">
-        {[
-          ["Source", ticket.source.split(",")[0]],
-          ["Duration", formatMinutes(totals.wallMinutes)],
-          ["Model spend", formatUsd(totals.aiUsd)],
-          ["People's time", formatMinutes(totals.humanMinutes)],
-        ].map(([k, v]) => (
-          <div key={k} className="bg-panel px-4 py-2.5">
-            <dt className="text-xs text-dim">{k}</dt>
-            <dd className="truncate font-semibold tabular-nums">{v}</dd>
-          </div>
-        ))}
-      </dl>
+      <Board tickets={TICKETS} cursors={cursors} selectedId={ticket.id} onSelect={setSelectedId} />
 
-      {/* The workflow */}
-      <section className="flex flex-col gap-4 rounded-md border border-edge bg-panel p-4 sm:p-5">
-        <WorkflowGraph ticket={ticket} cursor={cursor} onPick={goTo} />
-        <div className="border-t border-edge pt-3">
-          <TestStrip ticket={ticket} cursor={cursor} />
-        </div>
-      </section>
-
-      <JobLog ticket={ticket} cursor={cursor} />
+      <IssuePanel ticket={ticket} cursor={cursor} onJump={jump} />
     </main>
   );
 }

@@ -10,6 +10,7 @@ import { RulesPanel } from "./RulesPanel";
 import { Scorecard } from "./Scorecard";
 import { Scrubber } from "./Scrubber";
 import { StoryPanel } from "./StoryPanel";
+import { Gadget } from "./ui";
 
 /** With no `?m=`, show the end of the year: every rule has had its chance to fire. */
 export const DEFAULT_MONTH = LAST_MONTH;
@@ -85,7 +86,7 @@ export function MetricsView({ month }: { month: number }) {
   const verdicts = PAIRS.map((p) => pairVerdict(metricById(p.speed), metricById(p.quality), month).verdict);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       <Scrubber
         month={month}
         playing={playing}
@@ -93,10 +94,18 @@ export function MetricsView({ month }: { month: number }) {
         onMonthChange={changeMonth}
         onTogglePlay={togglePlay}
       />
-      <PairCards month={month} />
-      <RulesPanel month={month} />
-      <CostSection month={month} />
-      <details className="group rounded-md border border-edge">
+      <Gadget>
+        <PairCards month={month} />
+      </Gadget>
+      <div className="grid gap-4 2xl:grid-cols-2">
+        <Gadget>
+          <RulesPanel month={month} />
+        </Gadget>
+        <Gadget>
+          <CostSection month={month} />
+        </Gadget>
+      </div>
+      <details className="group rounded-md border border-edge bg-panel shadow-card">
         <summary className="cursor-pointer select-none bg-panel-2 px-4 py-2.5 text-sm font-semibold">
           Full scorecard and timeline
         </summary>

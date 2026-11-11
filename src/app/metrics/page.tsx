@@ -10,10 +10,11 @@ export const metadata: Metadata = {
 
 export default function MetricsPage() {
   return (
-    <main className="mx-auto max-w-[1280px] px-4 pt-5 sm:px-6">
-      <h1 className="mb-4 text-xl font-normal sm:text-2xl">
-        A year of the rollout <span className="text-faint">· speed never reported without quality</span>
-      </h1>
+    <main className="bg-panel-2 px-4 pb-10 pt-4 sm:px-6">
+      <nav aria-label="Breadcrumb" className="text-sm text-dim">
+        Projects <span className="text-faint">/</span> Bookwell <span className="text-faint">/</span> Reports
+      </nav>
+      <h1 className="mb-4 mt-3 text-2xl font-medium">AI rollout dashboard</h1>
       <Suspense fallback={<MetricsView month={DEFAULT_MONTH} />}>
         <MetricsDashboard />
       </Suspense>

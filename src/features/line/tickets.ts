@@ -150,6 +150,7 @@ export const TICKETS: Ticket[] = [
     title: "Checkout charges a card twice when 3-D Secure verification times out",
     source: "Monitoring alert, opened automatically",
     priority: "P1",
+    pace: 2,
     summary:
       "A payments bug that starts life as an alert. Fast lane: short spec, a reproducing test before anything else, heavy security review, no load test, and a fast canary.",
     tests: {

@@ -1,5 +1,5 @@
 import { COMPUTE_USD_PER_MINUTE, STATIONS, TIERS } from "./stations";
-import { STATION_IDS, type StationId, type TestKind, type Ticket, type TicketStep, type Tier, type Usage } from "./types";
+import { STATION_IDS, type ActorId, type StationId, type TestKind, type Ticket, type TicketStep, type Tier, type Usage } from "./types";
 
 /** Where playback is: which station, and how many of its log lines are showing. */
 export interface Cursor {
@@ -39,6 +39,33 @@ export function tick(ticket: Ticket, cursor: Cursor): Cursor | null {
   if (!isStationDone(ticket, cursor)) return { station: cursor.station, shown: cursor.shown + 1 };
   if (cursor.station >= LAST_STATION) return null;
   return { station: cursor.station + 1, shown: 0 };
+}
+
+/**
+ * One beat for the whole board: every ticket that is not finished moves on
+ * by one tick. Returns null once every ticket has finished.
+ */
+export function tickAll(tickets: Ticket[], cursors: Record<string, Cursor>): Record<string, Cursor> | null {
+  let moved = false;
+  const next: Record<string, Cursor> = { ...cursors };
+  for (const ticket of tickets) {
+    let c = cursors[ticket.id] ?? START;
+    for (let k = 0; k < (ticket.pace ?? 1); k++) {
+      const n = tick(ticket, c);
+      if (!n) break;
+      c = n;
+      moved = true;
+    }
+    next[ticket.id] = c;
+  }
+  return moved ? next : null;
+}
+
+/** Who has the ticket right now: whoever wrote the latest line, or the station's first worker. */
+export function assigneeAt(ticket: Ticket, cursor: Cursor): ActorId {
+  const step = stepAt(ticket, cursor.station);
+  const last = step.log[cursor.shown - 1];
+  return last ? last.who : STATIONS[cursor.station].actors[0];
 }
 
 /** Jump to a station with all its lines showing (manual stepping). */
