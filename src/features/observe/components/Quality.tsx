@@ -50,7 +50,7 @@ export function Quality() {
         </div>
         <svg
           viewBox={`0 0 ${W} ${H}`}
-          className="mt-2 block h-auto w-full"
+          className="mt-2 block h-auto max-h-56 w-full"
           role="img"
           aria-label={`Weekly pass rate from ${QUALITY_WEEKS[0]!.week} to ${QUALITY_WEEKS[n - 1]!.week}: ${rates.map((r) => `${r.toFixed(1)}%`).join(", ")}. Threshold ${RELEASE_THRESHOLD}%. Model upgrade landed in ${DRIFT_WEEK}.`}
         >
