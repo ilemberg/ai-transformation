@@ -27,7 +27,7 @@ export function Scrubber({ month, playing, verdicts, onMonthChange, onTogglePlay
   const watches = count("Watch");
 
   return (
-    <div className="sticky top-14 z-20 -mx-4 border-y border-edge/80 bg-bg/85 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-md sm:border sm:px-5">
+    <div className="z-20 -mx-4 sm:sticky sm:top-14 border-y border-edge/80 bg-bg/85 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-md sm:border sm:px-5">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <div className="flex items-center gap-1.5">
           <button

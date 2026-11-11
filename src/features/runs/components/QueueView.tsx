@@ -28,6 +28,10 @@ function clockAt(tick: number): string {
   return `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`;
 }
 
+function changedState(run: QueuedRun, tick: number): boolean {
+  return tick > 0 && FRAMES[tick - 1]!.find((x) => x.id === run.id)!.state !== run.state;
+}
+
 function note(r: QueuedRun, frame: readonly QueuedRun[]): string {
   const free = LIMITS.tokensPerMin - tokensInUse(frame);
   switch (r.state) {
@@ -138,7 +142,31 @@ export function QueueView() {
         )}
       </div>
 
-      <div className="mt-3 overflow-x-auto rounded-md border border-edge" tabIndex={0} role="region" aria-label="Runs in the queue, scrolls sideways">
+      <ul className="mt-3 space-y-2 sm:hidden" aria-label={`Runs in the queue at ${clockAt(tick)}`}>
+        {frame.map((run) => (
+          <li
+            key={run.id}
+            className={`min-w-0 rounded-md border border-edge p-2.5 text-sm ${run.files.includes("src/booking/price.ts") ? "bg-warn-bg/40" : "bg-card"}`}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-mono text-xs font-semibold">{run.id}</span>
+              <span key={`${run.id}-${run.state}-${tick}`} className={`inline-block rounded-[3px] p-0.5 ${changedState(run, tick) ? "flash-ring" : ""}`}>
+                <Tone tone={STATE[run.state].tone}>{STATE[run.state].label}</Tone>
+              </span>
+            </div>
+            <p className="mt-1">
+              <span className="font-medium text-brand">{run.ticket}</span> <span className="text-dim">{run.title}</span>
+            </p>
+            <p className="mt-1 text-xs text-dim">
+              {run.team} · <span className="font-mono text-faint">{run.workspace}</span>
+            </p>
+            <p className="mt-1 break-all font-mono text-xs">{run.files.join(", ")}</p>
+            <p className="mt-1 text-xs text-dim">{note(run, frame)}</p>
+          </li>
+        ))}
+      </ul>
+
+      <div className="mt-3 hidden overflow-x-auto rounded-md border border-edge sm:block" tabIndex={0} role="region" aria-label="Runs in the queue, scrolls sideways">
         <table className="w-full min-w-[920px] border-collapse text-left text-sm">
           <caption className="sr-only">Every run at {clockAt(tick)}, with team, isolated workspace, files it edits, state and why.</caption>
           <thead className="bg-panel-2 text-xs font-semibold text-dim">
@@ -167,7 +195,7 @@ export function QueueView() {
                   ))}
                 </td>
                 <td className="px-3 py-2">
-                  <span key={`${run.id}-${run.state}-${tick}`} className={`inline-block rounded-[3px] p-0.5 ${tick && FRAMES[tick - 1]!.find((x) => x.id === run.id)!.state !== run.state ? "flash-ring" : ""}`}>
+                  <span key={`${run.id}-${run.state}-${tick}`} className={`inline-block rounded-[3px] p-0.5 ${changedState(run, tick) ? "flash-ring" : ""}`}>
                     <Tone tone={STATE[run.state].tone}>{STATE[run.state].label}</Tone>
                   </span>
                 </td>

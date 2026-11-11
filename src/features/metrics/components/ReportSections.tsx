@@ -25,10 +25,10 @@ function MetricTile({ id, month, note }: { id: string; month: number; note?: str
   const metric = metricById(id);
   const delta = deltaVsBaseline(metric, month);
   return (
-    <div className="flex min-w-0 items-center justify-between gap-3 rounded-md border border-edge bg-card p-3">
+    <div className="flex min-w-0 flex-col gap-2 rounded-md border border-edge bg-card p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
       <div className="min-w-0">
         <div className="truncate text-xs text-dim">{metric.short}</div>
-        <div className={`font-mono text-xl font-semibold tabular-nums ${metric.descriptive ? "text-dim" : KIND_TEXT[metric.kind]}`}>
+        <div className={`font-mono text-lg font-semibold tabular-nums sm:text-xl ${metric.descriptive ? "text-dim" : KIND_TEXT[metric.kind]}`}>
           {formatValue(metric, valueAt(metric.series, month))}
         </div>
         <DeltaText delta={delta} text={formatDelta(metric, delta)} />
@@ -137,7 +137,7 @@ export function VelocitySection({ month }: { month: number }) {
             }))}
           />
         </div>
-        <div className="grid content-start gap-2 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+        <div className="grid grid-cols-2 content-start gap-2 xl:grid-cols-1 2xl:grid-cols-2">
           <MetricTile id="cycleTime" month={month} />
           <MetricTile id="throughput" month={month} />
           <MetricTile id="deployFreq" month={month} />
@@ -194,7 +194,7 @@ export function QualitySection({ month }: { month: number }) {
   return (
     <Gadget>
       <SectionHeading id="quality-heading" kicker="" title="Quality: what breaks, and where it is caught" />
-      <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
         <MetricTile id="cfr" month={month} />
         <MetricTile id="mttr" month={month} />
         <MetricTile id="evalPass" month={month} />

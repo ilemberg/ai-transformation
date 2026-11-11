@@ -26,13 +26,39 @@ export function Alerts() {
 
   return (
     <div>
-      <dl className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-3">
-        <Stat label="Pages, last 7 days" value={s.pages} />
-        <Stat label="Pages actionable" value={`${Math.round(s.actionablePct)}%`} tone={s.actionablePct < 70 ? "warn" : "pass"} />
-        <Stat label="Median time to acknowledge" value={`${s.medianAckMinutes} min`} />
+      <dl className="grid grid-cols-3 gap-2">
+        <Stat label="Pages, last 7 days" value={s.pages} wrap />
+        <Stat label="Pages actionable" value={`${Math.round(s.actionablePct)}%`} tone={s.actionablePct < 70 ? "warn" : "pass"} wrap />
+        <Stat label="Median time to acknowledge" value={`${s.medianAckMinutes} min`} wrap />
       </dl>
 
-      <Scroller label="Recent alerts, scrolls sideways" className="mt-4">
+      <ul className="mt-4 space-y-2 sm:hidden" aria-label="Recent alerts">
+        {ALERTS.map((a) => (
+          <li key={a.id} className="min-w-0 rounded-md border border-edge bg-card p-2.5 text-sm">
+            <p className="break-words font-mono text-xs font-medium">{a.name}</p>
+            <p className="mt-0.5 text-xs text-dim">{a.note}</p>
+            <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">
+              <Lozenge tone={a.severity === "page" ? "danger" : "neutral"}>{a.severity === "page" ? "Page" : "Ticket"}</Lozenge>
+              <span className="text-dim">{a.service}</span>
+            </div>
+            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+              <span className="tabular-nums">{a.fired}</span>
+              <span className="tabular-nums">
+                <span className="text-faint">Ack </span>
+                {a.ackMinutes} min
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="text-faint">Actionable</span>
+                <Lozenge tone={a.actionable ? "success" : "warning"}>{a.actionable ? "Yes" : "No"}</Lozenge>
+              </span>
+              {a.ticket && <span className="font-medium text-brand">{a.ticket}</span>}
+              {a.trace && <TraceLink id={a.trace} />}
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      <Scroller label="Recent alerts, scrolls sideways" className="mt-4 hidden sm:block">
         <table className="w-full min-w-[960px] border-collapse text-left text-sm">
           <caption className="sr-only">Recent alerts: name, service, severity, when fired, time to acknowledge, whether it was actionable, and the linked ticket.</caption>
           <thead className="bg-panel-2 text-xs text-dim">
@@ -82,10 +108,10 @@ export function Alerts() {
           <span className="text-brand">{INCIDENT.ticket}</span>
           <span>{INCIDENT.title}</span>
         </h3>
-        <dl className="mt-3 grid grid-cols-1 gap-2 min-[420px]:grid-cols-3">
-          <Stat label="Time to restore" value={`${restore} min`} />
-          <Stat label="Time to fix in production" value={INCIDENT.timeToFix} />
-          <Stat label="Customers affected" value={INCIDENT.customers} />
+        <dl className="mt-3 grid grid-cols-3 gap-2">
+          <Stat label="Time to restore" value={`${restore} min`} wrap />
+          <Stat label="Time to fix in production" value={INCIDENT.timeToFix} wrap />
+          <Stat label="Customers affected" value={INCIDENT.customers} wrap />
         </dl>
         <ol className="mt-4 border-l-2 border-edge pl-4" aria-label={`${INCIDENT.ticket} timeline, Mon 9 Nov 2026`}>
           {INCIDENT.events.map((e) => (

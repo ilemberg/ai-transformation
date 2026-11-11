@@ -57,11 +57,12 @@ function FaultCard({ fault }: { fault: FaultCase }) {
         {latest ? `${latest.at}, ${actorName(latest.actor)}: ${latest.text}` : ""}
       </p>
 
+      {/* Events not yet replayed stay faintly visible, so the box shows what is coming instead of empty space. */}
       <ol className="mt-3 space-y-0.5 border-l border-edge pl-3">
         {fault.events.map((e, i) => {
           const visible = i < r.shown;
           return (
-            <li key={`${i}-${visible}`} className={`relative rounded-[3px] px-2 py-1 text-sm ${visible ? "flash" : "invisible"}`} aria-hidden={!visible}>
+            <li key={`${i}-${visible}`} className={`relative rounded-[3px] px-2 py-1 text-sm ${visible ? "flash" : "opacity-35 grayscale select-none"}`} aria-hidden={!visible}>
               <span aria-hidden className={`absolute -left-[17px] top-2.5 h-2 w-2 rounded-full ring-2 ring-card ${DOT[e.tone]}`} />
               <span className="flex items-start gap-2">
                 <ActorAvatar id={e.actor} size={18} />

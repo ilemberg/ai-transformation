@@ -125,7 +125,43 @@ export function ServiceHealth() {
 
   return (
     <div>
-      <Scroller label="Journey health, scrolls sideways">
+      <ul className="space-y-2 sm:hidden" aria-label="Journey health">
+        {JOURNEYS.map((j) => {
+          const b1 = burnRate(j.errorPct1h, SLO_TARGET);
+          const b6 = burnRate(j.errorPct6h, SLO_TARGET);
+          const st = STATUS[burnStatus(b1, b6)];
+          return (
+            <li key={j.id} className="min-w-0 rounded-md border border-edge bg-card p-2.5 text-sm">
+              <div className="flex items-center justify-between gap-2">
+                <span className="min-w-0 font-medium">{j.name}</span>
+                <Lozenge tone={st.tone}>{st.label}</Lozenge>
+              </div>
+              <div className="mt-1.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs">
+                <span className="tabular-nums">
+                  <span className="text-faint">Uptime, {BUDGET_DAYS} d </span>
+                  {j.uptimePct.toFixed(2)}% <span className="text-faint">/ {SLO_TARGET}%</span>
+                </span>
+                <span className="text-faint">
+                  Burn 1 h{" "}
+                  <span className="text-ink">
+                    <Burn value={b1} />
+                  </span>{" "}
+                  · 6 h{" "}
+                  <span className="text-ink">
+                    <Burn value={b6} />
+                  </span>
+                </span>
+              </div>
+              <div className="mt-1.5 text-xs">
+                <span className="text-faint">Error budget left</span>
+                <BudgetBar left={budgetLeftMinutes(j.uptimePct, SLO_TARGET, BUDGET_DAYS)} />
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+
+      <Scroller label="Journey health, scrolls sideways" className="hidden sm:block">
         <table className="w-full min-w-[820px] border-collapse text-left text-sm">
           <caption className="sr-only">
             For each user journey: uptime over {BUDGET_DAYS} days against the {SLO_TARGET}% target, error budget left, burn rate over 1 and 6 hours, and status.

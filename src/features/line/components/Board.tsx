@@ -42,7 +42,7 @@ export function Board({
   }, [selectedStation]);
 
   return (
-    <div ref={scroller} className="overflow-x-auto pb-3">
+    <div ref={scroller} className="hidden overflow-x-auto pb-3 lg:block">
       <div className="flex min-w-[1180px] gap-1.5">
         {STATIONS.map((station, i) => {
           const here = tickets.filter((t) => stationOf(t, cursors[t.id] ?? { step: 0, shown: 0 }) === i);
@@ -150,5 +150,73 @@ function Card({
         </span>
       )}
     </button>
+  );
+}
+
+/**
+ * The board on a phone: ten columns side by side do not fit, so each station
+ * is a row and the tickets in it are chips. All four tickets and every
+ * station stay on one screen.
+ */
+export function PhoneBoard({
+  tickets,
+  cursors,
+  selectedId,
+  onSelect,
+  event,
+}: {
+  tickets: Ticket[];
+  cursors: Record<string, Cursor>;
+  selectedId: string;
+  onSelect: (id: string) => void;
+  event: BoardEvent | null;
+}) {
+  const at = (t: Ticket) => stationOf(t, cursors[t.id] ?? { step: 0, shown: 0 });
+  const eventTicket = event ? tickets.find((t) => t.id === event.ticketId) : undefined;
+  return (
+    <ol className="flex flex-col overflow-hidden rounded-md bg-column lg:hidden" aria-label="Delivery board">
+      {STATIONS.map((station, i) => {
+        const here = tickets.filter((t) => at(t) === i);
+        const hasSelected = here.some((t) => t.id === selectedId);
+        const moved = event?.moved && eventTicket && stationOf(eventTicket, event.after) === i;
+        return (
+          <li
+            key={`${station.id}-${moved ? event!.seq : "still"}`}
+            className={`flex min-h-10 items-center gap-2 border-b border-edge px-2 py-1.5 last:border-b-0 ${
+              hasSelected ? "border-l-4 border-l-brand bg-selected" : "border-l-4 border-l-transparent"
+            } ${moved ? "flash" : ""}`}
+          >
+            <div className="w-24 shrink-0">
+              <div className="text-[10px] font-semibold uppercase leading-tight text-faint">{station.lane}</div>
+              <div className={`text-xs font-semibold leading-tight ${here.length ? "text-ink" : "text-faint"}`}>{station.name}</div>
+            </div>
+            <div className="flex min-w-0 flex-1 flex-wrap gap-1">
+              {here.map((t) => {
+                const c = cursors[t.id] ?? { step: 0, shown: 0 };
+                const failing = TEST_KINDS.filter((k) => testState(t, k.id, c) === "red").length > 0;
+                const selected = t.id === selectedId;
+                const changed = event?.ticketId === t.id;
+                return (
+                  <button
+                    key={`${t.id}-${changed ? event!.seq : "still"}`}
+                    type="button"
+                    onClick={() => onSelect(t.id)}
+                    aria-pressed={selected}
+                    className={`flex h-8 items-center gap-1.5 rounded-[3px] px-2 text-xs font-semibold shadow-card ${
+                      selected ? "bg-brand text-white" : "bg-card text-ink"
+                    } ${changed ? "flash-ring" : ""}`}
+                  >
+                    <IssueTypeIcon kind={t.kind} className="h-3.5 w-3.5" />
+                    {t.key}
+                    {failing && <span aria-label="tests failing" className={`h-1.5 w-1.5 rounded-full ${selected ? "bg-white" : "bg-fail"}`} />}
+                    <Avatar id={assigneeAt(t, c)} size={18} />
+                  </button>
+                );
+              })}
+            </div>
+          </li>
+        );
+      })}
+    </ol>
   );
 }

@@ -81,7 +81,9 @@ export function RunRecord() {
         </span>
       </div>
 
-      <div className="mt-2 overflow-x-auto rounded-md border border-edge" tabIndex={0} role="region" aria-label={`Audit log for ${RUN.id}, scrolls sideways`}>
+      <StepCards />
+
+      <div className="mt-2 hidden overflow-x-auto rounded-md border border-edge sm:block" tabIndex={0} role="region" aria-label={`Audit log for ${RUN.id}, scrolls sideways`}>
         <table className="w-full min-w-[1040px] border-collapse text-left text-sm">
           <caption className="sr-only">
             Every step of {RUN.id}, in order, with actor, inputs, outputs, tokens, cost, artifacts and status.
@@ -146,6 +148,56 @@ export function RunRecord() {
       </div>
 
       <TwoPaths />
+    </div>
+  );
+}
+
+/** Phone only: the audit log as one compact card per step. */
+function StepCards() {
+  return (
+    <div className="mt-2 sm:hidden">
+      <ol className="space-y-2" aria-label={`Audit log for ${RUN.id}`}>
+        {RUN_STEPS.map((s, i) => (
+          <li
+            key={i}
+            className={`min-w-0 rounded-md border border-edge border-l-[3px] p-2.5 text-sm ${s.mark ? MARK_ROW[s.mark] : ""} ${s.status === "rejected" ? "bg-fail-bg/40" : "bg-card"}`}
+          >
+            <div className="flex items-start gap-2">
+              <span className="shrink-0 pt-0.5 font-mono text-xs text-faint">{s.at}</span>
+              <span className="min-w-0 flex-1 font-medium">{s.step}</span>
+              <span className="shrink-0">
+                <Tone tone={STATUS[s.status].tone}>{STATUS[s.status].label}</Tone>
+              </span>
+            </div>
+            <div className="mt-1.5">
+              <ActorChip id={s.actor} />
+            </div>
+            <p className="mt-1.5 line-clamp-3 break-words text-xs">
+              <span className="font-mono text-faint">{s.input}</span> <span aria-hidden className="text-faint">→</span> <span>{s.output}</span>
+            </p>
+            {(s.tokens > 0 || s.artifacts.length > 0) && (
+              <div className="mt-1.5 flex flex-wrap items-center gap-1 text-xs">
+                {s.tokens > 0 && (
+                  <span className="mr-1 tabular-nums text-dim">
+                    {formatTokens(s.tokens)} tokens · {formatUsd(stepCost(s))}
+                  </span>
+                )}
+                {s.artifacts.map((a) => (
+                  <code key={a} className="max-w-full break-all rounded-[3px] bg-neutral-bg px-1">
+                    {a}
+                  </code>
+                ))}
+              </div>
+            )}
+          </li>
+        ))}
+      </ol>
+      <p className="mt-2 rounded-md border border-edge-2 bg-panel-2 p-2.5 text-sm">
+        <span className="font-semibold">
+          Total, {RUN_STEPS.length} steps: {formatTokens(totalTokens)} tokens · {formatUsd(totalCost)}
+        </span>
+        <span className="mt-0.5 block text-xs text-dim">Medium model at {formatUsd(MEDIUM_USD_PER_M)} per million tokens</span>
+      </p>
     </div>
   );
 }

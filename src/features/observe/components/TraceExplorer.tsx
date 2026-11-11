@@ -116,12 +116,12 @@ function TraceBody({ trace }: { trace: Trace }) {
 
       <div className="mt-3 grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="overflow-x-auto rounded-md border border-edge bg-card" tabIndex={0} role="region" aria-label={`Waterfall for ${trace.id}, scrolls sideways`}>
-          <div className="min-w-[640px]">
-            <div className="grid grid-cols-[220px_1fr] border-b border-edge bg-panel-2 text-xs text-dim">
-              <div className="px-3 py-1.5 font-semibold">Span</div>
-              <div className="relative mr-14 h-7" aria-hidden>
+          <div className="sm:min-w-[640px]">
+            <div className="grid grid-cols-1 border-b border-edge bg-panel-2 text-xs text-dim sm:grid-cols-[220px_1fr]">
+              <div className="hidden px-3 py-1.5 font-semibold sm:block">Span</div>
+              <div className="relative ml-3 mr-14 h-7 sm:ml-0" aria-hidden>
                 {ticks.map((t) => (
-                  <span key={t} className="absolute top-1.5 -translate-x-1/2 tabular-nums first:translate-x-0" style={{ left: `${(t / total) * 100}%` }}>
+                  <span key={t} className="absolute top-1.5 -translate-x-1/2 whitespace-nowrap tabular-nums first:translate-x-0" style={{ left: `${(t / total) * 100}%` }}>
                     {formatMs(t)}
                   </span>
                 ))}
@@ -137,24 +137,24 @@ function TraceBody({ trace }: { trace: Trace }) {
                       aria-pressed={on}
                       aria-label={`${s.service}: ${s.name}, starts at ${formatMs(s.start)}, takes ${formatMs(s.duration)}${s.status === "ok" ? "" : `, ${s.status}`}`}
                       onClick={() => setSelected(s.id)}
-                      className={`grid w-full grid-cols-[220px_1fr] items-center text-left text-sm ${on ? "bg-selected" : "hover:bg-hover"}`}
+                      className={`grid w-full grid-cols-1 items-center text-left text-sm sm:grid-cols-[220px_1fr] ${on ? "bg-selected" : "hover:bg-hover"}`}
                     >
-                      <span className="flex min-w-0 items-center gap-1 py-1.5 pr-2" style={{ paddingLeft: 12 + depth * 12 }}>
-                        <span className="min-w-0">
-                          <span className="block truncate text-xs text-dim">{s.service}</span>
-                          <span className={`block truncate ${on ? "font-semibold" : ""}`}>{s.name}</span>
+                      <span className="flex min-w-0 items-center gap-1 pr-2 pt-1.5 sm:py-1.5" style={{ paddingLeft: 12 + depth * 12 }}>
+                        <span className="flex min-w-0 items-baseline gap-1.5 sm:block">
+                          <span className="block shrink-0 truncate text-xs text-dim">{s.service}</span>
+                          <span className={`block min-w-0 truncate ${on ? "font-semibold" : ""}`}>{s.name}</span>
                         </span>
                       </span>
-                      <span className="relative mr-14 block h-8">
+                      <span className="relative ml-3 mr-14 block h-6 sm:ml-0 sm:h-8">
                         {ticks.map((t) => (
                           <span key={t} aria-hidden className="absolute inset-y-0 w-px bg-edge" style={{ left: `${(t / total) * 100}%` }} />
                         ))}
                         <span
                           aria-hidden
-                          className={`absolute top-2.5 h-3 rounded-[2px] ${barClass(s)} ${on ? "ring-2 ring-brand ring-offset-1 ring-offset-card" : ""}`}
+                          className={`absolute top-1.5 h-3 rounded-[2px] sm:top-2.5 ${barClass(s)} ${on ? "ring-2 ring-brand ring-offset-1 ring-offset-card" : ""}`}
                           style={{ left: `${left}%`, width: `${width}%` }}
                         />
-                        <span aria-hidden className="absolute top-2 whitespace-nowrap pl-1 text-xs tabular-nums text-dim" style={{ left: `${left + width}%` }}>
+                        <span aria-hidden className="absolute top-1 whitespace-nowrap sm:top-2 pl-1 text-xs tabular-nums text-dim" style={{ left: `${left + width}%` }}>
                           {formatMs(s.duration)}
                         </span>
                       </span>

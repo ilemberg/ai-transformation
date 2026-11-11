@@ -16,7 +16,7 @@ import {
 import { ACTORS, STATIONS } from "../stations";
 import { TICKETS } from "../tickets";
 import { TOUR, TOUR_STOP_MS } from "../tour";
-import { Board } from "./Board";
+import { Board, PhoneBoard } from "./Board";
 import { IssuePanel } from "./IssuePanel";
 import { Avatar, IssueTypeIcon } from "./jira";
 
@@ -181,7 +181,7 @@ export function LineApp({ initialTicketId, initialStep }: { initialTicketId: str
         Projects <span className="text-faint">/</span> Bookwell
       </nav>
       <div className="flex flex-wrap items-end gap-3">
-        <div className="min-w-0 flex-1">
+        <div className="w-full min-w-0 sm:w-auto sm:flex-1">
           <h1 className="text-2xl font-medium text-ink">Delivery board</h1>
           <p className="mt-0.5 max-w-3xl text-sm text-dim">
             Agents write the code. Tests written first, a second model, and gates nobody can talk past decide what ships.
@@ -261,6 +261,7 @@ export function LineApp({ initialTicketId, initialStep }: { initialTicketId: str
       )}
 
       <Board tickets={TICKETS} cursors={cursors} selectedId={ticket.id} onSelect={select} event={event} />
+      <PhoneBoard tickets={TICKETS} cursors={cursors} selectedId={ticket.id} onSelect={select} event={event} />
 
       <p key={station.id} className="flash rounded-[3px] border-l-4 border-brand bg-panel-2 px-3 py-2 text-sm text-ink">
         <span className="font-semibold">
