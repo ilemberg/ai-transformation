@@ -10,6 +10,7 @@ export const LANES: { id: Lane; blurb: string }[] = [
 export const STATIONS: Station[] = [
   {
     id: "intake",
+    brief: "A small, cheap model triages every ticket from Jira, GitHub or an alert, links duplicates and picks the route, so risky work never slips into the fast lane.",
     lane: "Plan",
     name: "Intake",
     tagline: "Pull the ticket in",
@@ -23,6 +24,7 @@ export const STATIONS: Station[] = [
   },
   {
     id: "plan",
+    brief: "A large model drafts the spec with acceptance examples and a person argues with it until they sign, because building the wrong thing is the most expensive bug.",
     lane: "Plan",
     name: "Plan",
     tagline: "Write the spec, argue about it",
@@ -36,6 +38,7 @@ export const STATIONS: Station[] = [
   },
   {
     id: "tests",
+    brief: "Every acceptance example becomes failing tests at each level that applies, plus evals and load scripts, then they are locked so nobody can weaken them later.",
     lane: "Build",
     name: "Tests first",
     tagline: "Tests and evals before code",
@@ -49,6 +52,7 @@ export const STATIONS: Station[] = [
   },
   {
     id: "build",
+    brief: "A coding agent works in a throwaway cloud sandbox until the locked tests pass; it cannot edit them, and it stops and asks a person when it runs out of budget.",
     lane: "Build",
     name: "Build",
     tagline: "An agent writes the code",
@@ -62,6 +66,7 @@ export const STATIONS: Station[] = [
   },
   {
     id: "review",
+    brief: "A model from a different family reviews the change against the spec, a security agent checks it, then a person approves with the findings already sorted.",
     lane: "Build",
     name: "Review",
     tagline: "Other models, then a person",
@@ -75,6 +80,7 @@ export const STATIONS: Station[] = [
   },
   {
     id: "gates",
+    brief: "The same checks run for every change whoever wrote it, including the eval pass rate; any red check stops the line and sends the ticket back.",
     lane: "Prove",
     name: "Pipeline gates",
     tagline: "The pipeline decides",
@@ -88,6 +94,7 @@ export const STATIONS: Station[] = [
   },
   {
     id: "stress",
+    brief: "Where the route calls for it, load at twice the peak and a break-it agent attack the change; every break becomes a new test.",
     lane: "Prove",
     name: "Load & break-it",
     tagline: "Load it, then attack it",
@@ -101,6 +108,7 @@ export const STATIONS: Station[] = [
   },
   {
     id: "release",
+    brief: "Ship behind a flag to 1%, 10%, 50%, 100% with live tests at each step; if errors or latency move, it rolls itself back.",
     lane: "Run",
     name: "Release",
     tagline: "Ship a little at a time",
@@ -114,6 +122,7 @@ export const STATIONS: Station[] = [
   },
   {
     id: "observe",
+    brief: "Every request and every model call is traced with its cost, dashboards carry deploy markers, and alerts fire on error-budget burn.",
     lane: "Run",
     name: "Observe",
     tagline: "Watch it like it will break",
@@ -127,6 +136,7 @@ export const STATIONS: Station[] = [
   },
   {
     id: "learn",
+    brief: "Every incident comes back as a failing test, and the gate that missed it gets a new rule or eval case, so the same bug cannot ship twice.",
     lane: "Run",
     name: "Bug loop",
     tagline: "When a bug comes in",
@@ -176,11 +186,16 @@ export const TEST_KINDS: TestKindInfo[] = [
   { id: "breakit", name: "Break-it", proves: "Every attack that worked, now a test" },
 ];
 
+/**
+ * Blended price per million tokens: mostly input, much of it served from the
+ * prompt cache, as agent runs are. Roughly in line with late-2026 list prices
+ * for small, mid and frontier models.
+ */
 export const TIERS: { id: Tier; name: string; usedFor: string; usdPerMillion: number }[] = [
-  { id: "small", name: "Small model", usedFor: "Sorting, routing, summaries", usdPerMillion: 1 },
-  { id: "medium", name: "Medium model", usedFor: "Writing tests and code", usdPerMillion: 6 },
-  { id: "large", name: "Large model", usedFor: "Planning, reviewing, attacking", usdPerMillion: 30 },
+  { id: "small", name: "Small model", usedFor: "Sorting, routing, summaries", usdPerMillion: 0.15 },
+  { id: "medium", name: "Medium model", usedFor: "Writing tests and code", usdPerMillion: 2.5 },
+  { id: "large", name: "Large model", usedFor: "Planning, reviewing, attacking", usdPerMillion: 5 },
 ];
 
-/** Sample price of a minute of cloud sandbox or CI runner time. */
+/** Price of a minute of cloud sandbox or CI runner time. */
 export const COMPUTE_USD_PER_MINUTE = 0.02;

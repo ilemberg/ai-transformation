@@ -3,7 +3,7 @@
 An animated walk through an AI-native software delivery line, and the numbers that show whether an AI
 transformation is working.
 
-The **Board** is a project-tracker board with one column per station. Press Start and the three tickets take turns, one event every few seconds; whatever changed (the card, its column, the assignee, a test, the newest comment) is highlighted, and with Follow activity on, the issue view follows the ticket that moved. The ten stations:
+The **Delivery board** is a project-tracker board with one column per station, at Bookwell, a business-travel booking company with six product teams. It opens with a 90-second guided tour of the moments that matter, including where the line stops. **Run all tickets** then plays all four tickets, one event every few seconds; whatever changed (the card, its column, the assignee, a test, the newest comment) is highlighted. The ten stations:
 
 | Lane  | Station         | What happens                                                                                  |
 | ----- | --------------- | --------------------------------------------------------------------------------------------- |
@@ -18,16 +18,23 @@ The **Board** is a project-tracker board with one column per station. Press Star
 | Run   | Observe         | One request ID through logs, metrics and traces; every model call traced with its cost          |
 | Run   | Bug loop        | Every incident becomes a failing test, and the gate that missed it gets stronger               |
 
-Three sample tickets take different routes: an AI feature (evals and prompt-injection testing), a payments bug that
-starts as an alert (fast lane), and a performance problem (the load test is written first).
+Four tickets take different routes:
 
-The **Reports** page is a dashboard that plays a year of a rollout: every speed metric paired with the quality metric that
+- **BW-142**, an AI rebooking assistant: evals, prompt-injection testing and a break-it pass.
+- **BW-311**, a payments double charge that starts as an alert: fast lane, a reproducing test before any fix.
+- **BW-87**, slow hotel search at peak: the load test is written first.
+- **BW-158**, a model upgrade: evals stop it at the gates, the coding agent runs out of budget and hands over to a
+  person, and the canary rolls it back once before it ships.
+
+**Engineering reports** play a year of the rollout for engineering leads: every speed metric paired with the quality metric that
 keeps it honest, the decision rules that fire when one moves the wrong way, and what the models cost.
 
-The **Dashboard** is a stakeholder view: gadgets for token spend, velocity, cycle time, deploys, uptime and error budget, delivery health, AI adoption and decision rules. Gadgets can be added, removed, resized and dragged into a new order; the layout is saved in your browser.
+The **Executive dashboard** is the stakeholder view, for any month of the rollout: token spend, velocity, cycle time, deploys, uptime and error budget, delivery health, AI adoption and decision rules. Gadgets can be added, removed, resized and dragged into a new order; the layout is saved in your browser.
 
-**Everything here is sample data.** Bookwell is a made-up business-travel booking app. No ticket, log line, cost or
-metric was measured.
+Model prices are blended per million tokens (most input served from the prompt cache), in line with late-2026 list
+prices for small, mid-size and frontier models. The trends follow published findings: the DORA 2024 report estimated
+that rising AI adoption came with a 1.5% drop in delivery throughput and a 7.2% drop in stability, which is what the
+gates here are built to beat.
 
 ## Run it
 

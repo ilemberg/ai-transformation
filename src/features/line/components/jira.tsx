@@ -3,7 +3,7 @@ import type { ActorId, TicketKind } from "../types";
 
 /** Small square issue-type marks: story (green), bug (red), improvement (blue). */
 export function IssueTypeIcon({ kind, className = "h-4 w-4" }: { kind: TicketKind; className?: string }) {
-  const label = kind === "feature" ? "Story" : kind === "bug" ? "Bug" : "Improvement";
+  const label = kind === "feature" ? "Story" : kind === "bug" ? "Bug" : kind === "task" ? "Task" : "Improvement";
   return (
     <svg viewBox="0 0 16 16" className={`${className} shrink-0`} role="img" aria-label={label}>
       <title>{label}</title>
@@ -19,9 +19,15 @@ export function IssueTypeIcon({ kind, className = "h-4 w-4" }: { kind: TicketKin
           <circle cx="8" cy="8" r="3.5" fill="white" />
         </>
       )}
-      {kind === "performance" && (
+      {kind === "task" && (
         <>
           <rect width="16" height="16" rx="2" fill="#4bade8" />
+          <path d="M4.5 8.2 7 10.6l4.6-5" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </>
+      )}
+      {kind === "performance" && (
+        <>
+          <rect width="16" height="16" rx="2" fill="#63ba3c" />
           <path d="M8 3.5 12 8H9.5v4.5h-3V8H4Z" fill="white" />
         </>
       )}

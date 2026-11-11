@@ -54,6 +54,8 @@ export interface Station {
   name: string;
   /** Short verb phrase shown under the node. */
   tagline: string;
+  /** One sentence: what happens here and what it catches. Shown under the board. */
+  brief: string;
   whatWeDo: string;
   catches: string;
   /** What stops the line here. */
@@ -116,13 +118,15 @@ export interface Usage {
 export interface TicketStep {
   station: StationId;
   mode: StepMode;
+  /** Test kinds this step turns red or green when it finishes (a failed eval run, a rollback). */
+  sets?: Partial<Record<TestKind, "red" | "green">>;
   /** For a skipped or light station: why. */
   reason?: string;
   log: LogLine[];
   usage: Usage;
 }
 
-export type TicketKind = "feature" | "bug" | "performance";
+export type TicketKind = "feature" | "bug" | "performance" | "task";
 
 export interface Ticket {
   id: string;

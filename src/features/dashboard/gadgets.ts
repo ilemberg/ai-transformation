@@ -26,6 +26,8 @@ export type GadgetInfo = {
   defaultWidth: Width;
   /** Extra footer text, e.g. how a derived number was worked out. */
   footnote?: string;
+  /** False for a gadget that does not follow the month picker (it shows the Board as it is now). */
+  monthly?: boolean;
 };
 
 export const GADGETS: Record<GadgetId, GadgetInfo> = {
@@ -34,7 +36,7 @@ export const GADGETS: Record<GadgetId, GadgetInfo> = {
     title: "Token spend by model size",
     description: "Monthly AI spend in dollars, stacked by small, medium and large models.",
     defaultWidth: 2,
-    footnote: "Spend per change × throughput × 6 teams × 4.33 weeks, split by token share",
+    footnote: "Spend per change × throughput × 6 teams × 4.33 weeks; split by token share weighted by price (1 : 3 : 12)",
   },
   velocity: {
     id: "velocity",
@@ -57,7 +59,7 @@ export const GADGETS: Record<GadgetId, GadgetInfo> = {
   health: {
     id: "health",
     title: "Delivery health",
-    description: "The four speed and quality pairs, each with its verdict.",
+    description: "The four speed and quality pairs, each with its verdict, against the DORA 2024 finding.",
     defaultWidth: 1,
   },
   errorBudget: {
@@ -99,9 +101,11 @@ export const GADGETS: Record<GadgetId, GadgetInfo> = {
   },
   tickets: {
     id: "tickets",
-    title: "Sample tickets",
-    description: "The three sample tickets with model spend and elapsed time.",
+    title: "Tickets in flight",
+    description: "The tickets on the Board, with model spend and elapsed time end to end.",
     defaultWidth: 2,
+    footnote: "Tickets on the Board today · model spend and elapsed time, intake to production",
+    monthly: false,
   },
 };
 

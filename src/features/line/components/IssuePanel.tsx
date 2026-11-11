@@ -5,7 +5,10 @@ import {
   assigneeAt,
   formatMinutes,
   formatUsd,
-  isStationDone,
+  isStepDone,
+  lastStep,
+  stationIndex,
+  stationOf,
   stepAt,
   testState,
   totalsAt,
@@ -47,11 +50,12 @@ export function IssuePanel({
   /** A yellow wash on an element that just changed; the key restarts it on every event. */
   const hlKey = (field: string, changed: boolean | undefined) => (event && changed ? `${field}-${seq}` : field);
   const hlClass = (changed: boolean | undefined) => (event && changed ? "flash rounded-[3px]" : "");
-  const station = STATIONS[cursor.station];
-  const done = isStationDone(ticket, cursor);
+  const stationNow = stationOf(ticket, cursor);
+  const station = STATIONS[stationNow];
+  const done = isStepDone(ticket, cursor);
   const now = totalsAt(ticket, cursor);
   const all = totalsFor(ticket);
-  const finished = done && cursor.station === STATIONS.length - 1;
+  const finished = done && cursor.step === lastStep(ticket);
 
   const tests = TEST_KINDS.map((k) => ({ k, state: testState(ticket, k.id, cursor), t: ticket.tests[k.id] })).filter(
     (r) => r.state !== "na",
@@ -114,7 +118,7 @@ export function IssuePanel({
 
       <div className="flex flex-wrap items-center gap-2">
         <span className="relative">
-          <StatusMenu current={cursor.station} finished={finished} onJump={onJump} />
+          <StatusMenu current={stationNow} visited={new Set(ticket.steps.slice(0, cursor.step + 1).map((s) => stationIndex(s.station)))} finished={finished} onJump={onJump} />
           {event?.moved && (
             <span key={seq} aria-hidden className="flash-ring pointer-events-none absolute inset-0 rounded-[3px]" />
           )}
@@ -164,7 +168,17 @@ export function IssuePanel({
   );
 }
 
-function StatusMenu({ current, finished, onJump }: { current: number; finished: boolean; onJump: (s: number) => void }) {
+function StatusMenu({
+  current,
+  visited,
+  finished,
+  onJump,
+}: {
+  current: number;
+  visited: Set<number>;
+  finished: boolean;
+  onJump: (s: number) => void;
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -206,7 +220,7 @@ function StatusMenu({ current, finished, onJump }: { current: number; finished: 
                   i === current ? "border-l-2 border-brand bg-selected" : "border-l-2 border-transparent"
                 }`}
               >
-                <Lozenge tone={i < current ? "success" : i === current ? "info" : "neutral"}>{s.name}</Lozenge>
+                <Lozenge tone={i === current ? "info" : visited.has(i) ? "success" : "neutral"}>{s.name}</Lozenge>
               </button>
             </li>
           ))}
@@ -219,7 +233,9 @@ function StatusMenu({ current, finished, onJump }: { current: number; finished: 
 interface Entry {
   key: string;
   who: ActorId;
-  station: number;
+  /** For a status change: the columns it moved between. */
+  from?: number;
+  to?: number;
   kind: "status" | "comment";
   text: string;
   tone?: Tone;
@@ -228,11 +244,15 @@ interface Entry {
 /** Status changes and comments, newest first, as they happen. */
 function Activity({ ticket, cursor, seq }: { ticket: Ticket; cursor: Cursor; seq: number | null }) {
   const entries: Entry[] = [];
-  for (let i = 0; i <= cursor.station; i++) {
+  for (let i = 0; i <= cursor.step; i++) {
     const step = stepAt(ticket, i);
-    if (i > 0) entries.push({ key: `s${i}`, who: "deployer", station: i, kind: "status", text: "" });
-    const lines = i < cursor.station ? step.log : step.log.slice(0, cursor.shown);
-    lines.forEach((l, j) => entries.push({ key: `${i}-${j}`, who: l.who, station: i, kind: "comment", text: l.text, tone: l.tone }));
+    if (i > 0) {
+      const from = stationIndex(ticket.steps[i - 1].station);
+      const to = stationIndex(step.station);
+      entries.push({ key: `s${i}`, who: "ci", from, to, kind: "status", text: "" });
+    }
+    const lines = i < cursor.step ? step.log : step.log.slice(0, cursor.shown);
+    lines.forEach((l, j) => entries.push({ key: `${i}-${j}`, who: l.who, kind: "comment", text: l.text, tone: l.tone }));
   }
   entries.reverse();
 
@@ -250,10 +270,10 @@ function Activity({ ticket, cursor, seq }: { ticket: Ticket; cursor: Cursor; seq
               className={`flex items-center gap-2 rounded px-1 py-0.5 text-xs text-dim ${idx === 0 && seq !== null ? "flash" : ""}`}
             >
               <Avatar id="ci" size={20} />
-              <span>Automation moved it</span>
-              <Lozenge tone="neutral">{STATIONS[e.station - 1].name}</Lozenge>
+              <span>{e.to! < e.from! ? "Automation sent it back" : "Automation moved it"}</span>
+              <Lozenge tone="neutral">{STATIONS[e.from!].name}</Lozenge>
               <span aria-hidden>→</span>
-              <Lozenge tone="info">{STATIONS[e.station].name}</Lozenge>
+              <Lozenge tone={e.to! < e.from! ? "warning" : "info"}>{STATIONS[e.to!].name}</Lozenge>
             </li>
           ) : (
             <li
@@ -272,7 +292,7 @@ function Activity({ ticket, cursor, seq }: { ticket: Ticket; cursor: Cursor; seq
             </li>
           ),
         )}
-        {entries.length === 0 && <li className="text-sm text-faint">Nothing yet. Press Start.</li>}
+        {entries.length === 0 && <li className="text-sm text-faint">Nothing yet.</li>}
       </ol>
     </section>
   );

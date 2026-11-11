@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const LINKS = [
-  { href: "/", label: "Board", icon: BoardIcon },
-  { href: "/metrics", label: "Reports", icon: ReportsIcon },
-  { href: "/dashboard", label: "Dashboard", icon: DashboardIcon },
+  { href: "/", label: "Board", long: "Delivery board", icon: BoardIcon },
+  { href: "/metrics", label: "Reports", long: "Engineering reports", icon: ReportsIcon },
+  { href: "/dashboard", label: "Dashboard", long: "Executive dashboard", icon: DashboardIcon },
 ];
 
 function useActive() {
@@ -40,24 +40,26 @@ export function TopBar() {
           </Link>
         ))}
       </nav>
-      <span className="ml-auto hidden rounded-[3px] bg-warn-bg sm:inline px-1.5 text-[11px] font-bold uppercase text-warn">Sample data</span>
     </header>
   );
 }
 
-/** The project sidebar: project name and its two views. Desktop only. */
+/**
+ * The project sidebar. Desktop only: an icon rail on laptops, so the board's
+ * ten columns fit, and the full sidebar on wide screens.
+ */
 export function Sidebar() {
   const isActive = useActive();
   return (
-    <aside className="sticky top-12 hidden h-[calc(100dvh-3rem)] w-60 shrink-0 flex-col border-r border-edge bg-panel-2 px-2 py-4 lg:flex">
-      <div className="mb-4 flex items-center gap-2 px-2">
-        <span className="grid h-8 w-8 place-items-center rounded bg-purple text-sm font-bold text-white">BW</span>
-        <div className="min-w-0">
+    <aside className="sticky top-12 hidden h-[calc(100dvh-3rem)] w-14 shrink-0 flex-col border-r border-edge bg-panel-2 px-2 py-4 lg:flex 2xl:w-60">
+      <div className="mb-4 flex items-center gap-2 px-1 2xl:px-2">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded bg-purple text-sm font-bold text-white">BW</span>
+        <div className="hidden min-w-0 2xl:block">
           <div className="truncate font-semibold">Bookwell</div>
-          <div className="text-xs text-faint">Software project · sample</div>
+          <div className="text-xs text-faint">Travel booking · 6 teams</div>
         </div>
       </div>
-      <div className="px-2 pb-1 text-[11px] font-bold uppercase text-faint">Planning</div>
+      <div className="hidden px-2 pb-1 text-[11px] font-bold uppercase text-faint 2xl:block">Planning</div>
       {LINKS.map((l) => {
         const active = isActive(l.href);
         const Icon = l.icon;
@@ -66,17 +68,17 @@ export function Sidebar() {
             key={l.href}
             href={l.href}
             aria-current={active ? "page" : undefined}
-            className={`relative flex h-9 items-center gap-3 rounded px-2 text-sm ${
+            title={l.long}
+            className={`relative flex h-9 items-center gap-3 rounded px-2.5 text-sm 2xl:px-2 ${
               active ? "bg-selected font-medium text-brand" : "text-dim hover:bg-hover"
             }`}
           >
             {active && <span aria-hidden className="absolute left-0 top-2 h-5 w-[3px] rounded-r bg-brand" />}
             <Icon />
-            {l.label}
+            <span className="sr-only 2xl:not-sr-only">{l.long}</span>
           </Link>
         );
       })}
-      <p className="mt-auto px-2 text-xs text-faint">Bookwell is a made-up travel booking app. Nothing here was measured.</p>
     </aside>
   );
 }

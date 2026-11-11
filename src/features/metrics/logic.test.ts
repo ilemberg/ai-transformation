@@ -154,9 +154,10 @@ describe("rules", () => {
     expect(firedMonths(r, 5, lookup)).toEqual([2, 3]);
   });
 
-  // The story the sample data is written to tell.
-  it("pauses expansion at month 5 and clears at month 6", () => {
-    expect(firedMonths(rule("cfr"), LAST_MONTH)).toEqual([5]);
+  // The story Bookwell's year tells.
+  it("pauses expansion in months 4 and 5 and clears at month 6", () => {
+    expect(firedMonths(rule("cfr"), LAST_MONTH)).toEqual([4, 5]);
+    expect(ruleStatus(rule("cfr"), 6)).toEqual({ state: "cleared", firstFired: 4, clearedAt: 6 });
   });
 
   it("flags review as the bottleneck in months 4 and 5", () => {
@@ -172,12 +173,12 @@ describe("rules", () => {
     expect(firedMonths(rule("rework"), LAST_MONTH)).toEqual([4, 5, 6]);
   });
 
-  it("never spends the error budget and never ranks people", () => {
-    expect(firedMonths(rule("budget"), LAST_MONTH)).toEqual([]);
+  it("spends the error budget once, in month 5, and never ranks people", () => {
+    expect(firedMonths(rule("budget"), LAST_MONTH)).toEqual([5]);
     expect(firedMonths(rule("rank"), LAST_MONTH)).toEqual([]);
   });
 
-  it("has nothing firing before the pilot", () => {
+  it("has nothing firing before expansion", () => {
     for (const r of RULES) expect(firedMonths(r, 3)).toEqual([]);
   });
 });
@@ -189,18 +190,47 @@ describe("the story in the pairs", () => {
     return pairVerdict(metricById(p.speed), metricById(p.quality), m).verdict;
   };
 
-  it("pilot cuts cycle time about 30% with CFR flat", () => {
+  it("pilot moves the six-team roll-up a little, with CFR flat", () => {
     const d = deltaVsBaseline(metricById("cycleTime"), 3);
-    expect(d.relative).toBeLessThan(-25);
-    expect(d.relative).toBeGreaterThan(-35);
+    expect(d.relative).toBeLessThan(-5);
+    expect(d.relative).toBeGreaterThan(-12);
     expect(deltaVsBaseline(metricById("cfr"), 3).effect).not.toBe("worse");
     expect(verdict("flow", 3)).toBe("Healthy");
   });
 
-  it("shows regressions in month 5 and all healthy at month 12", () => {
+  it("gives back some of the pilot gain when expansion starts", () => {
+    const ct = metricById("cycleTime").series;
+    expect(valueAt(ct, 4)).toBeGreaterThan(valueAt(ct, 3));
+    const tp = metricById("throughput").series;
+    expect(valueAt(tp, 4)).toBeLessThan(valueAt(tp, 3));
+  });
+
+  it("ends the year with modest, DORA-plausible gains", () => {
+    const rel = (id: string) => deltaVsBaseline(metricById(id), 12).relative;
+    expect(rel("cycleTime")).toBeGreaterThanOrEqual(-30);
+    expect(rel("cycleTime")).toBeLessThanOrEqual(-25);
+    expect(rel("throughput")).toBeGreaterThanOrEqual(30);
+    expect(rel("throughput")).toBeLessThanOrEqual(35);
+    expect(rel("deployFreq")).toBeGreaterThanOrEqual(40);
+    expect(rel("deployFreq")).toBeLessThan(60);
+    const cfr = metricById("cfr").series;
+    expect(Math.max(...cfr)).toBeGreaterThanOrEqual(15);
+    expect(valueAt(cfr, 12)).toBeGreaterThanOrEqual(10);
+    expect(valueAt(cfr, 12)).toBeLessThanOrEqual(11);
+  });
+
+  it("dips developer experience during expansion, then recovers", () => {
+    const devex = metricById("devex").series;
+    expect(valueAt(devex, 5)).toBeLessThan(baselineOf(devex));
+    expect(valueAt(devex, 12)).toBeGreaterThan(baselineOf(devex));
+  });
+
+  it("shows regressions in month 5, scars at month 6 and all healthy at month 12", () => {
     expect(verdict("flow", 5)).toBe("Regression");
     expect(verdict("people", 5)).toBe("Regression");
     expect(verdict("agents", 5)).toBe("Regression");
+    expect(verdict("flow", 6)).toBe("Watch");
+    expect(verdict("agents", 6)).toBe("Regression");
     for (const p of PAIRS) expect(verdict(p.id, 12)).toBe("Healthy");
   });
 
@@ -211,9 +241,14 @@ describe("the story in the pairs", () => {
   it("spends more early, then less as routing and caching land", () => {
     const spend = metricById("spend").series;
     const peak = Math.max(...spend);
-    expect(spend.indexOf(peak)).toBeGreaterThanOrEqual(2);
-    expect(spend.indexOf(peak)).toBeLessThanOrEqual(5);
-    expect(valueAt(spend, 12)).toBeLessThan(peak / 2);
+    expect(spend.indexOf(peak)).toBe(4);
+    expect(valueAt(spend, 0)).toBeLessThan(3);
+    expect(valueAt(spend, 12)).toBeGreaterThanOrEqual(20);
+    expect(valueAt(spend, 12)).toBeLessThanOrEqual(24);
+    const cache = metricById("cacheHit").series;
+    expect(valueAt(cache, 0)).toBeLessThanOrEqual(15);
+    expect(valueAt(cache, 12)).toBeGreaterThanOrEqual(70);
+    expect(TIER_SHARES[12]).toEqual({ small: 35, medium: 45, large: 20 });
     expect(valueAt(TIER_SHARES.map((t) => t.large), 12)).toBeLessThan(valueAt(TIER_SHARES.map((t) => t.large), 3));
   });
 });
@@ -257,9 +292,11 @@ describe("formatting and targets", () => {
 
   it("formats deltas as percent or points", () => {
     const ct = metricById("cycleTime");
-    expect(formatDelta(ct, deltaVsBaseline(ct, 3))).toBe("−29%");
+    expect(formatDelta(ct, deltaVsBaseline(ct, 12))).toBe("−29%");
     const cfr = metricById("cfr");
-    expect(formatDelta(cfr, deltaVsBaseline(cfr, 5))).toBe("+2.6 pts");
+    expect(formatDelta(cfr, deltaVsBaseline(cfr, 5))).toBe("+3.8 pts");
+    const spend = metricById("spend");
+    expect(formatDelta(spend, deltaVsBaseline(spend, 12))).toBe("+$19.90");
     expect(formatDelta(cfr, deltaVsBaseline(cfr, 0))).toBe("no change");
   });
 

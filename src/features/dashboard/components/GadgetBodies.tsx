@@ -13,10 +13,11 @@ import { Sparkline } from "@/features/metrics/components/Sparkline";
 import { DeltaText, VerdictChip } from "@/features/metrics/components/ui";
 import { totalsFor } from "@/features/line/logic";
 import { TICKETS } from "@/features/line/tickets";
-import { errorBudget, formatDollars, spendByTier } from "../derive";
+import { errorBudget, formatDollars, spendByTier, spendPerEngineer } from "../derive";
 import type { GadgetId } from "../gadgets";
 
-const M = LAST_MONTH;
+/** Every gadget body is drawn for one month of the rollout. */
+export type GadgetBodyProps = { month: number };
 
 type Tone = "neutral" | "info" | "pass" | "fail" | "warn" | "purple";
 
@@ -39,10 +40,10 @@ export function Lozenge({ tone, children }: { tone: Tone; children: React.ReactN
   );
 }
 
-/** Number with its prefix big and its unit small, e.g. "36" + "/ team / wk". */
-function Value({ id, size = "lg" }: { id: string; size?: "lg" | "md" }) {
+/** Number with its prefix big and its unit small, e.g. "18.7" + "/ team / wk". */
+function Value({ id, month, size = "lg" }: { id: string; month: number; size?: "lg" | "md" }) {
   const m = metricById(id);
-  const v = valueAt(m.series, M);
+  const v = valueAt(m.series, month);
   return (
     <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
       <span className={`font-semibold tabular-nums text-ink ${size === "lg" ? "text-[28px] leading-8" : "text-xl leading-7"}`}>
@@ -54,9 +55,9 @@ function Value({ id, size = "lg" }: { id: string; size?: "lg" | "md" }) {
   );
 }
 
-function Delta({ id }: { id: string }) {
+function Delta({ id, month }: { id: string; month: number }) {
   const m = metricById(id);
-  const d = deltaVsBaseline(m, M);
+  const d = deltaVsBaseline(m, month);
   return (
     <span className="flex flex-wrap items-baseline gap-x-1">
       <DeltaText delta={d} text={formatDelta(m, d)} />
@@ -65,27 +66,34 @@ function Delta({ id }: { id: string }) {
   );
 }
 
-function Spark({ id, colorClass }: { id: string; colorClass: string }) {
-  const m = metricById(id);
-  return <Sparkline series={m.series} month={M} label={m.short} colorClass={colorClass} threshold={m.threshold} />;
-}
-
 /** One metric: label, number, change against baseline, and its year as a sparkline. */
-function MetricStat({ id, colorClass, size = "lg", label }: { id: string; colorClass: string; size?: "lg" | "md"; label?: string }) {
+function MetricStat({
+  id,
+  month,
+  colorClass,
+  size = "lg",
+  label,
+}: {
+  id: string;
+  month: number;
+  colorClass: string;
+  size?: "lg" | "md";
+  label?: string;
+}) {
   const m = metricById(id);
   return (
     <div className="flex items-center justify-between gap-3">
       <div className="min-w-0">
         <div className="truncate text-xs font-medium text-dim">{label ?? m.short}</div>
-        <Value id={id} size={size} />
-        <Delta id={id} />
+        <Value id={id} month={month} size={size} />
+        <Delta id={id} month={month} />
       </div>
-      <Spark id={id} colorClass={colorClass} />
+      <Sparkline series={m.series} month={month} label={m.short} colorClass={colorClass} threshold={m.threshold} />
     </div>
   );
 }
 
-// 1. Token spend
+// Token spend
 
 const TIERS: readonly { key: keyof TierShare; label: string; bg: string }[] = [
   { key: "large", label: "Large", bg: "bg-large" },
@@ -93,25 +101,31 @@ const TIERS: readonly { key: keyof TierShare; label: string; bg: string }[] = [
   { key: "small", label: "Small", bg: "bg-small" },
 ];
 
-function TokenSpend() {
-  const months = Array.from({ length: MONTHS - 1 }, (_, i) => i + 1);
-  const spends = months.map((m) => ({ month: m, ...spendByTier(m) }));
+function TokenSpend({ month }: GadgetBodyProps) {
+  const spends = Array.from({ length: MONTHS }, (_, m) => ({ month: m, ...spendByTier(m) }));
   const max = Math.max(...spends.map((s) => s.total));
-  const now = spendByTier(M);
-  const peak = spends.reduce((a, b) => (b.total > a.total ? b : a));
+  const now = spendByTier(month);
+  const sofar = spends.slice(0, month + 1);
+  const peak = sofar.reduce((a, b) => (b.total > a.total ? b : a));
 
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
         <div>
-          <div className="text-xs font-medium text-dim">Month {M} spend</div>
+          <div className="text-xs font-medium text-dim">Month {month} AI spend</div>
           <span className="text-[28px] font-semibold leading-8 tabular-nums">{formatDollars(now.total)}</span>
           <span className="ml-1 text-xs text-dim">/ month</span>
           <div className="text-xs text-faint">
-            Peak {formatDollars(peak.total)} in month {peak.month}
+            {formatDollars(spendPerEngineer(month))} per engineer
+            {peak.month !== month && (
+              <>
+                {" "}
+                · peak so far {formatDollars(peak.total)} in month {peak.month}
+              </>
+            )}
           </div>
         </div>
-        <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-dim" aria-label={`Month ${M} spend by model size`}>
+        <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-dim" aria-label={`Month ${month} spend by model size`}>
           {TIERS.map((t) => (
             <li key={t.key} className="inline-flex items-center gap-1.5">
               <span aria-hidden className={`h-2.5 w-2.5 rounded-sm ${t.bg}`} />
@@ -122,25 +136,27 @@ function TokenSpend() {
       </div>
       <div
         role="img"
-        aria-label={`Monthly AI spend, months 1 to ${M}: ${spends.map((s) => `month ${s.month} ${formatDollars(s.total)}`).join(", ")}.`}
+        aria-label={`Monthly AI spend, months 0 to ${month}: ${sofar.map((s) => `month ${s.month} ${formatDollars(s.total)}`).join(", ")}.`}
       >
         <div className="flex h-28 items-end gap-1 border-b border-edge">
           {spends.map((s) => (
             <div
               key={s.month}
               title={`Month ${s.month}: ${formatDollars(s.total)}`}
-              className={`flex flex-1 flex-col overflow-hidden rounded-t-[3px] ${s.month === M ? "" : "opacity-60"}`}
+              className={`flex flex-1 flex-col overflow-hidden rounded-t-[3px] ${
+                s.month === month ? "" : s.month < month ? "opacity-60" : "opacity-15"
+              }`}
               style={{ height: `${(s.total / max) * 100}%` }}
             >
               {TIERS.map((t) => (
-                <div key={t.key} className={t.bg} style={{ height: `${(s[t.key] / s.total) * 100}%` }} />
+                <div key={t.key} className={t.bg} style={{ height: `${s.total ? (s[t.key] / s.total) * 100 : 0}%` }} />
               ))}
             </div>
           ))}
         </div>
         <div aria-hidden className="mt-1 flex gap-1 text-center text-[10px] tabular-nums text-faint">
           {spends.map((s) => (
-            <span key={s.month} className={`flex-1 ${s.month === M ? "font-bold text-ink" : ""}`}>
+            <span key={s.month} className={`flex-1 ${s.month === month ? "font-bold text-ink" : ""}`}>
               {s.month}
             </span>
           ))}
@@ -150,20 +166,20 @@ function TokenSpend() {
   );
 }
 
-// 4. Deploys and change failures
+// Deploys and change failures
 
-function Release() {
+function Release({ month }: GadgetBodyProps) {
   const deploys = metricById("deployFreq");
   const cfr = metricById("cfr");
-  const { verdict, reason } = pairVerdict(deploys, cfr, M);
+  const { verdict, reason } = pairVerdict(deploys, cfr, month);
   return (
     <div className="flex flex-col gap-3">
       <div className="grid grid-cols-2 gap-3">
         {[deploys, cfr].map((m) => (
           <div key={m.id} className="min-w-0">
             <div className="truncate text-xs font-medium text-dim">{m.short}</div>
-            <Value id={m.id} size="md" />
-            <Delta id={m.id} />
+            <Value id={m.id} month={month} size="md" />
+            <Delta id={m.id} month={month} />
           </div>
         ))}
       </div>
@@ -177,13 +193,13 @@ function Release() {
   );
 }
 
-// 6. Delivery health
+// Delivery health
 
-function Health() {
+function Health({ month }: GadgetBodyProps) {
   const rows = PAIRS.map((p) => {
     const speed = metricById(p.speed);
     const quality = metricById(p.quality);
-    return { id: p.id, speed, quality, ...pairVerdict(speed, quality, M) };
+    return { id: p.id, speed, quality, ...pairVerdict(speed, quality, month) };
   });
   const healthy = rows.filter((r) => r.verdict === "Healthy").length;
   return (
@@ -202,22 +218,26 @@ function Health() {
           </li>
         ))}
       </ul>
+      <p className="border-t border-edge pt-2.5 text-xs leading-relaxed text-dim">
+        DORA 2024: as AI adoption rose, delivery throughput fell an estimated 1.5% and stability 7.2%. The gates on the
+        Board exist to beat that.
+      </p>
     </div>
   );
 }
 
-// 5. Uptime and error budget
+// Uptime and error budget
 
-function ErrorBudgetGadget() {
+function ErrorBudgetGadget({ month }: GadgetBodyProps) {
   const uptime = metricById("uptime");
-  const b = errorBudget(valueAt(uptime.series, M));
+  const b = errorBudget(valueAt(uptime.series, month));
   const pct = Math.round(b.leftShare * 100);
   const tone = b.leftShare > 0.5 ? "pass" : b.leftShare > 0.2 ? "warn" : "fail";
   const bar = { pass: "bg-pass", warn: "bg-warn", fail: "bg-fail" }[tone];
-  const word = { pass: "Healthy", warn: "Low", fail: "Nearly spent" }[tone];
+  const word = b.left <= 0 ? "Spent" : { pass: "Healthy", warn: "Low", fail: "Nearly spent" }[tone];
   return (
     <div className="flex flex-col gap-3">
-      <MetricStat id="uptime" colorClass="text-quality" label="Uptime, last 30 days" />
+      <MetricStat id="uptime" month={month} colorClass="text-quality" label="Uptime, trailing 30 days" />
       <div>
         <div className="mb-1 flex items-center justify-between gap-2 text-xs">
           <span className="font-medium text-dim">Error budget left</span>
@@ -243,29 +263,29 @@ function ErrorBudgetGadget() {
   );
 }
 
-// 7. AI adoption
+// AI adoption
 
-function Adoption() {
+function Adoption({ month }: GadgetBodyProps) {
   return (
     <div className="flex flex-col gap-3">
-      <MetricStat id="agentShare" colorClass="text-speed" label="Agent-authored share of merged code" />
+      <MetricStat id="agentShare" month={month} colorClass="text-speed" label="Agent-authored share of merged code" />
       <div className="border-t border-edge pt-3">
-        <MetricStat id="rework" colorClass="text-quality" size="md" label="Rework rate, agent code" />
+        <MetricStat id="rework" month={month} colorClass="text-quality" size="md" label="Rework rate, agent code" />
       </div>
     </div>
   );
 }
 
-// 8. Eval pass rate
+// Eval pass rate
 
-function Evals() {
+function Evals({ month }: GadgetBodyProps) {
   const m = metricById("evalPass");
-  const v = valueAt(m.series, M);
+  const v = valueAt(m.series, month);
   const threshold = m.threshold?.value ?? 92;
   const above = v >= threshold;
   return (
     <div className="flex flex-col gap-3">
-      <MetricStat id="evalPass" colorClass="text-quality" />
+      <MetricStat id="evalPass" month={month} colorClass="text-quality" />
       <div className="flex items-center gap-2 border-t border-edge pt-2.5 text-xs text-dim">
         <Lozenge tone={above ? "pass" : "fail"}>{above ? "Release open" : "Release blocked"}</Lozenge>
         <span>
@@ -276,7 +296,7 @@ function Evals() {
   );
 }
 
-// 9. Decision rules
+// Decision rules
 
 function statusLozenge(s: RuleStatus) {
   if (s.state === "active") return <Lozenge tone="fail">Firing</Lozenge>;
@@ -284,8 +304,8 @@ function statusLozenge(s: RuleStatus) {
   return <Lozenge tone="neutral">Not fired</Lozenge>;
 }
 
-function Rules() {
-  const rows = RULES.map((r) => ({ rule: r, status: ruleStatus(r, M) }));
+function Rules({ month }: GadgetBodyProps) {
+  const rows = RULES.map((r) => ({ rule: r, status: ruleStatus(r, month) }));
   const firing = rows.filter((r) => r.status.state === "active").length;
   return (
     <div className="flex flex-col gap-2">
@@ -307,24 +327,24 @@ function Rules() {
   );
 }
 
-// 10. Cost per change
+// Cost per change
 
-function CostPerChange() {
+function CostPerChange({ month }: GadgetBodyProps) {
   return (
     <div className="flex flex-col gap-3">
-      <MetricStat id="spend" colorClass="text-medium" label="AI spend per merged change" />
+      <MetricStat id="spend" month={month} colorClass="text-medium" label="AI spend per merged change" />
       <div className="border-t border-edge pt-3">
-        <MetricStat id="cacheHit" colorClass="text-small" size="md" label="Prompt-cache hit rate" />
+        <MetricStat id="cacheHit" month={month} colorClass="text-small" size="md" label="Prompt-cache hit rate" />
       </div>
     </div>
   );
 }
 
-// 11. Rollout phase
+// Rollout phase
 
-function Phase() {
-  const current = phaseFor(M);
-  const pct = Math.round((M / LAST_MONTH) * 100);
+function Phase({ month }: GadgetBodyProps) {
+  const current = phaseFor(month);
+  const pct = Math.round((month / LAST_MONTH) * 100);
   return (
     <div className="flex flex-col gap-3">
       <div>
@@ -334,21 +354,21 @@ function Phase() {
           <Lozenge tone="info">In progress</Lozenge>
         </div>
         <div className="text-xs text-faint">
-          Month {M} of {LAST_MONTH} · {pct}% through the year
+          Month {month} of {LAST_MONTH} · {pct}% through the year
         </div>
       </div>
       <div className="flex gap-1" aria-hidden>
         {PHASES.map((p) => (
           <div key={p.id} className="min-w-0" style={{ flex: p.end - p.start + 1 }}>
             <div
-              className={`h-2 rounded-full ${p.id === current.id ? "bg-brand" : p.end < M ? "bg-pass" : "bg-neutral-bg"}`}
+              className={`h-2 rounded-full ${p.id === current.id ? "bg-brand" : p.end < month ? "bg-pass" : "bg-neutral-bg"}`}
             />
           </div>
         ))}
       </div>
       <ul className="space-y-1 text-sm">
         {PHASES.map((p) => {
-          const done = p.end < M;
+          const done = p.end < month;
           const now = p.id === current.id;
           return (
             <li key={p.id} className="flex items-center justify-between gap-2">
@@ -367,7 +387,7 @@ function Phase() {
   );
 }
 
-// 12. Sample tickets
+// Tickets in flight (the Board as it is now; does not follow the month picker)
 
 function formatUsdCents(usd: number): string {
   return usd < 100 ? `$${usd.toFixed(2)}` : formatDollars(usd);
@@ -385,7 +405,7 @@ function formatElapsed(minutes: number): string {
   return `${days} ${days === 1 ? "day" : "days"}`;
 }
 
-const KIND_TONE: Record<string, Tone> = { feature: "pass", bug: "fail", performance: "purple" };
+const KIND_TONE: Record<string, Tone> = { feature: "pass", bug: "fail", performance: "purple", task: "info" };
 
 function Tickets() {
   const rows = TICKETS.map((t) => ({ ticket: t, totals: totalsFor(t) }));
@@ -427,15 +447,15 @@ function Tickets() {
   );
 }
 
-function Velocity() {
-  return <MetricStat id="throughput" colorClass="text-speed" label="Merged changes per team per week" />;
+function Velocity({ month }: GadgetBodyProps) {
+  return <MetricStat id="throughput" month={month} colorClass="text-speed" label="Merged changes per team per week" />;
 }
 
-function CycleTime() {
-  return <MetricStat id="cycleTime" colorClass="text-speed" label="Median, first commit to production" />;
+function CycleTime({ month }: GadgetBodyProps) {
+  return <MetricStat id="cycleTime" month={month} colorClass="text-speed" label="Median, first commit to production" />;
 }
 
-export const GADGET_BODIES: Record<GadgetId, () => React.ReactNode> = {
+export const GADGET_BODIES: Record<GadgetId, (props: GadgetBodyProps) => React.ReactNode> = {
   tokenSpend: TokenSpend,
   velocity: Velocity,
   cycleTime: CycleTime,

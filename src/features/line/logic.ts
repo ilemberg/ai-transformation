@@ -1,9 +1,13 @@
 import { COMPUTE_USD_PER_MINUTE, STATIONS, TIERS } from "./stations";
 import { STATION_IDS, type ActorId, type LogLine, type StationId, type TestKind, type Ticket, type TicketStep, type Tier, type Usage } from "./types";
 
-/** Where playback is: which station, and how many of its log lines are showing. */
+/**
+ * Where playback is: which step of the ticket's route, and how many of that
+ * step's log lines are showing. A route can visit a station more than once
+ * (a failed gate sends the ticket back to Build), so steps and stations differ.
+ */
 export interface Cursor {
-  station: number;
+  step: number;
   shown: number;
 }
 
@@ -13,52 +17,40 @@ export function stationIndex(id: StationId): number {
   return STATION_IDS.indexOf(id);
 }
 
-export function stepAt(ticket: Ticket, station: number): TicketStep {
-  const id = STATION_IDS[station];
-  const step = ticket.steps.find((s) => s.station === id);
-  if (!step) throw new Error(`Ticket ${ticket.key} has no step for ${id}`);
-  return step;
+export function lastStep(ticket: Ticket): number {
+  return ticket.steps.length - 1;
+}
+
+export function stepAt(ticket: Ticket, step: number): TicketStep {
+  const s = ticket.steps[step];
+  if (!s) throw new Error(`Ticket ${ticket.key} has no step ${step}`);
+  return s;
+}
+
+/** The board column (station index) the ticket is in at the cursor. */
+export function stationOf(ticket: Ticket, cursor: Cursor): number {
+  return stationIndex(stepAt(ticket, cursor.step).station);
 }
 
 export function stationAt(station: number) {
   return STATIONS[station];
 }
 
-export function isStationDone(ticket: Ticket, cursor: Cursor): boolean {
-  return cursor.shown >= stepAt(ticket, cursor.station).log.length;
+export function isStepDone(ticket: Ticket, cursor: Cursor): boolean {
+  return cursor.shown >= stepAt(ticket, cursor.step).log.length;
 }
 
 export function isFinished(ticket: Ticket, cursor: Cursor): boolean {
-  return cursor.station === LAST_STATION && isStationDone(ticket, cursor);
+  return cursor.step === lastStep(ticket) && isStepDone(ticket, cursor);
 }
 
-export const START: Cursor = { station: 0, shown: 0 };
+export const START: Cursor = { step: 0, shown: 0 };
 
-/** One tick of playback: reveal the next log line, or move on to the next station. */
+/** One tick of playback: reveal the next log line, or move on to the next step. */
 export function tick(ticket: Ticket, cursor: Cursor): Cursor | null {
-  if (!isStationDone(ticket, cursor)) return { station: cursor.station, shown: cursor.shown + 1 };
-  if (cursor.station >= LAST_STATION) return null;
-  return { station: cursor.station + 1, shown: 0 };
-}
-
-/**
- * One beat for the whole board: every ticket that is not finished moves on
- * by one tick. Returns null once every ticket has finished.
- */
-export function tickAll(tickets: Ticket[], cursors: Record<string, Cursor>): Record<string, Cursor> | null {
-  let moved = false;
-  const next: Record<string, Cursor> = { ...cursors };
-  for (const ticket of tickets) {
-    let c = cursors[ticket.id] ?? START;
-    for (let k = 0; k < (ticket.pace ?? 1); k++) {
-      const n = tick(ticket, c);
-      if (!n) break;
-      c = n;
-      moved = true;
-    }
-    next[ticket.id] = c;
-  }
-  return moved ? next : null;
+  if (!isStepDone(ticket, cursor)) return { step: cursor.step, shown: cursor.shown + 1 };
+  if (cursor.step >= lastStep(ticket)) return null;
+  return { step: cursor.step + 1, shown: 0 };
 }
 
 /**
@@ -78,15 +70,20 @@ export interface BoardEvent {
   ticketId: string;
   before: Cursor;
   after: Cursor;
+  /** The ticket changed column. */
   moved: boolean;
+  /** It changed column backwards: a gate sent it back. */
+  movedBack: boolean;
   line: LogLine | null;
   tests: TestKind[];
   assigneeChanged: boolean;
 }
 
 export function describeChange(ticket: Ticket, before: Cursor, after: Cursor, seq: number): BoardEvent {
-  const moved = before.station !== after.station;
-  const line = !moved && after.shown > before.shown ? (stepAt(ticket, after.station).log[after.shown - 1] ?? null) : null;
+  const from = stationOf(ticket, before);
+  const to = stationOf(ticket, after);
+  const stepChanged = before.step !== after.step;
+  const line = !stepChanged && after.shown > before.shown ? (stepAt(ticket, after.step).log[after.shown - 1] ?? null) : null;
   const tests = (Object.keys(ticket.tests) as TestKind[]).filter(
     (k) => testState(ticket, k, before) !== testState(ticket, k, after),
   );
@@ -95,7 +92,8 @@ export function describeChange(ticket: Ticket, before: Cursor, after: Cursor, se
     ticketId: ticket.id,
     before,
     after,
-    moved,
+    moved: from !== to,
+    movedBack: to < from,
     line,
     tests,
     assigneeChanged: assigneeAt(ticket, before) !== assigneeAt(ticket, after),
@@ -131,28 +129,44 @@ export function stepOne(
 
 /** Who has the ticket right now: whoever wrote the latest line, or the station's first worker. */
 export function assigneeAt(ticket: Ticket, cursor: Cursor): ActorId {
-  const step = stepAt(ticket, cursor.station);
+  const step = stepAt(ticket, cursor.step);
   const last = step.log[cursor.shown - 1];
-  return last ? last.who : STATIONS[cursor.station].actors[0];
+  return last ? last.who : STATIONS[stationIndex(step.station)].actors[0];
 }
 
-/** Jump to a station with all its lines showing (manual stepping). */
-export function jumpTo(ticket: Ticket, station: number): Cursor {
-  const clamped = Math.max(0, Math.min(LAST_STATION, station));
-  return { station: clamped, shown: stepAt(ticket, clamped).log.length };
+/** Jump to a step with all its lines showing (manual stepping). */
+export function jumpTo(ticket: Ticket, step: number): Cursor {
+  const clamped = Math.max(0, Math.min(lastStep(ticket), step));
+  return { step: clamped, shown: stepAt(ticket, clamped).log.length };
+}
+
+/** Jump to the first visit of a station (from the status menu). Null if the route never goes there. */
+export function jumpToStation(ticket: Ticket, station: number): Cursor | null {
+  const step = ticket.steps.findIndex((s) => stationIndex(s.station) === station);
+  return step < 0 ? null : jumpTo(ticket, step);
 }
 
 export type TestState = "na" | "none" | "red" | "green";
 
+/**
+ * A kind of test shows nothing until the route reaches the station that
+ * writes it, then red, then green once the station that makes it pass has
+ * finished. A step can also turn a kind red or green when it finishes (a
+ * failed eval run, a rollback) through its `sets`.
+ */
 export function testState(ticket: Ticket, kind: TestKind, cursor: Cursor): TestState {
   const tests = ticket.tests[kind];
   if (!tests) return "na";
-  const written = stationIndex(tests.writtenAt);
-  const green = stationIndex(tests.greenAt);
-  if (cursor.station < written) return "none";
-  if (cursor.station > green) return "green";
-  if (cursor.station === green && isStationDone(ticket, cursor)) return "green";
-  return "red";
+  let state: TestState = "none";
+  for (let i = 0; i <= cursor.step; i++) {
+    const step = ticket.steps[i];
+    const done = i < cursor.step || isStepDone(ticket, cursor);
+    if (state === "none" && step.station === tests.writtenAt) state = "red";
+    if (done && step.station === tests.greenAt && state !== "none") state = "green";
+    const set = done ? step.sets?.[kind] : undefined;
+    if (set) state = set;
+  }
+  return state;
 }
 
 export interface Totals {
@@ -190,22 +204,22 @@ function addUsage(totals: Totals, usage: Usage, share: number): Totals {
 }
 
 /**
- * Cost and time spent up to the cursor. Earlier stations count in full; the
- * current station counts in proportion to how many of its lines are showing.
+ * Cost and time spent up to the cursor. Earlier steps count in full; the
+ * current step counts in proportion to how many of its lines are showing.
  */
 export function totalsAt(ticket: Ticket, cursor: Cursor): Totals {
   let totals = emptyTotals();
-  for (let i = 0; i <= cursor.station; i++) {
+  for (let i = 0; i <= cursor.step; i++) {
     const step = stepAt(ticket, i);
     const lines = step.log.length;
-    const share = i < cursor.station ? 1 : lines === 0 ? 1 : Math.min(1, cursor.shown / lines);
+    const share = i < cursor.step ? 1 : lines === 0 ? 1 : Math.min(1, cursor.shown / lines);
     totals = addUsage(totals, step.usage, share);
   }
   return totals;
 }
 
 export function totalsFor(ticket: Ticket): Totals {
-  return totalsAt(ticket, jumpTo(ticket, LAST_STATION));
+  return totalsAt(ticket, jumpTo(ticket, lastStep(ticket)));
 }
 
 /** "45 min", "1 h 35 min", "1 day", "7 days". Used for elapsed time. */
@@ -242,14 +256,14 @@ export function tierShares(totals: Totals): Record<Tier, number> {
   };
 }
 
-/** Read a ticket and station from the address bar, falling back to the first ticket at the start. */
+/** Read a ticket and step (1-based) from the address bar, falling back to the first ticket at the start. */
 export function parseLocation(
   tickets: Ticket[],
   t: string | undefined,
   s: string | undefined,
-): { ticketId: string; station: number | null } {
+): { ticketId: string; step: number | null } {
   const ticket = tickets.find((x) => x.id === t) ?? tickets[0];
   const n = s === undefined ? NaN : Number.parseInt(s, 10);
-  const station = Number.isInteger(n) && n >= 1 && n <= STATION_IDS.length ? n - 1 : null;
-  return { ticketId: ticket.id, station };
+  const step = Number.isInteger(n) && n >= 1 && n <= ticket.steps.length ? n - 1 : null;
+  return { ticketId: ticket.id, step };
 }

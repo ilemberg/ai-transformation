@@ -1,12 +1,20 @@
 /*
- * Numbers the gadgets show that are not stored as series: derived from the
- * sample metrics. Everything here is sample data.
+ * Numbers the gadgets show that are not stored as series, derived from
+ * Bookwell's monthly metrics.
  */
 import { TIER_SHARES, type TierShare } from "@/features/metrics/data";
 import { metricById, valueAt } from "@/features/metrics/logic";
 
 export const TEAMS = 6;
+export const ENGINEERS = 40;
 export const WEEKS_PER_MONTH = 4.33;
+
+/**
+ * Relative price per token by model size. A large-model token costs about
+ * twelve small-model tokens, so dollars are split by token share weighted by
+ * price, not by token share alone.
+ */
+export const TIER_PRICE: Readonly<TierShare> = { small: 1, medium: 3, large: 12 };
 
 /** 99.9% over 30 days. */
 export const SLO = 99.9;
@@ -19,16 +27,28 @@ export function monthlySpend(month: number): number {
   return perChange * throughput * TEAMS * WEEKS_PER_MONTH;
 }
 
+/** Monthly AI spend per engineer. */
+export function spendPerEngineer(month: number): number {
+  return monthlySpend(month) / ENGINEERS;
+}
+
 export type TierSpend = TierShare & { total: number };
 
-/** The month's spend split by model size, using that month's token share. */
+/** The month's spend split by model size: that month's token share, weighted by price per token. */
 export function spendByTier(month: number): TierSpend {
   const total = monthlySpend(month);
   const share = TIER_SHARES[month] ?? { small: 0, medium: 0, large: 0 };
+  const weight = {
+    small: share.small * TIER_PRICE.small,
+    medium: share.medium * TIER_PRICE.medium,
+    large: share.large * TIER_PRICE.large,
+  };
+  const sum = weight.small + weight.medium + weight.large;
+  if (sum === 0) return { small: 0, medium: 0, large: 0, total };
   return {
-    small: (total * share.small) / 100,
-    medium: (total * share.medium) / 100,
-    large: (total * share.large) / 100,
+    small: (total * weight.small) / sum,
+    medium: (total * weight.medium) / sum,
+    large: (total * weight.large) / sum,
     total,
   };
 }

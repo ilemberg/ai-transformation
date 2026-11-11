@@ -1,9 +1,10 @@
 import type { Ticket } from "./types";
 
 /**
- * Three sample tickets for Bookwell, a made-up business-travel booking app.
- * Each one takes a different route through the line, which is the point:
- * the line is the same, the work it does depends on the ticket.
+ * Four tickets at Bookwell, a business-travel booking app. Each takes a
+ * different route through the line: the line is the same, the work it does
+ * depends on the ticket. BW-158 is stopped twice and sent back, because a
+ * line that never stops proves nothing.
  */
 export const TICKETS: Ticket[] = [
   {
@@ -37,7 +38,7 @@ export const TICKETS: Ticket[] = [
           { who: "triage", text: "Risk: medium. Touches booking flow and calls a model with customer data." },
           { who: "triage", text: "Route: all 10 stations. Evals required (AI output). Load test: yes, cancellations spike in storms.", tone: "info" },
         ],
-        usage: { ktokens: { small: 18 }, computeMinutes: 1, wallMinutes: 2, humanMinutes: 0 },
+        usage: { ktokens: { small: 72 }, computeMinutes: 1, wallMinutes: 2, humanMinutes: 0 },
       },
       {
         station: "plan",
@@ -49,7 +50,7 @@ export const TICKETS: Ticket[] = [
           { who: "planner", text: "Spec v2: 9 examples, loyalty rule added, \"no suggestion\" case defined, rollout behind a flag." },
           { who: "owner", text: "Signed spec v2.", tone: "pass" },
         ],
-        usage: { ktokens: { large: 220 }, computeMinutes: 6, wallMinutes: 95, humanMinutes: 35 },
+        usage: { ktokens: { large: 880 }, computeMinutes: 6, wallMinutes: 95, humanMinutes: 35 },
       },
       {
         station: "tests",
@@ -62,7 +63,7 @@ export const TICKETS: Ticket[] = [
           { who: "ci", text: "All 203 new tests fail, as expected. Mutation check: tests kill 94% of mutants.", tone: "fail" },
           { who: "engineer", text: "Reviewed tests. Added one: suggestion list is empty, not an error, when nothing fits. Locked.", tone: "pass" },
         ],
-        usage: { ktokens: { medium: 640 }, computeMinutes: 22, wallMinutes: 70, humanMinutes: 25 },
+        usage: { ktokens: { medium: 2560 }, computeMinutes: 22, wallMinutes: 70, humanMinutes: 25 },
       },
       {
         station: "build",
@@ -74,7 +75,7 @@ export const TICKETS: Ticket[] = [
           { who: "builder", text: "Loop 4: all 63 code tests green. Diff: 412 lines, under the 500 cap.", tone: "pass" },
           { who: "builder", text: "Opened a pull request labelled agent-written. Sandbox torn down after 38 minutes." },
         ],
-        usage: { ktokens: { medium: 1450 }, computeMinutes: 38, wallMinutes: 41, humanMinutes: 0 },
+        usage: { ktokens: { medium: 5800 }, computeMinutes: 38, wallMinutes: 41, humanMinutes: 0 },
       },
       {
         station: "review",
@@ -85,7 +86,7 @@ export const TICKETS: Ticket[] = [
           { who: "builder", text: "Fixed all three, added a test for example 7. Re-ran: green.", tone: "pass" },
           { who: "engineer", text: "Read the diff with findings pre-sorted. Approved in 18 minutes.", tone: "pass" },
         ],
-        usage: { ktokens: { large: 310, medium: 260 }, computeMinutes: 9, wallMinutes: 75, humanMinutes: 18 },
+        usage: { ktokens: { large: 1240, medium: 1040 }, computeMinutes: 9, wallMinutes: 75, humanMinutes: 18 },
       },
       {
         station: "gates",
@@ -96,7 +97,7 @@ export const TICKETS: Ticket[] = [
           { who: "ci", text: "Preview built. End-to-end on Chrome, Safari, Firefox, phone: green. Accessibility: green.", tone: "pass" },
           { who: "ci", text: "Evals: 112 of 120 (93.3%). Release threshold 92%. Passed.", tone: "pass" },
         ],
-        usage: { ktokens: { small: 90, large: 160 }, computeMinutes: 46, wallMinutes: 19, humanMinutes: 0 },
+        usage: { ktokens: { small: 360, large: 640 }, computeMinutes: 46, wallMinutes: 19, humanMinutes: 0 },
       },
       {
         station: "stress",
@@ -108,7 +109,7 @@ export const TICKETS: Ticket[] = [
           { who: "breaker", text: "Break: suggestions shown in the wrong currency for a Swiss traveller.", tone: "fail" },
           { who: "builder", text: "Both turned into failing tests, then fixed. Third new test for the injection case. All green.", tone: "pass" },
         ],
-        usage: { ktokens: { large: 380, medium: 210 }, computeMinutes: 70, wallMinutes: 85, humanMinutes: 10 },
+        usage: { ktokens: { large: 1520, medium: 840 }, computeMinutes: 70, wallMinutes: 85, humanMinutes: 10 },
       },
       {
         station: "release",
@@ -119,7 +120,7 @@ export const TICKETS: Ticket[] = [
           { who: "monitor", text: "10% → 50%: error rate flat, suggestion latency p95 640 ms.", tone: "pass" },
           { who: "deployer", text: "100%. Flag kept for a week as a kill switch.", tone: "pass" },
         ],
-        usage: { ktokens: { small: 12 }, computeMinutes: 8, wallMinutes: 1440, humanMinutes: 10 },
+        usage: { ktokens: { small: 48 }, computeMinutes: 8, wallMinutes: 1440, humanMinutes: 10 },
       },
       {
         station: "observe",
@@ -129,7 +130,7 @@ export const TICKETS: Ticket[] = [
           { who: "monitor", text: "Every model call traced: prompt v3, model, 2.1k tokens, $0.004, 1 tool call." },
           { who: "monitor", text: "Weekly drift check: 200 real conversations scored. Pass rate holding at 93%.", tone: "pass" },
         ],
-        usage: { ktokens: { small: 40 }, computeMinutes: 4, wallMinutes: 10080, humanMinutes: 15 },
+        usage: { ktokens: { small: 160 }, computeMinutes: 4, wallMinutes: 10080, humanMinutes: 15 },
       },
       {
         station: "learn",
@@ -172,7 +173,7 @@ export const TICKETS: Ticket[] = [
           { who: "triage", text: "Risk: high (money). Route: fast lane. Load test skipped; break-it limited to payments." },
           { who: "oncall", text: "Acknowledged in 3 minutes. Turned off retry-on-timeout flag as a stopgap.", tone: "warn" },
         ],
-        usage: { ktokens: { small: 25 }, computeMinutes: 1, wallMinutes: 8, humanMinutes: 6 },
+        usage: { ktokens: { small: 100 }, computeMinutes: 1, wallMinutes: 8, humanMinutes: 6 },
       },
       {
         station: "plan",
@@ -184,7 +185,7 @@ export const TICKETS: Ticket[] = [
           { who: "planner", text: "Spec: every charge carries an idempotency key; a retry with the same key is a no-op." },
           { who: "owner", text: "Signed. Refunds for the 7 customers handled by support today.", tone: "pass" },
         ],
-        usage: { ktokens: { large: 140, medium: 60 }, computeMinutes: 8, wallMinutes: 25, humanMinutes: 10 },
+        usage: { ktokens: { large: 560, medium: 240 }, computeMinutes: 8, wallMinutes: 25, humanMinutes: 10 },
       },
       {
         station: "tests",
@@ -194,7 +195,7 @@ export const TICKETS: Ticket[] = [
           { who: "tester", text: "Behaviour: \"Given a timeout, when the traveller retries, then they are charged once.\"" },
           { who: "ci", text: "14 code tests and the checkout journey red, the reproducer among them. Locked.", tone: "fail" },
         ],
-        usage: { ktokens: { medium: 180 }, computeMinutes: 9, wallMinutes: 20, humanMinutes: 8 },
+        usage: { ktokens: { medium: 720 }, computeMinutes: 9, wallMinutes: 20, humanMinutes: 8 },
       },
       {
         station: "build",
@@ -204,7 +205,7 @@ export const TICKETS: Ticket[] = [
           { who: "builder", text: "Added idempotency key at checkout; stored for 24 hours. 46 lines changed." },
           { who: "builder", text: "All 14 code tests green, including the reproducer.", tone: "pass" },
         ],
-        usage: { ktokens: { medium: 320 }, computeMinutes: 14, wallMinutes: 16, humanMinutes: 0 },
+        usage: { ktokens: { medium: 1280 }, computeMinutes: 14, wallMinutes: 16, humanMinutes: 0 },
       },
       {
         station: "review",
@@ -215,7 +216,7 @@ export const TICKETS: Ticket[] = [
           { who: "security", text: "Key is not guessable and not logged. Payments review: pass.", tone: "pass" },
           { who: "engineer", text: "Two approvals required for payments. Both in.", tone: "pass" },
         ],
-        usage: { ktokens: { large: 120, medium: 90 }, computeMinutes: 6, wallMinutes: 35, humanMinutes: 20 },
+        usage: { ktokens: { large: 480, medium: 360 }, computeMinutes: 6, wallMinutes: 35, humanMinutes: 20 },
       },
       {
         station: "gates",
@@ -225,7 +226,7 @@ export const TICKETS: Ticket[] = [
           { who: "ci", text: "Checkout journey on 4 browsers against preview: green.", tone: "pass" },
           { who: "ci", text: "Evals: not applicable, no model involved.", tone: "info" },
         ],
-        usage: { ktokens: { small: 30 }, computeMinutes: 31, wallMinutes: 14, humanMinutes: 0 },
+        usage: { ktokens: { small: 120 }, computeMinutes: 31, wallMinutes: 14, humanMinutes: 0 },
       },
       {
         station: "stress",
@@ -236,7 +237,7 @@ export const TICKETS: Ticket[] = [
           { who: "breaker", text: "Break: key expiry at exactly 24 h lets a stale retry through.", tone: "fail" },
           { who: "builder", text: "Expiry check made inclusive. Two new tests. Green.", tone: "pass" },
         ],
-        usage: { ktokens: { large: 110 }, computeMinutes: 12, wallMinutes: 22, humanMinutes: 0 },
+        usage: { ktokens: { large: 440 }, computeMinutes: 12, wallMinutes: 22, humanMinutes: 0 },
       },
       {
         station: "release",
@@ -246,7 +247,7 @@ export const TICKETS: Ticket[] = [
           { who: "monitor", text: "Live test buys a refundable test booking every 2 minutes: one charge each.", tone: "pass" },
           { who: "deployer", text: "100%. Retry-on-timeout flag back on.", tone: "pass" },
         ],
-        usage: { ktokens: { small: 6 }, computeMinutes: 4, wallMinutes: 40, humanMinutes: 5 },
+        usage: { ktokens: { small: 24 }, computeMinutes: 4, wallMinutes: 40, humanMinutes: 5 },
       },
       {
         station: "observe",
@@ -255,7 +256,7 @@ export const TICKETS: Ticket[] = [
           { who: "monitor", text: "payment.duplicate_charge = 0 for 7 days. Retries succeeding: 98%.", tone: "pass" },
           { who: "monitor", text: "Time to restore: 52 minutes (stopgap). Time to fix in production: 3 h 20 min." },
         ],
-        usage: { ktokens: { small: 10 }, computeMinutes: 2, wallMinutes: 10080, humanMinutes: 5 },
+        usage: { ktokens: { small: 40 }, computeMinutes: 2, wallMinutes: 10080, humanMinutes: 5 },
       },
       {
         station: "learn",
@@ -266,7 +267,7 @@ export const TICKETS: Ticket[] = [
           { who: "triage", text: "The original change was agent-written. Spec template now asks \"what happens on retry?\".", tone: "info" },
           { who: "oncall", text: "Blameless review published. Incident closed.", tone: "pass" },
         ],
-        usage: { ktokens: { small: 15, large: 40 }, computeMinutes: 1, wallMinutes: 90, humanMinutes: 45 },
+        usage: { ktokens: { small: 60, large: 160 }, computeMinutes: 1, wallMinutes: 90, humanMinutes: 45 },
       },
     ],
   },
@@ -297,7 +298,7 @@ export const TICKETS: Ticket[] = [
           { who: "triage", text: "Merged 4 duplicates into BW-87." },
           { who: "triage", text: "Route: performance. Load test mandatory. Evals: none.", tone: "info" },
         ],
-        usage: { ktokens: { small: 22 }, computeMinutes: 1, wallMinutes: 3, humanMinutes: 0 },
+        usage: { ktokens: { small: 88 }, computeMinutes: 1, wallMinutes: 3, humanMinutes: 0 },
       },
       {
         station: "plan",
@@ -309,7 +310,7 @@ export const TICKETS: Ticket[] = [
           { who: "owner", text: "Pushback: a 5-minute cache must never show a price the traveller cannot book.", tone: "warn" },
           { who: "planner", text: "Spec v2: price is re-checked at the moment of booking. Signed.", tone: "pass" },
         ],
-        usage: { ktokens: { large: 190 }, computeMinutes: 9, wallMinutes: 60, humanMinutes: 20 },
+        usage: { ktokens: { large: 760 }, computeMinutes: 9, wallMinutes: 60, humanMinutes: 20 },
       },
       {
         station: "tests",
@@ -320,7 +321,7 @@ export const TICKETS: Ticket[] = [
           { who: "tester", text: "Unit and integration tests for batching, cache expiry, and the re-check at booking." },
           { who: "ci", text: "23 code tests and 3 load scenarios red. Locked.", tone: "fail" },
         ],
-        usage: { ktokens: { medium: 300 }, computeMinutes: 35, wallMinutes: 45, humanMinutes: 10 },
+        usage: { ktokens: { medium: 1200 }, computeMinutes: 35, wallMinutes: 45, humanMinutes: 10 },
       },
       {
         station: "build",
@@ -330,7 +331,7 @@ export const TICKETS: Ticket[] = [
           { who: "builder", text: "Added a 5-minute rate cache, keyed by hotel, dates and rate plan." },
           { who: "builder", text: "Photos load after results. 23 code tests green.", tone: "pass" },
         ],
-        usage: { ktokens: { medium: 720 }, computeMinutes: 25, wallMinutes: 28, humanMinutes: 0 },
+        usage: { ktokens: { medium: 2880 }, computeMinutes: 25, wallMinutes: 28, humanMinutes: 0 },
       },
       {
         station: "review",
@@ -340,7 +341,7 @@ export const TICKETS: Ticket[] = [
           { who: "builder", text: "Company added to the key. New test proves two companies see their own rates.", tone: "pass" },
           { who: "engineer", text: "Approved.", tone: "pass" },
         ],
-        usage: { ktokens: { large: 150, medium: 80 }, computeMinutes: 5, wallMinutes: 40, humanMinutes: 15 },
+        usage: { ktokens: { large: 600, medium: 320 }, computeMinutes: 5, wallMinutes: 40, humanMinutes: 15 },
       },
       {
         station: "gates",
@@ -349,7 +350,7 @@ export const TICKETS: Ticket[] = [
           { who: "ci", text: "All code checks green.", tone: "pass" },
           { who: "ci", text: "Search journey on 4 browsers: green. Largest paint on results 1.1 s → 0.6 s.", tone: "pass" },
         ],
-        usage: { ktokens: { small: 25 }, computeMinutes: 28, wallMinutes: 13, humanMinutes: 0 },
+        usage: { ktokens: { small: 100 }, computeMinutes: 28, wallMinutes: 13, humanMinutes: 0 },
       },
       {
         station: "stress",
@@ -361,7 +362,7 @@ export const TICKETS: Ticket[] = [
           { who: "breaker", text: "Break: rate changes upstream while cached; booking shows the old price for a moment.", tone: "fail" },
           { who: "builder", text: "Booking page now shows the re-checked price before payment. Test added. Green.", tone: "pass" },
         ],
-        usage: { ktokens: { large: 90, medium: 60 }, computeMinutes: 140, wallMinutes: 110, humanMinutes: 10 },
+        usage: { ktokens: { large: 360, medium: 240 }, computeMinutes: 140, wallMinutes: 110, humanMinutes: 10 },
       },
       {
         station: "release",
@@ -371,7 +372,7 @@ export const TICKETS: Ticket[] = [
           { who: "monitor", text: "Canary p95 590 ms vs 2,350 ms on the old version.", tone: "pass" },
           { who: "deployer", text: "100%.", tone: "pass" },
         ],
-        usage: { ktokens: { small: 8 }, computeMinutes: 4, wallMinutes: 180, humanMinutes: 5 },
+        usage: { ktokens: { small: 32 }, computeMinutes: 4, wallMinutes: 180, humanMinutes: 5 },
       },
       {
         station: "observe",
@@ -380,7 +381,7 @@ export const TICKETS: Ticket[] = [
           { who: "monitor", text: "Search latency chart drops at the deploy marker. Support tickets on speed: 11 → 0." },
           { who: "monitor", text: "New alert: rate cache hit rate below 60% for 15 minutes." },
         ],
-        usage: { ktokens: { small: 10 }, computeMinutes: 2, wallMinutes: 10080, humanMinutes: 5 },
+        usage: { ktokens: { small: 40 }, computeMinutes: 2, wallMinutes: 10080, humanMinutes: 5 },
       },
       {
         station: "learn",
@@ -389,7 +390,183 @@ export const TICKETS: Ticket[] = [
           { who: "oncall", text: "Why did it get slow unnoticed? There was no speed budget in the pipeline.", tone: "warn" },
           { who: "oncall", text: "Search p95 budget is now a permanent gate, run nightly against staging.", tone: "pass" },
         ],
-        usage: { ktokens: { small: 6 }, computeMinutes: 1, wallMinutes: 30, humanMinutes: 15 },
+        usage: { ktokens: { small: 24 }, computeMinutes: 1, wallMinutes: 30, humanMinutes: 15 },
+      },
+    ],
+  },
+  {
+    id: "upgrade",
+    key: "BW-158",
+    kind: "task",
+    title: "Move the rebooking assistant to the newer model",
+    source: "Jira, from the platform team",
+    priority: "P2",
+    summary:
+      "A model upgrade that looks like a one-line change. Evals stop it at the gates, the coding agent runs out of budget and hands over, and the canary rolls it back once before it ships.",
+    tests: {
+      unit: { count: 4, unit: "tests", writtenAt: "tests", greenAt: "build" },
+      contract: { count: 3, unit: "tests", writtenAt: "tests", greenAt: "build" },
+      e2e: { count: 3, unit: "journeys", writtenAt: "tests", greenAt: "gates" },
+      evals: { count: 160, unit: "cases", writtenAt: "tests", greenAt: "gates" },
+      load: { count: 1, unit: "script", writtenAt: "tests", greenAt: "stress" },
+    },
+    steps: [
+      {
+        station: "intake",
+        mode: "full",
+        log: [
+          { who: "triage", text: "Pulled BW-158. Area: rebooking assistant. Change: model version and prompt." },
+          { who: "triage", text: "Risk: medium. No code paths change, but every answer the feature gives can.", tone: "info" },
+          { who: "triage", text: "Route: evals mandatory, load check on latency, canary with automatic rollback." },
+        ],
+        usage: { ktokens: { small: 60 }, computeMinutes: 1, wallMinutes: 3, humanMinutes: 0 },
+      },
+      {
+        station: "plan",
+        mode: "light",
+        reason: "A model swap gets a short spec: what must not get worse.",
+        log: [
+          { who: "planner", text: "Spec: same answers or better on the eval set, p95 latency under 1.2 s, cost per answer not up." },
+          { who: "owner", text: "Signed. Release threshold stays at 92%.", tone: "pass" },
+        ],
+        usage: { ktokens: { large: 400 }, computeMinutes: 3, wallMinutes: 20, humanMinutes: 10 },
+      },
+      {
+        station: "tests",
+        mode: "full",
+        log: [
+          { who: "tester", text: "Eval set grown to 160 cases: 40 new ones from last month's real conversations." },
+          { who: "tester", text: "Latency budget script: p95 under 1.2 s at the storm peak." },
+          { who: "ci", text: "Old model on the new set: 93.1%. That is the bar to beat.", tone: "info" },
+        ],
+        usage: { ktokens: { medium: 900 }, computeMinutes: 20, wallMinutes: 35, humanMinutes: 10 },
+      },
+      {
+        station: "build",
+        mode: "full",
+        log: [
+          { who: "builder", text: "Switched the model version behind the gateway. Prompt unchanged." },
+          { who: "builder", text: "Unit and contract tests green. 9 lines changed.", tone: "pass" },
+        ],
+        usage: { ktokens: { medium: 1200 }, computeMinutes: 8, wallMinutes: 10, humanMinutes: 0 },
+      },
+      {
+        station: "review",
+        mode: "light",
+        reason: "Nine lines: one reviewer model and one person.",
+        log: [
+          { who: "reviewer", text: "Diff is fine. Warning: the prompt was tuned for the old model's habits.", tone: "warn" },
+          { who: "engineer", text: "Approved, pending evals." },
+        ],
+        usage: { ktokens: { large: 300 }, computeMinutes: 2, wallMinutes: 30, humanMinutes: 8 },
+      },
+      {
+        station: "gates",
+        mode: "full",
+        sets: { evals: "red" },
+        log: [
+          { who: "ci", text: "Lint, types, unit, contract, end-to-end: green.", tone: "pass" },
+          { who: "ci", text: "Evals: 143 of 160 (89.4%). Release threshold 92%.", tone: "fail" },
+          { who: "ci", text: "Failures cluster on loyalty tiers and non-USD prices. Line stopped. Back to Build.", tone: "fail" },
+        ],
+        usage: { ktokens: { small: 200, large: 900 }, computeMinutes: 40, wallMinutes: 25, humanMinutes: 0 },
+      },
+      {
+        station: "build",
+        mode: "full",
+        log: [
+          { who: "builder", text: "Rewriting the prompt for the new model. Loops 1 to 6: eval pass rate 89.4% → 91.2%." },
+          { who: "builder", text: "Loop 8: no gain in 3 loops and 80% of the ticket's token budget spent. Stopping.", tone: "warn" },
+          { who: "builder", text: "Handed to a person with the 17 failing cases grouped by cause." },
+          {
+            who: "engineer",
+            text: "The new model ignores the loyalty table when it sits after the hotel list. Moved it up, added 2 examples.",
+          },
+          { who: "builder", text: "Re-ran in the sandbox: 94.4%.", tone: "pass" },
+        ],
+        usage: { ktokens: { medium: 6400 }, computeMinutes: 45, wallMinutes: 140, humanMinutes: 40 },
+      },
+      {
+        station: "gates",
+        mode: "full",
+        log: [
+          { who: "ci", text: "Evals: 151 of 160 (94.4%). Threshold 92%. Better than the old model's 93.1%.", tone: "pass" },
+          { who: "ci", text: "Cost per answer down 31%. All other checks green.", tone: "pass" },
+        ],
+        usage: { ktokens: { small: 200, large: 900 }, computeMinutes: 40, wallMinutes: 25, humanMinutes: 0 },
+      },
+      {
+        station: "stress",
+        mode: "light",
+        reason: "No new code to attack: latency at peak and the injection cases only.",
+        log: [
+          { who: "loadgen", text: "Storm peak on staging: p95 1.05 s. Inside the 1.2 s budget.", tone: "pass" },
+          { who: "breaker", text: "The 14 prompt-injection cases still hold on the new model.", tone: "pass" },
+        ],
+        usage: { ktokens: { large: 500 }, computeMinutes: 30, wallMinutes: 40, humanMinutes: 0 },
+      },
+      {
+        station: "release",
+        mode: "full",
+        sets: { load: "red" },
+        log: [
+          { who: "deployer", text: "1% of customers: answers good, latency fine. Soak 2 hours.", tone: "pass" },
+          { who: "monitor", text: "10%: p95 climbs to 2.3 s when the model provider's region is busy.", tone: "fail" },
+          { who: "deployer", text: "Latency SLO burning 6x too fast. Rolled back automatically in 4 minutes.", tone: "fail" },
+          { who: "oncall", text: "No customer saw an error: the old model took over. Back to Build.", tone: "warn" },
+        ],
+        usage: { ktokens: { small: 40 }, computeMinutes: 10, wallMinutes: 160, humanMinutes: 20 },
+      },
+      {
+        station: "build",
+        mode: "full",
+        log: [
+          { who: "builder", text: "Added a 1.5 s timeout that falls back to the old model, and streaming for long answers." },
+          { who: "builder", text: "New load scenario: provider latency doubled. Written first, failing, then passing.", tone: "pass" },
+        ],
+        usage: { ktokens: { medium: 2400 }, computeMinutes: 20, wallMinutes: 50, humanMinutes: 15 },
+      },
+      {
+        station: "gates",
+        mode: "light",
+        reason: "Re-run of the full gate set after the fix.",
+        log: [{ who: "ci", text: "All checks green. Evals 94.4%.", tone: "pass" }],
+        usage: { ktokens: { small: 200, large: 900 }, computeMinutes: 40, wallMinutes: 25, humanMinutes: 0 },
+      },
+      {
+        station: "stress",
+        mode: "light",
+        reason: "Re-run of the latency scenarios the canary caught.",
+        log: [{ who: "loadgen", text: "Slow provider at storm peak: p95 1.15 s, fallback used on 3% of answers.", tone: "pass" }],
+        usage: { ktokens: {}, computeMinutes: 30, wallMinutes: 30, humanMinutes: 0 },
+      },
+      {
+        station: "release",
+        mode: "full",
+        log: [
+          { who: "deployer", text: "1% → 10% → 50% → 100% over a day. p95 1.0 s, fallback 2%.", tone: "pass" },
+          { who: "monitor", text: "Accepted suggestions up from 38% to 41%.", tone: "pass" },
+        ],
+        usage: { ktokens: { small: 40 }, computeMinutes: 10, wallMinutes: 1440, humanMinutes: 10 },
+      },
+      {
+        station: "observe",
+        mode: "full",
+        log: [
+          { who: "monitor", text: "Model calls traced by version: new model 98%, fallback 2%, cost per answer down 29%." },
+          { who: "monitor", text: "New alert: fallback rate above 10% for 15 minutes." },
+        ],
+        usage: { ktokens: { small: 100 }, computeMinutes: 2, wallMinutes: 10080, humanMinutes: 5 },
+      },
+      {
+        station: "learn",
+        mode: "full",
+        log: [
+          { who: "oncall", text: "Why did staging miss it? Staging calls the provider at quiet hours.", tone: "warn" },
+          { who: "oncall", text: "New gate: every model change load-tests against a slowed provider.", tone: "pass" },
+          { who: "triage", text: "The budget rule held: the coding agent stopped at loop 8 instead of looping on.", tone: "info" },
+        ],
+        usage: { ktokens: { small: 60 }, computeMinutes: 1, wallMinutes: 30, humanMinutes: 20 },
       },
     ],
   },

@@ -8,6 +8,6 @@ function first(value: string | string[] | undefined): string | undefined {
 
 export default async function Home({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const params = await searchParams;
-  const { ticketId, station } = parseLocation(TICKETS, first(params.t), first(params.s));
-  return <LineApp initialTicketId={ticketId} initialStation={station} />;
+  const { ticketId, step } = parseLocation(TICKETS, first(params.t), first(params.s));
+  return <LineApp initialTicketId={ticketId} initialStep={step} />;
 }

@@ -5,7 +5,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Ticket to Production · an AI-native delivery board",
   description:
-    "An animated AI-native software workflow: tests and evals first, agents building, other models reviewing, gates, load and break-it testing, release, monitoring and the bug loop. With the metrics that show whether it works. Sample data.",
+    "An animated AI-native software workflow: tests and evals first, agents building, other models reviewing, gates, load and break-it testing, release, monitoring and the bug loop. With the metrics that show whether it works.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

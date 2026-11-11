@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Dashboard } from "@/features/dashboard/components/Dashboard";
+import { Suspense } from "react";
+import { DEFAULT_MONTH, Dashboard, DashboardView } from "@/features/dashboard/components/Dashboard";
 
 export const metadata: Metadata = {
-  title: "Dashboard · Ticket to Production",
+  title: "Executive dashboard · Ticket to Production",
   description:
-    "A stakeholder dashboard for the AI rollout: token spend, velocity and delivery metrics as gadgets you can add, remove and rearrange. Sample data.",
+    "Bookwell's AI rollout for stakeholders: AI spend, delivery speed and stability for any month of the year, as gadgets you can add, remove and rearrange.",
 };
 
 export default function DashboardPage() {
@@ -13,7 +14,9 @@ export default function DashboardPage() {
       <nav aria-label="Breadcrumb" className="text-sm text-dim">
         Projects <span className="text-faint">/</span> Bookwell <span className="text-faint">/</span> Dashboard
       </nav>
-      <Dashboard />
+      <Suspense fallback={<DashboardView month={DEFAULT_MONTH} />}>
+        <Dashboard />
+      </Suspense>
     </main>
   );
 }

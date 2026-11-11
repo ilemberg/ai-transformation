@@ -1,6 +1,8 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useRef, useState, useSyncExternalStore } from "react";
+import { parseMonth } from "@/features/metrics/logic";
 import { DEFAULT_LAYOUT, GADGET_IDS, GADGETS, STORAGE_KEY, isGadgetId, type GadgetId } from "../gadgets";
 import {
   addGadget,
@@ -18,6 +20,10 @@ import { browserStorage, createLayoutStore } from "../store";
 import { AddGadgetDialog } from "./AddGadgetDialog";
 import { GADGET_BODIES } from "./GadgetBodies";
 import { GadgetFrame } from "./GadgetFrame";
+import { MonthPicker } from "./MonthPicker";
+
+/** With no `?m=`, show month 6: the expansion rules have just cleared and the scars still show. */
+export const DEFAULT_MONTH = 6;
 
 const store = createLayoutStore({
   key: STORAGE_KEY,
@@ -45,7 +51,14 @@ function focusLater(...ids: string[]) {
   }, 0);
 }
 
+/** The month comes from `?m=`; this must sit inside a Suspense boundary. */
 export function Dashboard() {
+  const params = useSearchParams();
+  return <DashboardView month={parseMonth(params.get("m"), DEFAULT_MONTH)} />;
+}
+
+/** Same view, for the Suspense fallback before the query string is read. */
+export function DashboardView({ month }: { month: number }) {
   const layout = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getServerSnapshot);
   const [editing, setEditing] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -143,6 +156,7 @@ export function Dashboard() {
       <GadgetFrame
         key={slot.id}
         info={info}
+        month={month}
         width={slot.width}
         index={i}
         count={slots.length}
@@ -159,7 +173,7 @@ export function Dashboard() {
         onDragEnd={() => setDrag(null)}
         onDragOver={(e) => onDragOverCard(e, i)}
       >
-        <Body />
+        <Body month={month} />
       </GadgetFrame>,
     );
   });
@@ -169,9 +183,13 @@ export function Dashboard() {
 
   return (
     <>
-      <div className="mb-4 mt-3 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-medium">Stakeholder dashboard</h1>
+      <div className="mb-4 mt-3 flex flex-wrap items-end justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-medium">Executive dashboard</h1>
+          <p className="mt-1 text-sm text-dim">For stakeholders: spend, speed and stability at a glance.</p>
+        </div>
         <div className="flex flex-wrap items-center gap-2">
+          <MonthPicker month={month} />
           {editing && (
             <button type="button" className={neutral} onClick={reset} disabled={isDefault}>
               Reset layout

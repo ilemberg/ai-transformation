@@ -1,10 +1,10 @@
 /*
- * Sample data for Bookwell, a made-up business-travel booking app.
- * Every number in this file was written to tell the story of a twelve-month
- * AI rollout. None of it was measured.
+ * Bookwell's delivery metrics over the twelve months of the AI rollout:
+ * six product teams, about forty engineers.
  *
  * Each series has 13 readings: month 0 to month 12. A month's reading is the
- * trailing four weeks for that team-level metric, rolled up across teams.
+ * trailing four weeks for that team-level metric, rolled up across all six
+ * teams, so the pilot (two teams) moves the roll-up only a little.
  */
 
 export const MONTHS = 13;
@@ -66,8 +66,8 @@ export const METRICS: readonly Metric[] = [
     deltaMode: "relative",
     suffix: " h",
     decimals: 0,
-    target: { op: "<=", value: 32 },
-    series: [52, 52, 44, 37, 35, 38, 33, 30, 29, 28, 27, 26, 26],
+    target: { op: "<=", value: 40 },
+    series: [52, 52, 50, 48, 50, 49, 46, 44, 42, 41, 39, 38, 37],
   },
   {
     id: "deployFreq",
@@ -81,8 +81,8 @@ export const METRICS: readonly Metric[] = [
     deltaMode: "relative",
     suffix: " / svc / wk",
     decimals: 1,
-    target: { op: ">=", value: 5 },
-    series: [3.1, 3.1, 3.6, 4.2, 5.0, 5.4, 5.6, 6.2, 5.1, 6.4, 6.8, 7.0, 7.2],
+    target: { op: ">=", value: 4.5 },
+    series: [3.1, 3.1, 3.3, 3.5, 3.6, 3.4, 3.7, 3.9, 3.8, 4.1, 4.3, 4.5, 4.7],
   },
   {
     id: "reviewLatency",
@@ -98,7 +98,7 @@ export const METRICS: readonly Metric[] = [
     decimals: 0,
     target: { op: "<=", value: 24 },
     threshold: { value: 24, label: "1 day" },
-    series: [20, 20, 19, 21, 27, 31, 22, 17, 16, 15, 14, 14, 13],
+    series: [20, 20, 21, 22, 27, 30, 23, 19, 18, 18, 17, 17, 16],
   },
   {
     id: "prSize",
@@ -113,7 +113,7 @@ export const METRICS: readonly Metric[] = [
     suffix: " lines",
     decimals: 0,
     target: { op: "<=", value: 200 },
-    series: [210, 210, 230, 260, 340, 380, 180, 160, 150, 150, 145, 140, 140],
+    series: [210, 210, 240, 270, 360, 390, 230, 190, 180, 175, 170, 165, 160],
   },
 
   // Stability
@@ -132,7 +132,7 @@ export const METRICS: readonly Metric[] = [
     decimals: 2,
     target: { op: ">=", value: 99.9 },
     threshold: { value: 99.9, label: "SLO" },
-    series: [99.94, 99.94, 99.95, 99.94, 99.93, 99.91, 99.94, 99.95, 99.95, 99.96, 99.96, 99.97, 99.97],
+    series: [99.93, 99.93, 99.94, 99.93, 99.91, 99.86, 99.92, 99.93, 99.93, 99.94, 99.94, 99.95, 99.95],
   },
   {
     id: "cfr",
@@ -147,8 +147,8 @@ export const METRICS: readonly Metric[] = [
     deltaUnit: " pts",
     suffix: "%",
     decimals: 1,
-    target: { op: "<=", value: 10 },
-    series: [12, 12, 12, 11.8, 12.4, 14.6, 12.3, 11.4, 11.9, 10.8, 10.2, 9.8, 9.5],
+    target: { op: "<=", value: 11 },
+    series: [12, 12, 12.2, 11.9, 15.1, 15.8, 12.4, 11.8, 11.6, 11.2, 10.9, 10.6, 10.4],
   },
   {
     id: "mttr",
@@ -163,7 +163,7 @@ export const METRICS: readonly Metric[] = [
     suffix: " min",
     decimals: 0,
     target: { op: "<=", value: 45 },
-    series: [58, 58, 55, 52, 50, 64, 48, 42, 40, 38, 36, 35, 34],
+    series: [58, 58, 56, 55, 57, 66, 52, 49, 48, 46, 45, 44, 43],
   },
   {
     id: "escaped",
@@ -178,7 +178,7 @@ export const METRICS: readonly Metric[] = [
     suffix: " / 100",
     decimals: 1,
     target: { op: "<=", value: 2.8 },
-    series: [3.2, 3.2, 3.1, 3.0, 3.3, 3.9, 3.1, 2.8, 3.0, 2.6, 2.5, 2.4, 2.3],
+    series: [3.2, 3.2, 3.2, 3.1, 3.7, 3.9, 3.3, 3.0, 3.1, 2.9, 2.8, 2.7, 2.7],
   },
 
   // AI effectiveness
@@ -195,8 +195,8 @@ export const METRICS: readonly Metric[] = [
     deltaUnit: " pts",
     suffix: "%",
     decimals: 0,
-    target: { op: ">=", value: 50 },
-    series: [4, 4, 14, 22, 34, 41, 44, 49, 51, 55, 58, 60, 62],
+    target: { op: ">=", value: 40 },
+    series: [3, 3, 9, 14, 24, 31, 33, 36, 38, 41, 43, 45, 46],
   },
   {
     id: "firstPass",
@@ -211,8 +211,8 @@ export const METRICS: readonly Metric[] = [
     deltaUnit: " pts",
     suffix: "%",
     decimals: 0,
-    target: { op: ">=", value: 65 },
-    series: [41, 41, 48, 55, 52, 49, 61, 66, 64, 70, 72, 74, 75],
+    target: { op: ">=", value: 60 },
+    series: [38, 38, 44, 49, 46, 43, 52, 58, 55, 61, 63, 65, 66],
   },
   {
     id: "rework",
@@ -228,7 +228,7 @@ export const METRICS: readonly Metric[] = [
     suffix: "%",
     decimals: 1,
     target: { op: "<=", value: 8 },
-    series: [7.8, 7.8, 7.6, 7.5, 9.4, 10.1, 8.2, 7.4, 7.2, 6.9, 6.7, 6.5, 6.4],
+    series: [7.6, 7.6, 7.9, 7.8, 10.8, 11.6, 9.1, 7.7, 7.5, 7.3, 7.1, 6.9, 6.8],
   },
   {
     id: "evalPass",
@@ -245,7 +245,7 @@ export const METRICS: readonly Metric[] = [
     decimals: 0,
     target: { op: ">=", value: 92 },
     threshold: { value: 92, label: "release" },
-    series: [93, 93, 94, 95, 95, 94, 95, 96, 89, 95, 96, 96, 97],
+    series: [93, 93, 93, 94, 93, 92, 93, 94, 89, 93, 94, 94, 95],
   },
 
   // Cost
@@ -255,15 +255,16 @@ export const METRICS: readonly Metric[] = [
     kind: "other",
     name: "AI spend per merged change",
     short: "AI spend / change",
-    definition: "Model, sandbox and eval spend for the month over merged changes.",
+    definition: "Model, sandbox and eval spend for the month over merged changes. Baseline is autocomplete only.",
     lowerIsBetter: true,
-    tolerance: 0.2,
-    deltaMode: "relative",
+    tolerance: 0.5,
+    deltaMode: "absolute",
+    deltaUnit: "",
     prefix: "$",
     suffix: "",
     decimals: 2,
-    target: { op: "<=", value: 5 },
-    series: [1.8, 1.8, 6.2, 8.4, 9.1, 8.2, 6.9, 5.6, 5.9, 4.6, 3.9, 3.4, 3.1],
+    target: { op: "<=", value: 25 },
+    series: [2.1, 2.1, 12, 18, 38, 36, 33, 29, 30, 26, 24, 23, 22],
   },
   {
     id: "cacheHit",
@@ -279,7 +280,7 @@ export const METRICS: readonly Metric[] = [
     suffix: "%",
     decimals: 0,
     target: { op: ">=", value: 60 },
-    series: [12, 12, 18, 24, 31, 38, 47, 55, 52, 61, 66, 69, 71],
+    series: [15, 15, 18, 22, 27, 33, 41, 50, 47, 57, 63, 67, 70],
   },
 
   // People
@@ -297,7 +298,7 @@ export const METRICS: readonly Metric[] = [
     suffix: " / 100",
     decimals: 0,
     target: { op: ">=", value: 70 },
-    series: [64, 64, 68, 71, 66, 62, 68, 72, 71, 74, 75, 76, 77],
+    series: [64, 64, 67, 69, 63, 60, 64, 67, 66, 69, 70, 71, 72],
   },
   {
     id: "throughput",
@@ -307,12 +308,12 @@ export const METRICS: readonly Metric[] = [
     short: "Throughput",
     definition: "Merged changes per team per week.",
     lowerIsBetter: false,
-    tolerance: 1,
+    tolerance: 0.5,
     deltaMode: "relative",
     suffix: " / team / wk",
-    decimals: 0,
-    target: { op: ">=", value: 25 },
-    series: [18, 18, 21, 24, 27, 26, 28, 31, 29, 33, 34, 35, 36],
+    decimals: 1,
+    target: { op: ">=", value: 18 },
+    series: [14, 14, 14.6, 15.1, 14.9, 15.3, 15.9, 16.6, 16.9, 17.5, 18, 18.4, 18.7],
   },
   {
     id: "reviewLoad",
@@ -328,7 +329,7 @@ export const METRICS: readonly Metric[] = [
     suffix: " h / wk",
     decimals: 1,
     target: { op: "<=", value: 7 },
-    series: [6.0, 6.0, 6.1, 6.3, 9.8, 11.2, 6.3, 6.0, 5.9, 5.8, 5.7, 5.6, 5.5],
+    series: [6.0, 6.0, 6.2, 6.4, 9.1, 10.2, 6.4, 6.3, 6.2, 6.1, 6.1, 6.0, 6.0],
   },
   {
     id: "pages",
@@ -343,14 +344,14 @@ export const METRICS: readonly Metric[] = [
     suffix: "",
     decimals: 1,
     target: { op: "<=", value: 2 },
-    series: [2.4, 2.4, 2.3, 2.2, 2.6, 3.1, 2.4, 2.0, 2.1, 1.8, 1.7, 1.6, 1.5],
+    series: [2.4, 2.4, 2.4, 2.3, 2.8, 3.3, 2.6, 2.3, 2.3, 2.1, 2.0, 1.9, 1.9],
   },
 ];
 
 /** Series the rules read that are not on the scorecard. */
 export const SIGNALS = {
   /** Share of human-written lines rewritten within 21 days, for comparison with agent code. */
-  humanRework: [8.0, 8.0, 8.0, 7.9, 8.1, 8.2, 8.0, 7.9, 7.8, 7.8, 7.7, 7.7, 7.6],
+  humanRework: [8.0, 8.0, 8.0, 7.9, 8.1, 8.2, 8.1, 8.0, 7.9, 7.9, 7.8, 7.8, 7.7],
   /** Dashboards or reports that slice any metric by individual (from a monthly audit of saved queries). */
   perPersonViews: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 } as const satisfies Record<string, readonly number[]>;
@@ -426,7 +427,7 @@ export const PHASES: readonly Phase[] = [
     name: "Steady state",
     start: 7,
     end: 12,
-    summary: "Routing, caching and evals tuned; the scorecard becomes the monthly operating review.",
+    summary: "Routing, caching and evals tuned; the reports become the monthly operating review.",
     exitTest: "Pairs hold for a quarter and AI spend per merged change is under target.",
   },
 ];
@@ -445,25 +446,25 @@ export const EVENTS: readonly TimelineEvent[] = [
   {
     month: 2,
     title: "Pilot: two teams",
-    note: "Agents write tests and evals first, then the change. Large models do most of the work, so spend jumps.",
+    note: "Agents write tests and evals first, then the change. The largest model does nearly everything, so spend per merged change across the org goes from about $2 (autocomplete only) to $12, nearly all of it on the two pilot teams.",
     tone: "neutral",
   },
   {
     month: 3,
     title: "Pilot result",
-    note: "Cycle time down about 30% with change failure rate flat. Exit test passed.",
+    note: "Pilot teams' cycle time down about 20%; rolled up across all six teams, 8%. Change failure rate and rework flat. Exit test passed.",
     tone: "good",
   },
   {
     month: 4,
     title: "Expansion starts",
-    note: "Agent pull requests triple and grow larger. Review latency passes one day; review load climbs.",
+    note: "Two more teams onboard and the pilot gains partly slip. Agent pull requests grow larger, review latency passes one day, change failure rate jumps to 15%. Spend per change peaks at $38.",
     tone: "bad",
   },
   {
     month: 5,
     title: "Rules fire",
-    note: "Change failure rate rises above baseline and review load peaks. Expansion pauses.",
+    note: "Change failure rate at 15.8%, review load peaks, and the booking service spends its error budget. Expansion pauses and feature work on bookings stops.",
     tone: "bad",
   },
   {
@@ -475,7 +476,7 @@ export const EVENTS: readonly TimelineEvent[] = [
   {
     month: 7,
     title: "Routing by job",
-    note: "Small models for lint fixes and test scaffolds, medium for most changes, large only for design and hard bugs.",
+    note: "Small models for lint fixes and test scaffolds, medium for most changes, large only for design and hard bugs. Prompt-cache hit rate passes 50%.",
     tone: "good",
   },
   {
@@ -493,7 +494,7 @@ export const EVENTS: readonly TimelineEvent[] = [
   {
     month: 12,
     title: "One year on",
-    note: "Every pair Healthy. Spend per change falling as routing and caching do their work.",
+    note: "Every pair Healthy. Cycle time down 29%, throughput up 34%, deploys up 52%, change failure rate 10.4%. AI spend about $22 per merged change, roughly $270 per engineer per month.",
     tone: "good",
   },
 ];
@@ -502,19 +503,22 @@ export const EVENTS: readonly TimelineEvent[] = [
 export type TierShare = { small: number; medium: number; large: number };
 
 export const TIER_SHARES: readonly TierShare[] = [
-  { small: 20, medium: 30, large: 50 },
-  { small: 20, medium: 30, large: 50 },
+  // Baseline: editor autocomplete, which runs on small models.
+  { small: 60, medium: 30, large: 10 },
+  { small: 60, medium: 30, large: 10 },
+  // Pilot and expansion: the largest model for everything.
+  { small: 8, medium: 22, large: 70 },
+  { small: 6, medium: 20, large: 74 },
+  { small: 7, medium: 21, large: 72 },
   { small: 10, medium: 25, large: 65 },
-  { small: 8, medium: 24, large: 68 },
-  { small: 12, medium: 28, large: 60 },
-  { small: 18, medium: 32, large: 50 },
-  { small: 26, medium: 36, large: 38 },
-  { small: 34, medium: 38, large: 28 },
-  { small: 33, medium: 37, large: 30 },
-  { small: 40, medium: 38, large: 22 },
-  { small: 44, medium: 38, large: 18 },
-  { small: 47, medium: 38, large: 15 },
-  { small: 50, medium: 37, large: 13 },
+  { small: 15, medium: 32, large: 53 },
+  // Routing by job from month 7.
+  { small: 24, medium: 40, large: 36 },
+  { small: 22, medium: 38, large: 40 },
+  { small: 28, medium: 42, large: 30 },
+  { small: 31, medium: 44, large: 25 },
+  { small: 33, medium: 45, large: 22 },
+  { small: 35, medium: 45, large: 20 },
 ];
 
 /** How a rule's condition is tested against the data. */

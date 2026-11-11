@@ -123,7 +123,7 @@ function NotMeasured() {
   return (
     <section aria-labelledby="not-measured-heading" className="rounded-md border border-dashed border-edge-2 p-4 sm:p-6">
       <h2 id="not-measured-heading" className="font-semibold">
-        Deliberately not measured
+        Deliberately left off the scorecard
       </h2>
       <ul className="mt-3 grid gap-3 sm:grid-cols-3">
         {NOT_MEASURED.map((item) => (

@@ -128,7 +128,7 @@ export function AddGadgetDialog({ open, onClose, isAdded, onAdd }: Props) {
         </ul>
         <div className="flex items-center justify-between gap-3 px-6 py-4">
           <p aria-live="polite" className="min-w-0 truncate text-xs text-dim">
-            {status || "All gadgets show sample data."}
+            {status || "Gadgets follow the month picked on the dashboard."}
           </p>
           <button
             type="button"

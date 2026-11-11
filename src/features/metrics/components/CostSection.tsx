@@ -34,7 +34,7 @@ export function CostSection({ month }: { month: number }) {
   return (
     <section aria-labelledby="cost-heading">
       <SectionHeading id="cost-heading" kicker="Cost" title="Spend rises first, then falls as work is routed">
-        The pilot leans on large models, so spend per merged change jumps. From month 6 most tokens go to small and
+        The pilot and expansion lean on the largest model, so spend per merged change jumps. From month 7 most tokens go to small and
         medium models and the prompt cache does more of the work.
       </SectionHeading>
 

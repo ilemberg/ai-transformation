@@ -1,12 +1,14 @@
 "use client";
 
-import { LAST_MONTH } from "@/features/metrics/data";
+import { phaseFor } from "@/features/metrics/logic";
 import type { GadgetInfo } from "../gadgets";
 import type { Width } from "../layout";
 import { GadgetMenu } from "./GadgetMenu";
 
 type Props = {
   info: GadgetInfo;
+  /** The month the dashboard is showing. */
+  month: number;
   width: Width;
   index: number;
   count: number;
@@ -25,7 +27,11 @@ const iconButton =
   "grid h-7 w-7 shrink-0 place-items-center rounded-[3px] text-dim hover:bg-hover disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent focus-visible:outline-2 focus-visible:outline-brand";
 
 export function GadgetFrame(props: Props) {
-  const { info, width, index, count, editing, dragging, children } = props;
+  const { info, month, width, index, count, editing, dragging, children } = props;
+  const footer =
+    info.monthly === false
+      ? (info.footnote ?? "")
+      : `Month ${month} · ${phaseFor(month).name}${info.footnote ? ` · ${info.footnote}` : " · trend over the year"}`;
   const first = index === 0;
   const last = index === count - 1;
   const widthLabel = width === 1 ? "Make wide (2 columns)" : "Make narrow (1 column)";
@@ -118,10 +124,8 @@ export function GadgetFrame(props: Props) {
       </header>
       <div className="min-w-0 flex-1 p-4">{children}</div>
       <footer className="flex items-center gap-1.5 border-t border-edge px-4 py-2 text-[11px] text-faint">
-        <span className="shrink-0 rounded-[3px] bg-warn-bg px-1 font-bold uppercase leading-4 text-warn">Sample</span>
-        <span className="min-w-0 truncate" title={info.footnote}>
-          Month {LAST_MONTH}
-          {info.footnote ? ` · ${info.footnote}` : " · trend over the year"}
+        <span className="min-w-0 truncate" title={footer}>
+          {footer}
         </span>
       </footer>
     </section>

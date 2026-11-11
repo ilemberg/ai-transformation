@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { assigneeAt, isStationDone, testState, type BoardEvent, type Cursor } from "../logic";
+import { assigneeAt, isStepDone, stationOf, testState, type BoardEvent, type Cursor } from "../logic";
 import { STATIONS, TEST_KINDS } from "../stations";
 import type { Ticket } from "../types";
 import { Avatar, IssueTypeIcon, PriorityIcon } from "./jira";
@@ -26,7 +26,9 @@ export function Board({
   event: BoardEvent | null;
 }) {
   const scroller = useRef<HTMLDivElement>(null);
-  const selectedStation = cursors[selectedId]?.station ?? 0;
+  const eventTicket = event ? tickets.find((t) => t.id === event.ticketId) : undefined;
+  const selectedTicket = tickets.find((t) => t.id === selectedId);
+  const selectedStation = selectedTicket ? stationOf(selectedTicket, cursors[selectedId] ?? { step: 0, shown: 0 }) : 0;
 
   // Keep the selected card's column in view when the board scrolls sideways.
   useEffect(() => {
@@ -41,17 +43,17 @@ export function Board({
 
   return (
     <div ref={scroller} className="overflow-x-auto pb-3">
-      <div className="flex min-w-max gap-2">
+      <div className="flex min-w-[1180px] gap-1.5">
         {STATIONS.map((station, i) => {
-          const here = tickets.filter((t) => (cursors[t.id]?.station ?? 0) === i);
+          const here = tickets.filter((t) => stationOf(t, cursors[t.id] ?? { step: 0, shown: 0 }) === i);
           return (
             <section
               key={station.id}
               data-col={i}
               aria-label={`${station.name}, ${here.length} ${here.length === 1 ? "ticket" : "tickets"}`}
-              className={`relative flex w-[152px] shrink-0 flex-col rounded-md bg-column ${LANE_START.has(i) && i > 0 ? "ml-2" : ""}`}
+              className={`relative flex min-w-[110px] flex-1 flex-col rounded-md bg-column ${LANE_START.has(i) && i > 0 ? "ml-1.5" : ""}`}
             >
-              {event?.moved && event.after.station === i && (
+              {event?.moved && eventTicket && stationOf(eventTicket, event.after) === i && (
                 <span key={event.seq} aria-hidden className="flash-ring pointer-events-none absolute inset-0 rounded-md" />
               )}
               <header className="px-2 pb-1 pt-2.5" title={`Stops the line: ${station.gate}`}>
@@ -95,8 +97,10 @@ function Card({
   /** Set when this card just changed: a ring fades out around it. */
   flashKey: number | null;
 }) {
-  const step = ticket.steps[cursor.station];
-  const done = isStationDone(ticket, cursor);
+  const step = ticket.steps[cursor.step];
+  const done = isStepDone(ticket, cursor);
+  // This step is a move backwards: a gate or a rollback sent the ticket back.
+  const sentBack = cursor.step > 0 && STATIONS.findIndex((x) => x.id === step.station) < STATIONS.findIndex((x) => x.id === ticket.steps[cursor.step - 1].station);
   const progress = step.log.length ? cursor.shown / step.log.length : 1;
   const tally = (state: "red" | "green") =>
     TEST_KINDS.filter((k) => testState(ticket, k.id, cursor) === state).reduce((n, k) => n + (ticket.tests[k.id]?.count ?? 0), 0);
@@ -117,6 +121,9 @@ function Card({
       )}
       <span className="line-clamp-3 text-[13px] leading-snug text-ink">{ticket.title}</span>
       <span className="flex flex-wrap gap-1">
+        {sentBack && (
+          <span className="rounded-[3px] bg-warn-bg px-1 text-[11px] font-semibold uppercase text-warn">Sent back</span>
+        )}
         {step.mode !== "full" && (
           <span className="rounded-[3px] bg-neutral-bg px-1 text-[11px] font-semibold uppercase text-dim">{step.mode}</span>
         )}
@@ -129,8 +136,10 @@ function Card({
       </span>
       <span className="flex items-center gap-1.5">
         <IssueTypeIcon kind={ticket.kind} />
-        <span className="text-xs font-semibold text-dim">{ticket.key}</span>
-        <PriorityIcon priority={ticket.priority} />
+        <span className="whitespace-nowrap text-[11px] font-semibold text-dim">{ticket.key}</span>
+        <span className="hidden 2xl:inline">
+          <PriorityIcon priority={ticket.priority} />
+        </span>
         <span className="ml-auto">
           <Avatar id={assigneeAt(ticket, cursor)} size={22} />
         </span>

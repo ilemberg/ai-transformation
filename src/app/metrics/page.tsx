@@ -3,9 +3,9 @@ import { Suspense } from "react";
 import { DEFAULT_MONTH, MetricsDashboard, MetricsView } from "@/features/metrics/components/MetricsDashboard";
 
 export const metadata: Metadata = {
-  title: "Metrics · Ticket to Production",
+  title: "Engineering reports · Ticket to Production",
   description:
-    "A year of an AI rollout in numbers: paired speed and quality metrics, decision rules, and cost by model size. Sample data.",
+    "Bookwell's AI rollout month by month: every speed metric paired with the quality metric it could hurt, the decision rules that act on them, and cost by model size.",
 };
 
 export default function MetricsPage() {
@@ -14,7 +14,10 @@ export default function MetricsPage() {
       <nav aria-label="Breadcrumb" className="text-sm text-dim">
         Projects <span className="text-faint">/</span> Bookwell <span className="text-faint">/</span> Reports
       </nav>
-      <h1 className="mb-4 mt-3 text-2xl font-medium">AI rollout dashboard</h1>
+      <h1 className="mt-3 text-2xl font-medium">Engineering reports</h1>
+      <p className="mb-4 mt-1 text-sm text-dim">
+        For engineering leads: every metric with its pair, and the rules that act on them.
+      </p>
       <Suspense fallback={<MetricsView month={DEFAULT_MONTH} />}>
         <MetricsDashboard />
       </Suspense>
