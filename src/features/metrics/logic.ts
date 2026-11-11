@@ -40,7 +40,7 @@ export function baselineOf(series: readonly number[], months: readonly number[] 
   return tidy(values.reduce((a, b) => a + b, 0) / values.length);
 }
 
-export type Effect = "better" | "worse" | "same";
+export type Effect = "better" | "worse" | "same" | "context";
 
 export type Delta = {
   /** Value minus baseline, in the metric's units. */
@@ -54,7 +54,7 @@ export type Delta = {
   drifting: boolean;
 };
 
-type DeltaInput = Pick<Metric, "series" | "lowerIsBetter" | "tolerance">;
+type DeltaInput = Pick<Metric, "series" | "lowerIsBetter" | "tolerance"> & { descriptive?: boolean };
 
 export function deltaVsBaseline(metric: DeltaInput, month: number): Delta {
   const base = baselineOf(metric.series);
@@ -62,8 +62,14 @@ export function deltaVsBaseline(metric: DeltaInput, month: number): Delta {
   const relative = base === 0 ? 0 : tidy((diff / base) * 100);
   const direction = diff > 0 ? "up" : diff < 0 ? "down" : "flat";
   const goodDiff = metric.lowerIsBetter ? -diff : diff;
-  const effect: Effect = goodDiff > metric.tolerance ? "better" : goodDiff < -metric.tolerance ? "worse" : "same";
-  const drifting = effect === "worse" || goodDiff < -metric.tolerance / 2;
+  const effect: Effect = metric.descriptive
+    ? "context"
+    : goodDiff > metric.tolerance
+      ? "better"
+      : goodDiff < -metric.tolerance
+        ? "worse"
+        : "same";
+  const drifting = !metric.descriptive && (effect === "worse" || goodDiff < -metric.tolerance / 2);
   return { diff, relative, direction, effect, drifting };
 }
 

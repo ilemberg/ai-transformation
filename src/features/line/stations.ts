@@ -10,7 +10,7 @@ export const LANES: { id: Lane; blurb: string }[] = [
 export const STATIONS: Station[] = [
   {
     id: "intake",
-    brief: "A small, cheap model triages every ticket from Jira, GitHub or an alert, links duplicates and picks the route, so risky work never slips into the fast lane.",
+    brief: "A small, cheap model triages every ticket from Jira, GitHub or an alert, links duplicates and picks the route, so risky work does not slip into the fast lane.",
     lane: "Plan",
     name: "Intake",
     tagline: "Pull the ticket in",
@@ -38,26 +38,26 @@ export const STATIONS: Station[] = [
   },
   {
     id: "tests",
-    brief: "Every acceptance example becomes failing tests at each level that applies, plus evals and load scripts, then they are locked so nobody can weaken them later.",
+    brief: "Every acceptance example becomes failing tests at each level that applies, plus evals and load scripts, then locked: changing one later takes a recorded amendment that a person approves.",
     lane: "Build",
     name: "Tests first",
     tagline: "Tests and evals before code",
     whatWeDo:
       "An agent turns every acceptance example into tests at each level that applies: unit, integration, contract, behaviour, end-to-end, browser and accessibility. AI features get an eval set; speed-sensitive changes get a load script. Everything fails, because the code does not exist yet. A person reviews the tests, not the code.",
     catches: "Tests written after the code that only confirm what the code already does.",
-    gate: "Every acceptance example has a failing test, and a mutation check proves the tests can fail. Then the tests are locked.",
+    gate: "Every acceptance example has a failing test and a person has reviewed them. Then they are locked. Mutation testing comes later, once the code passes.",
     outputs: ["Failing test suite", "Eval golden set", "Load script with a budget", "Locked test manifest"],
     actors: ["tester", "engineer"],
     environment: "Cloud sandbox",
   },
   {
     id: "build",
-    brief: "A coding agent works in a throwaway cloud sandbox until the locked tests pass; it cannot edit them, and it stops and asks a person when it runs out of budget.",
+    brief: "A coding agent works in a throwaway cloud sandbox until the locked tests pass; a rule rejects any edit to them, a wrong test needs an approved amendment, and it hands over when its budget runs out.",
     lane: "Build",
     name: "Build",
     tagline: "An agent writes the code",
     whatWeDo:
-      "A coding agent works in a throwaway cloud sandbox: a container with the repo, a seeded database and no production secrets. It loops (edit, run the tests, read the failures) until everything is green. It cannot edit the locked tests; if it thinks one is wrong, it has to ask.",
+      "A coding agent works in a throwaway cloud sandbox: a container with the repo, a seeded database and no production secrets. It loops (edit, run the tests, read the failures) until everything is green. A rule rejects any edit to the locked tests and the run records the attempt; if a test really is wrong, the agent files an amendment that a person approves separately.",
     catches: "An agent that passes by weakening the tests.",
     gate: "Every locked test is green and the change is under the size cap, or it is split.",
     outputs: ["Pull request labelled agent-written", "Run trace", "Sandbox torn down"],
@@ -87,7 +87,7 @@ export const STATIONS: Station[] = [
     whatWeDo:
       "CI runs the same checks on every change, whoever wrote it: lint, types, unit, integration and contract tests, a mutation score on critical code, a security scan, a dependency audit, the eval pass rate against its threshold, page weight and accessibility. A preview environment is built and the end-to-end and browser tests run against it.",
     catches: "Regressions anywhere in the product, not only in the files that changed.",
-    gate: "Any red check stops the line. An override needs a named owner and a written reason.",
+    gate: "Any red check stops the line. Evals also have blocking categories (data leaks, prompt injection) where a single failure stops a release whatever the overall score. An override needs a named owner and a written reason.",
     outputs: ["Check record", "Preview link", "Eval report"],
     actors: ["ci"],
     environment: "Preview",
@@ -136,13 +136,13 @@ export const STATIONS: Station[] = [
   },
   {
     id: "learn",
-    brief: "Every incident comes back as a failing test, and the gate that missed it gets a new rule or eval case, so the same bug cannot ship twice.",
+    brief: "Every incident comes back as a failing test, and the gate that missed it gets a new rule or eval case, so that failure is caught if it comes back.",
     lane: "Run",
     name: "Bug loop",
     tagline: "When a bug comes in",
     whatWeDo:
       "An alert or a customer report becomes a ticket automatically, with the trace, the deploy and the agent run that wrote the code attached. The first step of every fix is a failing test that reproduces it. Afterwards we ask which gate should have caught it, and that gate gets a new test, rule or eval case. The ticket re-enters the line at Intake.",
-    catches: "The same bug twice.",
+    catches: "The same failure coming back.",
     gate: "A fix is not done until the gate that missed it has been strengthened.",
     outputs: ["Linked incident", "Reproducing test", "New gate rule or eval case"],
     actors: ["oncall", "triage"],

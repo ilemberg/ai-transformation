@@ -50,7 +50,14 @@ export function VerdictChip({ verdict }: { verdict: Verdict }) {
 export function DeltaText({ delta, text, className = "" }: { delta: Delta; text: string; className?: string }) {
   const arrow = delta.direction === "up" ? "▲" : delta.direction === "down" ? "▼" : "■";
   const tone = delta.effect === "better" ? "text-pass" : delta.effect === "worse" ? "text-fail" : "text-dim";
-  const word = delta.effect === "better" ? "better" : delta.effect === "worse" ? "worse" : "within noise";
+  const word =
+    delta.effect === "better"
+      ? "better"
+      : delta.effect === "worse"
+        ? "worse"
+        : delta.effect === "context"
+          ? "change (context, not a goal)"
+          : "within noise";
   return (
     <span className={`inline-flex items-baseline gap-1 font-mono text-xs ${tone} ${className}`}>
       <span aria-hidden className="text-[9px]">

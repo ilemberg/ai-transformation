@@ -13,6 +13,7 @@ import {
   toggleWidth,
   type Layout,
 } from "./layout";
+import { DEFAULT_LAYOUT, GADGET_IDS, GADGETS, STORAGE_KEY, isGadgetId } from "./gadgets";
 
 const L: Layout = [
   { id: "a", width: 2 },
@@ -133,5 +134,53 @@ describe("parseLayout", () => {
 
   it("keeps an empty list: every gadget was removed", () => {
     expect(parseLayout("[]", KNOWN, L)).toEqual([]);
+  });
+});
+
+describe("the executive default layout", () => {
+  it("is what is getting done, then spend, then one risk gadget", () => {
+    expect(DEFAULT_LAYOUT.map((s) => s.id)).toEqual([
+      "shipped",
+      "requestToLive",
+      "shippedPerEngineer",
+      "velocity",
+      "costPerTicket",
+      "aiBudget",
+      "payrollShare",
+      "tokenSpend",
+      "spendByTeam",
+      "forecast",
+      "risk",
+    ]);
+    const groups = DEFAULT_LAYOUT.map((s) => (isGadgetId(s.id) ? GADGETS[s.id].group : "unknown"));
+    expect(groups.filter((g) => g === "risk")).toHaveLength(1);
+    expect(groups).not.toContain("engineering");
+  });
+
+  it("uses each gadget's default width and fills every row of three columns", () => {
+    for (const s of DEFAULT_LAYOUT) expect(s.width, s.id).toBe(isGadgetId(s.id) ? GADGETS[s.id].defaultWidth : 0);
+    // Greedy placement in a three-column grid leaves no gaps.
+    let col = 0;
+    for (const s of DEFAULT_LAYOUT) {
+      if (col + s.width > 3) throw new Error(`${s.id} leaves a gap`);
+      col = (col + s.width) % 3;
+    }
+    expect(col).toBe(0);
+  });
+
+  it("keeps the engineering gadgets addable", () => {
+    for (const id of ["rules", "adoption", "evals", "phase", "cycleTime", "errorBudget"] as const) {
+      expect(GADGET_IDS).toContain(id);
+      expect(GADGETS[id].group).toBe("engineering");
+    }
+  });
+
+  it("is stored under a new key, so a layout saved before the change does not hide it", () => {
+    expect(STORAGE_KEY).toBe("bookwell.dashboard.layout.v2");
+    const v1 = JSON.stringify([{ id: "rules", width: 1 }]);
+    // A v2 read of nothing gives the new default.
+    expect(parseLayout(null, GADGET_IDS, DEFAULT_LAYOUT)).toEqual(DEFAULT_LAYOUT);
+    // Old ids still parse if a visitor saves them again later.
+    expect(parseLayout(v1, GADGET_IDS, DEFAULT_LAYOUT)).toEqual([{ id: "rules", width: 1 }]);
   });
 });

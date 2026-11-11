@@ -186,7 +186,9 @@ export function DashboardView({ month }: { month: number }) {
       <div className="mb-4 mt-3 flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-2xl font-medium">Executive dashboard</h1>
-          <p className="mt-1 text-sm text-dim">For stakeholders: spend, speed and stability at a glance.</p>
+          <p className="mt-1 text-sm text-dim">
+            For executives and finance: what we are getting done, what we are spending, and the risk.
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <MonthPicker month={month} />

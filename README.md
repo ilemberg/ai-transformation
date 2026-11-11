@@ -31,6 +31,11 @@ Four tickets take different routes:
 **Engineering reports** play a year of the rollout for engineering leads: every speed metric paired with the quality metric that
 keeps it honest, the decision rules that fire when one moves the wrong way, and what the models cost.
 
+**Agent runs** show the orchestration behind the board: a full run record with the protected-test rejection and an
+approved test amendment, replays of a crashed worker resuming from a checkpoint, a duplicated request being dropped, a
+provider timeout falling back, and a cancellation; many runs at once with concurrency limits, isolated workspaces and a
+file conflict; and how each team adopted the process.
+
 The **Executive dashboard** is the stakeholder view, for any month of the rollout: token spend, velocity, cycle time, deploys, uptime and error budget, delivery health, AI adoption and decision rules. Gadgets can be added, removed, resized and dragged into a new order; the layout is saved in your browser.
 
 Model prices are blended per million tokens (most input served from the prompt cache), in line with late-2026 list

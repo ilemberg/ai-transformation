@@ -47,6 +47,11 @@ export type Metric = {
   suffix: string;
   decimals: number;
   target?: Target;
+  /**
+   * Context, not a goal: shown without better or worse. More agent-written
+   * code is not an outcome in itself, so it is never scored.
+   */
+  descriptive?: boolean;
   /** A line drawn on the sparkline, e.g. the SLO or a release threshold. */
   threshold?: { value: number; label: string };
   series: readonly number[];
@@ -185,7 +190,8 @@ export const METRICS: readonly Metric[] = [
   {
     id: "agentShare",
     group: "ai",
-    kind: "speed",
+    kind: "other",
+    descriptive: true,
     name: "Agent-authored share",
     short: "Agent-authored share",
     definition: "Share of merged lines first written by an agent, then reviewed by a person.",
@@ -195,7 +201,6 @@ export const METRICS: readonly Metric[] = [
     deltaUnit: " pts",
     suffix: "%",
     decimals: 0,
-    target: { op: ">=", value: 40 },
     series: [3, 3, 9, 14, 24, 31, 33, 36, 38, 41, 43, 45, 46],
   },
   {
@@ -376,9 +381,9 @@ export const PAIRS: readonly Pair[] = [
   },
   {
     id: "agents",
-    speed: "agentShare",
+    speed: "firstPass",
     quality: "rework",
-    why: "More agent code is only better if it is not rewritten weeks later.",
+    why: "Agent changes that pass review first time only count if they are not rewritten weeks later.",
   },
   {
     id: "people",

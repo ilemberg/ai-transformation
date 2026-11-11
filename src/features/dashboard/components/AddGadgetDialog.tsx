@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { GADGET_LIST, type GadgetId } from "../gadgets";
+import { GADGET_LIST, GROUP_LABEL, GROUPS, type GadgetId } from "../gadgets";
 
 type Props = {
   open: boolean;
@@ -40,7 +40,12 @@ export function AddGadgetDialog({ open, onClose, isAdded, onAdd }: Props) {
   }
 
   const q = query.trim().toLowerCase();
-  const shown = GADGET_LIST.filter((g) => !q || `${g.title} ${g.description}`.toLowerCase().includes(q));
+  const shown = GADGET_LIST.filter((g) =>
+    !q || `${g.title} ${g.description} ${GROUP_LABEL[g.group]}`.toLowerCase().includes(q),
+  );
+  const groups = GROUPS.map((group) => ({ group, items: shown.filter((g) => g.group === group) })).filter(
+    (x) => x.items.length > 0,
+  );
 
   return (
     <dialog
@@ -91,41 +96,53 @@ export function AddGadgetDialog({ open, onClose, isAdded, onAdd }: Props) {
             className="h-9 w-full rounded-[3px] border-2 border-edge bg-panel-2 px-2 text-sm placeholder:text-faint focus:border-brand focus:bg-panel focus:outline-none"
           />
         </div>
-        <ul className="min-h-0 flex-1 divide-y divide-edge overflow-y-auto border-y border-edge px-6">
-          {shown.map((g) => {
-            const added = isAdded(g.id);
-            return (
-              <li key={g.id} className="flex items-center gap-3 py-3">
-                <span
-                  aria-hidden
-                  className="grid h-10 w-10 shrink-0 place-items-center rounded-[3px] bg-info-bg text-xs font-bold text-info-text"
-                >
-                  {g.defaultWidth === 2 ? "▦" : "▤"}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="font-medium">{g.title}</div>
-                  <div className="text-xs text-dim">{g.description}</div>
-                </div>
-                <button
-                  type="button"
-                  aria-disabled={added}
-                  aria-label={added ? `${g.title} added` : `Add ${g.title}`}
-                  onClick={() => {
-                    if (added) return;
-                    onAdd(g.id);
-                    setStatus(`${g.title} added to the dashboard.`);
-                  }}
-                  className={`h-8 shrink-0 rounded-[3px] px-3 text-sm font-medium ${
-                    added ? "cursor-not-allowed bg-neutral-bg text-faint" : "bg-neutral-bg text-ink hover:bg-edge"
-                  }`}
-                >
-                  {added ? "Added" : "Add"}
-                </button>
-              </li>
-            );
-          })}
-          {shown.length === 0 && <li className="py-6 text-center text-sm text-dim">No gadgets match “{query}”.</li>}
-        </ul>
+        <div className="min-h-0 flex-1 overflow-y-auto border-y border-edge px-6">
+          {groups.map(({ group, items }) => (
+            <section key={group} aria-labelledby={`gadget-group-${group}`}>
+              <h3
+                id={`gadget-group-${group}`}
+                className="pb-1 pt-3 text-[11px] font-bold uppercase tracking-wide text-dim"
+              >
+                {GROUP_LABEL[group]}
+              </h3>
+              <ul className="divide-y divide-edge">
+                {items.map((g) => {
+                  const added = isAdded(g.id);
+                  return (
+                    <li key={g.id} className="flex items-center gap-3 py-3">
+                      <span
+                        aria-hidden
+                        className="grid h-10 w-10 shrink-0 place-items-center rounded-[3px] bg-info-bg text-xs font-bold text-info-text"
+                      >
+                        {g.defaultWidth === 2 ? "▦" : "▤"}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-medium">{g.title}</div>
+                        <div className="text-xs text-dim">{g.description}</div>
+                      </div>
+                      <button
+                        type="button"
+                        aria-disabled={added}
+                        aria-label={added ? `${g.title} added` : `Add ${g.title}`}
+                        onClick={() => {
+                          if (added) return;
+                          onAdd(g.id);
+                          setStatus(`${g.title} added to the dashboard.`);
+                        }}
+                        className={`h-8 shrink-0 rounded-[3px] px-3 text-sm font-medium ${
+                          added ? "cursor-not-allowed bg-neutral-bg text-faint" : "bg-neutral-bg text-ink hover:bg-edge"
+                        }`}
+                      >
+                        {added ? "Added" : "Add"}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ))}
+          {shown.length === 0 && <p className="py-6 text-center text-sm text-dim">No gadgets match “{query}”.</p>}
+        </div>
         <div className="flex items-center justify-between gap-3 px-6 py-4">
           <p aria-live="polite" className="min-w-0 truncate text-xs text-dim">
             {status || "Gadgets follow the month picked on the dashboard."}

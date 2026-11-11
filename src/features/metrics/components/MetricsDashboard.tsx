@@ -4,13 +4,12 @@ import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { LAST_MONTH, NOT_MEASURED, PAIRS } from "../data";
 import { clampMonth, metricById, pairVerdict, parseMonth } from "../logic";
-import { CostSection } from "./CostSection";
 import { PairCards } from "./PairCards";
+import { ImprovingSection, QualitySection, VelocitySection } from "./ReportSections";
 import { RulesPanel } from "./RulesPanel";
 import { Scorecard } from "./Scorecard";
 import { Scrubber } from "./Scrubber";
 import { StoryPanel } from "./StoryPanel";
-import { Gadget } from "./ui";
 
 /** With no `?m=`, show the end of the year: every rule has had its chance to fire. */
 export const DEFAULT_MONTH = LAST_MONTH;
@@ -94,22 +93,16 @@ export function MetricsView({ month }: { month: number }) {
         onMonthChange={changeMonth}
         onTogglePlay={togglePlay}
       />
-      <Gadget>
-        <PairCards month={month} />
-      </Gadget>
-      <div className="grid gap-4 2xl:grid-cols-2">
-        <Gadget>
-          <RulesPanel month={month} />
-        </Gadget>
-        <Gadget>
-          <CostSection month={month} />
-        </Gadget>
-      </div>
+      <VelocitySection month={month} />
+      <QualitySection month={month} />
+      <ImprovingSection month={month} />
       <details className="group rounded-md border border-edge bg-panel shadow-card">
         <summary className="cursor-pointer select-none bg-panel-2 px-4 py-2.5 text-sm font-semibold">
-          Full scorecard and timeline
+          Supporting detail: speed and quality pairs, decision rules, full scorecard
         </summary>
         <div className="space-y-8 p-4">
+          <PairCards month={month} />
+          <RulesPanel month={month} />
           <StoryPanel month={month} />
           <Scorecard month={month} />
           <NotMeasured />

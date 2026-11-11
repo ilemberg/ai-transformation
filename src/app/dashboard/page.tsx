@@ -5,7 +5,7 @@ import { DEFAULT_MONTH, Dashboard, DashboardView } from "@/features/dashboard/co
 export const metadata: Metadata = {
   title: "Executive dashboard · adevsworld",
   description:
-    "Bookwell's AI rollout for stakeholders: AI spend, delivery speed and stability for any month of the year, as gadgets you can add, remove and rearrange.",
+    "Bookwell's AI rollout for executives and finance: what shipped, what it cost against budget, and the risk, for any month of the year, as gadgets you can add, remove and rearrange.",
 };
 
 export default function DashboardPage() {

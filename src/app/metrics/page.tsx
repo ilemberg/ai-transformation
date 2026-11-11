@@ -16,7 +16,7 @@ export default function MetricsPage() {
       </nav>
       <h1 className="mt-3 text-2xl font-medium">Engineering reports</h1>
       <p className="mb-4 mt-1 text-sm text-dim">
-        For engineering leads: every metric with its pair, and the rules that act on them.
+        For engineering leads: velocity, quality, and whether the rollout is what is improving them.
       </p>
       <Suspense fallback={<MetricsView month={DEFAULT_MONTH} />}>
         <MetricsDashboard />

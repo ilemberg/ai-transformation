@@ -1,5 +1,6 @@
 import { LAST_MONTH, MONTHS, PAIRS, PHASES, RULES, type TierShare } from "@/features/metrics/data";
 import {
+  baselineOf,
   deltaVsBaseline,
   formatDelta,
   metricById,
@@ -13,7 +14,40 @@ import { Sparkline } from "@/features/metrics/components/Sparkline";
 import { DeltaText, VerdictChip } from "@/features/metrics/components/ui";
 import { totalsFor } from "@/features/line/logic";
 import { TICKETS } from "@/features/line/tickets";
-import { errorBudget, formatDollars, spendByTier, spendPerEngineer } from "../derive";
+import {
+  AI_BUDGET,
+  ESCAPED_BY_SEVERITY,
+  PAYROLL_PER_MONTH,
+  REQUEST_TO_LIVE_DAYS,
+  SEVERITIES,
+  SEVERITY_LABEL,
+  SHIPPED,
+  WORK_LABEL,
+  WORK_TYPES,
+  shippedTotal,
+  type WorkType,
+} from "@/features/metrics/delivery";
+import {
+  ENGINEERS,
+  SLO,
+  budgetCheck,
+  budgetToDate,
+  costPerShipped,
+  errorBudget,
+  forecastQuarter,
+  formatDollars,
+  fromPeak,
+  incidentSeries,
+  incidentsAt,
+  monthlySpend,
+  payrollShare,
+  shippedPerEngineer,
+  shippedSeries,
+  spendByTeam,
+  spendByTier,
+  spendPerEngineer,
+  spendSeries,
+} from "../derive";
 import type { GadgetId } from "../gadgets";
 
 /** Every gadget body is drawn for one month of the rollout. */
@@ -73,12 +107,14 @@ function MetricStat({
   colorClass,
   size = "lg",
   label,
+  compare = "baseline",
 }: {
   id: string;
   month: number;
   colorClass: string;
   size?: "lg" | "md";
   label?: string;
+  compare?: "baseline" | "peak";
 }) {
   const m = metricById(id);
   return (
@@ -86,7 +122,7 @@ function MetricStat({
       <div className="min-w-0">
         <div className="truncate text-xs font-medium text-dim">{label ?? m.short}</div>
         <Value id={id} month={month} size={size} />
-        <Delta id={id} month={month} />
+        {compare === "peak" ? <PeakDelta series={m.series} month={month} /> : <Delta id={id} month={month} />}
       </div>
       <Sparkline series={m.series} month={month} label={m.short} colorClass={colorClass} threshold={m.threshold} />
     </div>
@@ -332,7 +368,7 @@ function Rules({ month }: GadgetBodyProps) {
 function CostPerChange({ month }: GadgetBodyProps) {
   return (
     <div className="flex flex-col gap-3">
-      <MetricStat id="spend" month={month} colorClass="text-medium" label="AI spend per merged change" />
+      <MetricStat id="spend" month={month} colorClass="text-medium" label="AI spend per merged change" compare="peak" />
       <div className="border-t border-edge pt-3">
         <MetricStat id="cacheHit" month={month} colorClass="text-small" size="md" label="Prompt-cache hit rate" />
       </div>
@@ -455,7 +491,542 @@ function CycleTime({ month }: GadgetBodyProps) {
   return <MetricStat id="cycleTime" month={month} colorClass="text-speed" label="Median, first commit to production" />;
 }
 
+// ------------------------------------------------- executive gadgets: shared
+
+const ALL_MONTHS = Array.from({ length: MONTHS }, (_, m) => m);
+
+/** A series that is not a metric in data.ts, described well enough for the delta and the sparkline. */
+type SeriesSpec = {
+  series: readonly number[];
+  lowerIsBetter: boolean;
+  tolerance: number;
+  deltaMode: "relative" | "absolute";
+  deltaUnit?: string;
+  decimals: number;
+  prefix?: string;
+};
+
+function SeriesDelta({ spec, month }: { spec: SeriesSpec; month: number }) {
+  const d = deltaVsBaseline(spec, month);
+  return (
+    <span className="flex flex-wrap items-baseline gap-x-1">
+      <DeltaText delta={d} text={formatDelta(spec, d)} />
+      <span className="text-xs text-faint">vs baseline</span>
+    </span>
+  );
+}
+
+function BigNumber({ value, unit }: { value: string; unit?: string }) {
+  return (
+    <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+      <span className="text-[28px] font-semibold leading-8 tabular-nums text-ink">{value}</span>
+      {unit && <span className="text-xs text-dim">{unit}</span>}
+    </span>
+  );
+}
+
+/**
+ * Change from the highest month so far, for spend: below the peak is good.
+ * Nothing in months 0–1, before the rollout gives a peak to compare with.
+ */
+function PeakDelta({ series, month }: { series: readonly number[]; month: number }) {
+  const p = fromPeak(series, month);
+  if (!p) return null;
+  if (p.atPeak) {
+    return (
+      <span className="inline-flex items-baseline gap-1 font-mono text-xs text-dim">
+        <span aria-hidden className="text-[9px]">
+          ■
+        </span>
+        <span className="font-sans">highest month so far</span>
+      </span>
+    );
+  }
+  return (
+    <span className="flex flex-wrap items-baseline gap-x-1">
+      <span className="inline-flex items-baseline gap-1 font-mono text-xs text-pass">
+        <span aria-hidden className="text-[9px]">
+          ▼
+        </span>
+        <span>−{Math.abs(p.relative).toFixed(0)}%</span>
+      </span>
+      <span className="text-xs text-faint">from the month-{p.peakMonth} peak</span>
+    </span>
+  );
+}
+
+/** Label, big number, change against baseline (or the peak), and the year as a sparkline. */
+function SeriesStat({
+  label,
+  value,
+  unit,
+  spec,
+  month,
+  colorClass,
+  threshold,
+  compare = "baseline",
+  children,
+}: {
+  label: string;
+  value: string;
+  unit?: string;
+  spec: SeriesSpec;
+  month: number;
+  colorClass: string;
+  threshold?: { value: number; label: string };
+  /** Spend gadgets compare with the peak so far: their baseline is autocomplete only. */
+  compare?: "baseline" | "peak";
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="truncate text-xs font-medium text-dim">{label}</div>
+          <BigNumber value={value} unit={unit} />
+          {compare === "peak" ? <PeakDelta series={spec.series} month={month} /> : <SeriesDelta spec={spec} month={month} />}
+        </div>
+        <Sparkline series={spec.series} month={month} label={label} colorClass={colorClass} threshold={threshold} />
+      </div>
+      {children && <div className="border-t border-edge pt-2.5 text-xs text-dim">{children}</div>}
+    </div>
+  );
+}
+
+/** Month numbers under a bar chart, the selected one in bold. */
+function MonthAxis({ month }: { month: number }) {
+  return (
+    <div aria-hidden className="mt-1 flex gap-1 text-center text-[10px] tabular-nums text-faint">
+      {ALL_MONTHS.map((m) => (
+        <span key={m} className={`flex-1 ${m === month ? "font-bold text-ink" : ""}`}>
+          {m}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function barOpacity(m: number, month: number): string {
+  return m === month ? "" : m < month ? "opacity-60" : "opacity-15";
+}
+
+// Shipped this month
+
+const WORK_BG: Record<WorkType, string> = {
+  features: "bg-brand",
+  fixes: "bg-purple",
+  performance: "bg-pass",
+  maintenance: "bg-faint",
+};
+
+/** Drawn top to bottom in each bar; features sit on top. */
+const WORK_STACK: readonly WorkType[] = ["features", "performance", "fixes", "maintenance"];
+
+const SHIPPED_SPEC: SeriesSpec = {
+  series: shippedSeries(),
+  lowerIsBetter: false,
+  tolerance: 3,
+  deltaMode: "relative",
+  decimals: 0,
+};
+
+function Shipped({ month }: GadgetBodyProps) {
+  const totals = SHIPPED_SPEC.series;
+  const max = Math.max(...totals);
+  const total = shippedTotal(month);
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+        <div>
+          <div className="text-xs font-medium text-dim">Month {month}, tickets live for customers</div>
+          <BigNumber value={String(total)} unit="tickets" />
+          <SeriesDelta spec={SHIPPED_SPEC} month={month} />
+        </div>
+        <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-dim" aria-label={`Month ${month} shipped by type`}>
+          {WORK_TYPES.map((t) => (
+            <li key={t} className="inline-flex items-center gap-1.5">
+              <span aria-hidden className={`h-2.5 w-2.5 rounded-sm ${WORK_BG[t]}`} />
+              {WORK_LABEL[t]} <span className="font-medium tabular-nums text-ink">{SHIPPED[t][month]}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div
+        role="img"
+        aria-label={`Tickets shipped, months 0 to ${month}: ${ALL_MONTHS.slice(0, month + 1)
+          .map((m) => `month ${m} ${totals[m]}`)
+          .join(", ")}.`}
+      >
+        <div className="flex h-28 items-end gap-1 border-b border-edge">
+          {ALL_MONTHS.map((m) => (
+            <div
+              key={m}
+              title={`Month ${m}: ${totals[m]} shipped`}
+              className={`flex flex-1 flex-col overflow-hidden rounded-t-[3px] ${barOpacity(m, month)}`}
+              style={{ height: `${((totals[m] ?? 0) / max) * 100}%` }}
+            >
+              {WORK_STACK.map((t) => (
+                <div key={t} className={WORK_BG[t]} style={{ height: `${(SHIPPED[t][m] / (totals[m] || 1)) * 100}%` }} />
+              ))}
+            </div>
+          ))}
+        </div>
+        <MonthAxis month={month} />
+      </div>
+    </div>
+  );
+}
+
+// Request to live
+
+const REQUEST_SPEC: SeriesSpec = {
+  series: REQUEST_TO_LIVE_DAYS,
+  lowerIsBetter: true,
+  tolerance: 0.5,
+  deltaMode: "absolute",
+  deltaUnit: " days",
+  decimals: 1,
+};
+
+function RequestToLive({ month }: GadgetBodyProps) {
+  const days = valueAt(REQUEST_TO_LIVE_DAYS, month);
+  const base = baselineOf(REQUEST_TO_LIVE_DAYS);
+  const weeks = days / 7;
+  return (
+    <SeriesStat
+      label="Median, accepted to live"
+      value={days.toFixed(1)}
+      unit="days"
+      spec={REQUEST_SPEC}
+      month={month}
+      colorClass="text-speed"
+    >
+      About {weeks.toFixed(1)} weeks · baseline {base.toFixed(0)} days
+    </SeriesStat>
+  );
+}
+
+// Shipped per engineer
+
+const PER_ENGINEER_SPEC: SeriesSpec = {
+  series: ALL_MONTHS.map(shippedPerEngineer),
+  lowerIsBetter: false,
+  tolerance: 0.08,
+  deltaMode: "relative",
+  decimals: 2,
+};
+
+function ShippedPerEngineer({ month }: GadgetBodyProps) {
+  return (
+    <SeriesStat
+      label="Tickets live per engineer"
+      value={shippedPerEngineer(month).toFixed(2)}
+      unit="/ month"
+      spec={PER_ENGINEER_SPEC}
+      month={month}
+      colorClass="text-speed"
+    >
+      {shippedTotal(month)} tickets across {ENGINEERS} engineers · baseline {baselineOf(PER_ENGINEER_SPEC.series).toFixed(2)}
+    </SeriesStat>
+  );
+}
+
+// AI spend vs budget
+
+function AiBudget({ month }: GadgetBodyProps) {
+  const spends = spendSeries();
+  const max = Math.max(...spends, ...AI_BUDGET);
+  const now = budgetCheck(month);
+  const ytd = budgetToDate(month);
+  const usedPct = Math.round(now.usedShare * 100);
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+        <div>
+          <div className="text-xs font-medium text-dim">Month {month} AI spend</div>
+          <BigNumber value={formatDollars(now.spend)} unit={`of ${formatDollars(now.budget)} budget`} />
+          <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-dim">
+            <Lozenge tone={now.over ? "fail" : "pass"}>
+              {now.over ? "Over" : "Under"} by {formatDollars(Math.abs(now.diff))}
+            </Lozenge>
+            <span>{usedPct}% of budget used</span>
+          </div>
+        </div>
+        <div className="text-xs text-dim">
+          <div className="font-medium">Year to date</div>
+          <div className="tabular-nums">
+            <span className="font-semibold text-ink">{formatDollars(ytd.spend)}</span> of {formatDollars(ytd.budget)}
+          </div>
+        </div>
+      </div>
+      <div
+        role="img"
+        aria-label={`AI spend against budget, months 0 to ${month}: ${ALL_MONTHS.slice(0, month + 1)
+          .map((m) => `month ${m} ${formatDollars(spends[m] ?? 0)} of ${formatDollars(AI_BUDGET[m] ?? 0)}`)
+          .join(", ")}.`}
+      >
+        <div className="flex h-28 items-end gap-1 border-b border-edge">
+          {ALL_MONTHS.map((m) => {
+            const spend = spends[m] ?? 0;
+            const budget = AI_BUDGET[m] ?? 0;
+            const over = spend > budget;
+            return (
+              <div
+                key={m}
+                title={`Month ${m}: ${formatDollars(spend)} of ${formatDollars(budget)} budget`}
+                className={`relative h-full flex-1 ${barOpacity(m, month)}`}
+              >
+                <div
+                  className={`absolute inset-x-0 bottom-0 rounded-t-[3px] ${over ? "bg-fail" : "bg-medium"}`}
+                  style={{ height: `${(spend / max) * 100}%` }}
+                />
+                <div className="absolute -inset-x-0.5 h-0.5 bg-ink" style={{ bottom: `${(budget / max) * 100}%` }} />
+              </div>
+            );
+          })}
+        </div>
+        <MonthAxis month={month} />
+      </div>
+      <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-dim">
+        <li className="inline-flex items-center gap-1.5">
+          <span aria-hidden className="h-2.5 w-2.5 rounded-sm bg-medium" />
+          Spend
+        </li>
+        <li className="inline-flex items-center gap-1.5">
+          <span aria-hidden className="h-0.5 w-3 bg-ink" />
+          Budget
+        </li>
+      </ul>
+    </div>
+  );
+}
+
+// Cost per shipped ticket
+
+const COST_PER_TICKET_SPEC: SeriesSpec = {
+  series: ALL_MONTHS.map(costPerShipped),
+  lowerIsBetter: true,
+  tolerance: 5,
+  deltaMode: "absolute",
+  decimals: 0,
+  prefix: "$",
+};
+
+function CostPerTicket({ month }: GadgetBodyProps) {
+  const p = fromPeak(COST_PER_TICKET_SPEC.series, month);
+  return (
+    <SeriesStat
+      label="AI spend per shipped ticket"
+      value={formatDollars(costPerShipped(month))}
+      unit="/ ticket"
+      spec={COST_PER_TICKET_SPEC}
+      month={month}
+      colorClass="text-medium"
+      compare="peak"
+    >
+      {formatDollars(monthlySpend(month))} over {shippedTotal(month)} tickets
+      {p && !p.atPeak && <> · peak {formatDollars(p.peak)} in month {p.peakMonth}</>}
+    </SeriesStat>
+  );
+}
+
+// Spend by team
+
+function SpendByTeam({ month }: GadgetBodyProps) {
+  const rows = spendByTeam(month);
+  const max = Math.max(...rows.map((r) => r.spend)) || 1;
+  return (
+    <div className="flex flex-col gap-3">
+      <div>
+        <div className="text-xs font-medium text-dim">Month {month} AI spend</div>
+        <BigNumber value={formatDollars(monthlySpend(month))} unit="across 6 teams" />
+      </div>
+      <ul className="flex flex-col gap-2" aria-label={`Month ${month} AI spend by team`}>
+        {rows.map((r) => {
+          const inRollout = month >= r.joined;
+          return (
+            <li key={r.id} className="grid grid-cols-[5.5rem_1fr_auto] items-center gap-2 text-sm">
+              <span className="truncate" title={`${r.name}: ${r.engineers} engineers, joined month ${r.joined}`}>
+                {r.name}
+              </span>
+              <span className="h-2.5 overflow-hidden rounded-full bg-neutral-bg" aria-hidden>
+                <span
+                  className={`block h-full rounded-full ${inRollout ? "bg-brand" : "bg-faint"}`}
+                  style={{ width: `${(r.spend / max) * 100}%` }}
+                />
+              </span>
+              <span className="whitespace-nowrap text-right text-xs tabular-nums">
+                <span className="font-medium text-ink">{formatDollars(r.spend)}</span>{" "}
+                <span className="text-faint">{Math.round(r.share * 100)}%</span>
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+      {rows.some((r) => month < r.joined) && (
+        <p className="border-t border-edge pt-2.5 text-xs text-dim">
+          Grey: not yet in the rollout ({rows
+            .filter((r) => month < r.joined)
+            .map((r) => `${r.name} joins month ${r.joined}`)
+            .join(", ")}); editor autocomplete only.
+        </p>
+      )}
+    </div>
+  );
+}
+
+// Share of payroll
+
+const PAYROLL_SPEC: SeriesSpec = {
+  series: ALL_MONTHS.map(payrollShare),
+  lowerIsBetter: true,
+  tolerance: 0.1,
+  deltaMode: "absolute",
+  deltaUnit: " pts",
+  decimals: 2,
+};
+
+function PayrollShare({ month }: GadgetBodyProps) {
+  const share = payrollShare(month);
+  const payrollPerEngineer = PAYROLL_PER_MONTH / ENGINEERS;
+  return (
+    <SeriesStat
+      label="AI spend as a share of payroll"
+      value={`${share.toFixed(2)}%`}
+      spec={PAYROLL_SPEC}
+      month={month}
+      colorClass="text-medium"
+      compare="peak"
+    >
+      {formatDollars(monthlySpend(month))} of {formatDollars(PAYROLL_PER_MONTH)} monthly engineering payroll ·{" "}
+      {formatDollars(spendPerEngineer(month))} per engineer against {formatDollars(payrollPerEngineer)}
+    </SeriesStat>
+  );
+}
+
+// Forecast next quarter
+
+function Forecast({ month }: GadgetBodyProps) {
+  const f = forecastQuarter(month);
+  const [first, , last] = f.months;
+  const scaleMax = Math.max(f.high, f.budget ?? 0) * 1.05 || 1;
+  const pos = (v: number) => `${(v / scaleMax) * 100}%`;
+  const verdict =
+    f.budget === null
+      ? null
+      : f.high <= f.budget
+        ? { tone: "pass" as const, text: "Within budget" }
+        : f.low > f.budget
+          ? { tone: "fail" as const, text: "Above budget" }
+          : { tone: "warn" as const, text: "Near budget" };
+  const trendWord = f.slope < 0 ? "falling" : f.slope > 0 ? "rising" : "flat";
+  return (
+    <div className="flex flex-col gap-3">
+      <div>
+        <div className="text-xs font-medium text-dim">
+          AI spend, months {first}–{last}
+        </div>
+        <span className="text-[24px] font-semibold leading-8 tabular-nums">
+          {formatDollars(f.low, true)} – {formatDollars(f.high, true)}
+        </span>
+        <div className="text-xs text-faint">
+          Trend {formatDollars(f.central, true)} · flat {formatDollars(f.flat, true)}
+        </div>
+      </div>
+      <div
+        role="img"
+        aria-label={`Projected range ${formatDollars(f.low)} to ${formatDollars(f.high)}${
+          f.budget === null ? "" : `, against a budget of ${formatDollars(f.budget)}`
+        }.`}
+        className="relative h-6"
+      >
+        <div className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-neutral-bg" />
+        <div
+          className="absolute top-1/2 h-3 -translate-y-1/2 rounded-full bg-medium opacity-60"
+          style={{ left: pos(f.low), width: `${((f.high - f.low) / scaleMax) * 100}%` }}
+        />
+        <div className="absolute top-0 h-6 w-0.5 bg-medium" style={{ left: pos(f.central) }} />
+        {f.budget !== null && <div className="absolute top-0 h-6 w-0.5 bg-ink" style={{ left: pos(f.budget) }} />}
+      </div>
+      <div className="flex flex-wrap items-center gap-2 border-t border-edge pt-2.5 text-xs text-dim">
+        {verdict ? (
+          <>
+            <Lozenge tone={verdict.tone}>{verdict.text}</Lozenge>
+            <span>Budget {formatDollars(f.budget ?? 0, true)} for those months</span>
+          </>
+        ) : (
+          <span>No budget agreed yet for months {first}–{last}</span>
+        )}
+        <span className="basis-full">
+          Last 3 months: spend {trendWord}
+          {f.slope !== 0 && ` ${formatDollars(Math.abs(f.slope), true)} a month`}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// Uptime and incidents
+
+const INCIDENT_SPEC: SeriesSpec = {
+  series: incidentSeries(),
+  lowerIsBetter: true,
+  tolerance: 1,
+  deltaMode: "absolute",
+  decimals: 0,
+};
+
+const SEVERITY_TONE = { sev1: "fail", sev2: "warn", sev3: "neutral" } as const;
+
+function Risk({ month }: GadgetBodyProps) {
+  const uptime = metricById("uptime");
+  const v = valueAt(uptime.series, month);
+  const within = v >= SLO;
+  const inc = incidentsAt(month);
+  return (
+    <div className="grid gap-4 sm:grid-cols-2">
+      <div className="flex flex-col gap-2">
+        <MetricStat id="uptime" month={month} colorClass="text-quality" label="Uptime, trailing 30 days" />
+        <div className="flex flex-wrap items-center gap-2 text-xs text-dim">
+          <Lozenge tone={within ? "pass" : "fail"}>{within ? "Within SLO" : "Below SLO"}</Lozenge>
+          <span>SLO {SLO}%</span>
+        </div>
+      </div>
+      <div className="flex flex-col gap-2 border-t border-edge pt-3 sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
+        <div className="text-xs font-medium text-dim">Customer-facing bugs this month</div>
+        <div className="flex flex-wrap items-baseline gap-x-2">
+          <BigNumber value={String(inc.total)} />
+          <SeriesDelta spec={INCIDENT_SPEC} month={month} />
+        </div>
+        <ul className="divide-y divide-edge">
+          {SEVERITIES.map((s) => (
+            <li key={s} className="flex items-center justify-between gap-2 py-1 text-sm">
+              <span className="flex min-w-0 items-center gap-2">
+                <Lozenge tone={inc[s] > 0 ? SEVERITY_TONE[s] : "neutral"}>{s.replace("sev", "Sev ")}</Lozenge>
+                <span className="truncate text-xs text-dim">{SEVERITY_LABEL[s].replace(/^Sev \d /, "")}</span>
+              </span>
+              <span className="whitespace-nowrap text-xs tabular-nums">
+                <span className="font-semibold text-ink">{inc[s]}</span>{" "}
+                <span className="text-faint">baseline {baselineOf(ESCAPED_BY_SEVERITY[s])}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
 export const GADGET_BODIES: Record<GadgetId, (props: GadgetBodyProps) => React.ReactNode> = {
+  shipped: Shipped,
+  requestToLive: RequestToLive,
+  shippedPerEngineer: ShippedPerEngineer,
+  aiBudget: AiBudget,
+  costPerTicket: CostPerTicket,
+  spendByTeam: SpendByTeam,
+  payrollShare: PayrollShare,
+  forecast: Forecast,
+  risk: Risk,
   tokenSpend: TokenSpend,
   velocity: Velocity,
   cycleTime: CycleTime,

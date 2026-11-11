@@ -264,10 +264,19 @@ describe("data shape", () => {
     for (const t of TIER_SHARES) expect(t.small + t.medium + t.large).toBe(100);
   });
 
+  it("treats agent-written share as context, never better or worse", () => {
+    const share = metricById("agentShare");
+    expect(share.descriptive).toBe(true);
+    expect(share.target).toBeUndefined();
+    expect(deltaVsBaseline(share, 12).effect).toBe("context");
+    expect(PAIRS.some((p) => p.speed === "agentShare" || p.quality === "agentShare")).toBe(false);
+  });
+
   it("has unique metric ids, and pairs and rules that point at real series", () => {
     expect(new Set(METRICS.map((m) => m.id)).size).toBe(METRICS.length);
     for (const p of PAIRS) {
-      expect(metricById(p.speed).kind).toBe("speed");
+      // The speed side is a speed metric, or first-pass rate for the agent pair; never a descriptive one.
+      expect(metricById(p.speed).descriptive).not.toBe(true);
       expect(metricById(p.quality).kind).toBe("quality");
     }
     for (const r of RULES) {

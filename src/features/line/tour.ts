@@ -26,13 +26,19 @@ export const TOUR: TourStop[] = [
     ticketId: "feature",
     cursor: { step: 2, shown: 6 },
     title: "Tests and evals before code",
-    body: "82 tests, 120 eval cases and a load script are written from the spec. All fail, because there is no code yet. A person reviews them, then they are locked.",
+    body: "82 tests, 120 eval cases and a load script are written from the spec. All fail, because there is no code yet. A person reviews them, then they are locked. Mutation testing waits until the code passes.",
   },
   {
     ticketId: "feature",
-    cursor: { step: 3, shown: 3 },
-    title: "The agent cannot weaken a test",
-    body: "The coding agent asked to change a locked test. Refused. It fixed the code instead.",
+    cursor: { step: 3, shown: 5 },
+    title: "The agent cannot quietly weaken a test",
+    body: "It tried to edit a locked test to make its failures go away. The locked-tests rule rejected it and the run recorded the attempt. It fixed the real bug in the code.",
+  },
+  {
+    ticketId: "feature",
+    cursor: { step: 3, shown: 7 },
+    title: "Changing a test takes a person",
+    body: "One test really was wrong: it expected cents on yen. The agent filed an amendment with the evidence, an engineer approved it separately, and the change is on record.",
   },
   {
     ticketId: "feature",
@@ -62,7 +68,7 @@ export const TOUR: TourStop[] = [
     ticketId: "bug",
     cursor: { step: 9, shown: 4 },
     title: "Every bug makes a gate stronger",
-    body: "A double charge arrived as an alert, got a failing test before any fix, and left a new rule in the pipeline so it cannot ship again.",
+    body: "A double charge arrived as an alert, got a failing test before any fix, and left a new rule in the pipeline so that failure is caught if it comes back.",
   },
 ];
 

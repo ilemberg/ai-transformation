@@ -7,6 +7,7 @@ const LINKS = [
   { href: "/", label: "Board", long: "Delivery board", icon: BoardIcon },
   { href: "/metrics", label: "Reports", long: "Engineering reports", icon: ReportsIcon },
   { href: "/dashboard", label: "Dashboard", long: "Executive dashboard", icon: DashboardIcon },
+  { href: "/runs", label: "Runs", long: "Agent runs", icon: RunsIcon },
 ];
 
 function useActive() {
@@ -19,7 +20,7 @@ export function TopBar() {
   const isActive = useActive();
   return (
     <header className="sticky top-0 z-30 flex h-12 items-center gap-3 border-b border-edge bg-panel px-3">
-      <span aria-hidden className="grid h-8 w-8 grid-cols-3 place-content-center gap-[3px] rounded p-2 text-faint">
+      <span aria-hidden className="hidden h-8 w-8 grid-cols-3 place-content-center sm:grid gap-[3px] rounded p-2 text-faint">
         {Array.from({ length: 9 }).map((_, i) => (
           <span key={i} className="h-[3px] w-[3px] rounded-full bg-current" />
         ))}
@@ -30,13 +31,13 @@ export function TopBar() {
           adevs<span className="text-brand">world</span>
         </span>
       </Link>
-      <nav className="ml-2 flex gap-1 lg:hidden">
+      <nav className="ml-1 flex min-w-0 gap-0.5 overflow-x-auto lg:hidden">
         {LINKS.map((l) => (
           <Link
             key={l.href}
             href={l.href}
             aria-current={isActive(l.href) ? "page" : undefined}
-            className={`rounded px-2 py-1 text-sm font-medium ${isActive(l.href) ? "bg-selected text-brand" : "text-dim hover:bg-hover"}`}
+            className={`shrink-0 whitespace-nowrap rounded px-1.5 py-1 text-sm font-medium ${isActive(l.href) ? "bg-selected text-brand" : "text-dim hover:bg-hover"}`}
           >
             {l.label}
           </Link>
@@ -106,6 +107,16 @@ function BoardIcon() {
       <rect x="1.5" y="2" width="3.5" height="12" rx="1" fill="none" stroke="currentColor" strokeWidth="1.4" />
       <rect x="6.25" y="2" width="3.5" height="8" rx="1" fill="none" stroke="currentColor" strokeWidth="1.4" />
       <rect x="11" y="2" width="3.5" height="10" rx="1" fill="none" stroke="currentColor" strokeWidth="1.4" />
+    </svg>
+  );
+}
+
+function RunsIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-4 w-4" aria-hidden>
+      <path d="M2 4h8M2 8h12M2 12h6" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <circle cx="13" cy="4" r="1.6" fill="currentColor" />
+      <circle cx="11" cy="12" r="1.6" fill="currentColor" />
     </svg>
   );
 }
