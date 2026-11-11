@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { traceHref } from "@/features/observe/data";
 import { useEffect, useRef, useState } from "react";
 import {
   assigneeAt,
@@ -239,6 +241,7 @@ interface Entry {
   kind: "status" | "comment";
   text: string;
   tone?: Tone;
+  trace?: string;
 }
 
 /** Status changes and comments, newest first, as they happen. */
@@ -252,7 +255,7 @@ function Activity({ ticket, cursor, seq }: { ticket: Ticket; cursor: Cursor; seq
       entries.push({ key: `s${i}`, who: "ci", from, to, kind: "status", text: "" });
     }
     const lines = i < cursor.step ? step.log : step.log.slice(0, cursor.shown);
-    lines.forEach((l, j) => entries.push({ key: `${i}-${j}`, who: l.who, kind: "comment", text: l.text, tone: l.tone }));
+    lines.forEach((l, j) => entries.push({ key: `${i}-${j}`, who: l.who, kind: "comment", text: l.text, tone: l.tone, trace: l.trace }));
   }
   entries.reverse();
 
@@ -287,7 +290,17 @@ function Activity({ ticket, cursor, seq }: { ticket: Ticket; cursor: Cursor; seq
                   {ACTORS[e.who].tier && <span className="text-faint">{ACTORS[e.who].tier} model</span>}
                   {e.tone && TONE_LOZENGE[e.tone] && <Lozenge tone={TONE_LOZENGE[e.tone]!.tone}>{TONE_LOZENGE[e.tone]!.label}</Lozenge>}
                 </div>
-                <p className="text-sm text-ink">{e.text}</p>
+                <p className="text-sm text-ink">
+                  {e.text}
+                  {e.trace && (
+                    <>
+                      {" "}
+                      <Link href={traceHref(e.trace)} className="whitespace-nowrap text-xs font-medium text-brand hover:underline">
+                        View trace →
+                      </Link>
+                    </>
+                  )}
+                </p>
               </div>
             </li>
           ),

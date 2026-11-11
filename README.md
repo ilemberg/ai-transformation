@@ -36,6 +36,11 @@ approved test amendment, replays of a crashed worker resuming from a checkpoint,
 provider timeout falling back, and a cancellation; many runs at once with concurrency limits, isolated workspaces and a
 file conflict; and how each team adopted the process.
 
+**Observe** is what an engineer sees in production: a trace explorer that follows one customer request through every
+service and model call, a filterable log of model calls with cost, cache and fallback, service health per user journey
+with error budget and burn rate, alerts and on-call with an incident timeline, and weekly quality scoring of real AI
+answers. Board activity links straight to the matching trace.
+
 The **Executive dashboard** is the stakeholder view, for any month of the rollout: token spend, velocity, cycle time, deploys, uptime and error budget, delivery health, AI adoption and decision rules. Gadgets can be added, removed, resized and dragged into a new order; the layout is saved in your browser.
 
 Model prices are blended per million tokens (most input served from the prompt cache), in line with late-2026 list

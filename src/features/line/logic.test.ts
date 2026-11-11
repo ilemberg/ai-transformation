@@ -24,6 +24,7 @@ import {
 import { ACTORS, STATIONS } from "./stations";
 import { TICKETS } from "./tickets";
 import { TOUR, TOUR_STOP_MS } from "./tour";
+import { TRACE_IDS } from "@/features/observe/data";
 import { STATION_IDS } from "./types";
 
 const byId = (id: string) => TICKETS.find((t) => t.id === id)!;
@@ -65,6 +66,12 @@ describe("content", () => {
         else expect(to).toBeGreaterThan(from);
       }
     }
+  });
+
+  it("only links to traces that exist on the Observe page", () => {
+    const linked = TICKETS.flatMap((t) => t.steps.flatMap((s) => s.log.flatMap((l) => (l.trace ? [l.trace] : []))));
+    expect(linked.length).toBeGreaterThan(0);
+    for (const id of linked) expect(TRACE_IDS).toContain(id);
   });
 
   it("only names actors that exist", () => {

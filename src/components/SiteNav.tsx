@@ -8,6 +8,7 @@ const LINKS = [
   { href: "/metrics", label: "Reports", long: "Engineering reports", icon: ReportsIcon },
   { href: "/dashboard", label: "Dashboard", long: "Executive dashboard", icon: DashboardIcon },
   { href: "/runs", label: "Runs", long: "Agent runs", icon: RunsIcon },
+  { href: "/observe", label: "Observe", long: "Observe", icon: ObserveIcon },
 ];
 
 function useActive() {
@@ -107,6 +108,14 @@ function BoardIcon() {
       <rect x="1.5" y="2" width="3.5" height="12" rx="1" fill="none" stroke="currentColor" strokeWidth="1.4" />
       <rect x="6.25" y="2" width="3.5" height="8" rx="1" fill="none" stroke="currentColor" strokeWidth="1.4" />
       <rect x="11" y="2" width="3.5" height="10" rx="1" fill="none" stroke="currentColor" strokeWidth="1.4" />
+    </svg>
+  );
+}
+
+function ObserveIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-4 w-4" aria-hidden>
+      <path d="M1 9h3l2-5 3 9 2-6 1 2h3" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

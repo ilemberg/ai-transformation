@@ -149,7 +149,7 @@ export const TICKETS: Ticket[] = [
         mode: "full",
         log: [
           { who: "monitor", text: "Dashboard: suggestions shown, accepted (38%), and fallback rate (4%), with a deploy marker." },
-          { who: "monitor", text: "Every model call traced: prompt v3, model, 2.1k tokens, $0.004, 1 tool call." },
+          { who: "monitor", text: "Every model call traced: prompt v3, model, 2.1k tokens, $0.004, 1 tool call.", trace: "tr_9c41e2" },
           { who: "monitor", text: "Weekly drift check: 200 real conversations scored. Pass rate holding at 93%.", tone: "pass" },
         ],
         usage: { ktokens: { small: 160 }, computeMinutes: 4, wallMinutes: 10080, humanMinutes: 15 },
@@ -190,7 +190,7 @@ export const TICKETS: Ticket[] = [
         station: "intake",
         mode: "full",
         log: [
-          { who: "monitor", text: "Alert: payment.duplicate_charge > 0 for 10 minutes. 7 customers affected.", tone: "fail" },
+          { who: "monitor", text: "Alert: payment.duplicate_charge > 0 for 10 minutes. 7 customers affected.", tone: "fail", trace: "tr_e30a17" },
           { who: "triage", text: "Opened BW-311 automatically. Attached: trace IDs, deploy 2026.11.09-3, the agent run that wrote it." },
           { who: "triage", text: "Risk: high (money). Route: fast lane. Load test skipped; break-it limited to payments." },
           { who: "oncall", text: "Acknowledged in 3 minutes. Turned off retry-on-timeout flag as a stopgap.", tone: "warn" },
@@ -537,7 +537,7 @@ export const TICKETS: Ticket[] = [
         sets: { load: "red" },
         log: [
           { who: "deployer", text: "1% of customers: answers good, latency fine. Soak 2 hours.", tone: "pass" },
-          { who: "monitor", text: "10%: p95 climbs to 2.3 s when the model provider's region is busy.", tone: "fail" },
+          { who: "monitor", text: "10%: p95 climbs to 2.3 s when the model provider's region is busy.", tone: "fail", trace: "tr_5b07d4" },
           { who: "deployer", text: "Latency SLO burning 6x too fast. Rolled back automatically in 4 minutes.", tone: "fail" },
           { who: "oncall", text: "No customer saw an error: the old model took over. Back to Build.", tone: "warn" },
         ],

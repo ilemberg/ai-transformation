@@ -100,6 +100,8 @@ export interface LogLine {
   who: ActorId;
   text: string;
   tone?: Tone;
+  /** A request trace on the Observe page that shows this moment. */
+  trace?: string;
 }
 
 export type StepMode = "full" | "light" | "skip";
