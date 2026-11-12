@@ -37,7 +37,7 @@ export const RUN = {
   finished: "10:55:12",
   model: "Medium model",
   budgetUsd: 25,
-  sizeCap: 500,
+  sizeCap: 250,
 };
 
 export const RUN_STEPS: RunStep[] = [
@@ -255,7 +255,7 @@ export const RUN_STEPS: RunStep[] = [
     step: "Loop 4: tests",
     actor: "ci",
     input: "diff.patch, manifest 3e07…",
-    output: "63 of 63 pass. 412 lines, under the 500-line cap",
+    output: "63 of 63 pass. 412 lines: over the 250-line cap for high-risk changes (change-size v3); split into 238 + 174",
     tokens: 0,
     artifacts: ["test-report.json"],
     status: "ok",

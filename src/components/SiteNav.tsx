@@ -9,6 +9,7 @@ const LINKS = [
   { href: "/dashboard", label: "Dashboard", long: "Executive dashboard", icon: DashboardIcon },
   { href: "/runs", label: "Runs", long: "Agent runs", icon: RunsIcon },
   { href: "/observe", label: "Observe", long: "Observe", icon: ObserveIcon },
+  { href: "/harness", label: "Harness", long: "Harness", icon: HarnessIcon },
 ];
 
 function useActive() {
@@ -108,6 +109,15 @@ function BoardIcon() {
       <rect x="1.5" y="2" width="3.5" height="12" rx="1" fill="none" stroke="currentColor" strokeWidth="1.4" />
       <rect x="6.25" y="2" width="3.5" height="8" rx="1" fill="none" stroke="currentColor" strokeWidth="1.4" />
       <rect x="11" y="2" width="3.5" height="10" rx="1" fill="none" stroke="currentColor" strokeWidth="1.4" />
+    </svg>
+  );
+}
+
+function HarnessIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-4 w-4" aria-hidden>
+      <path d="M8 1.5 13.5 4v4c0 3.2-2.3 5.6-5.5 6.5C4.8 13.6 2.5 11.2 2.5 8V4Z" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+      <path d="m5.5 8 1.8 1.8 3.2-3.6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

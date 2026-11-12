@@ -122,6 +122,11 @@ export interface TicketStep {
   mode: StepMode;
   /** Test kinds this step turns red or green when it finishes (a failed eval run, a rollback). */
   sets?: Partial<Record<TestKind, "red" | "green">>;
+  /**
+   * When a suite fails as a whole, how many of its individual checks still
+   * passed (an eval run at 143 of 160 fails the release bar but not every case).
+   */
+  passing?: Partial<Record<TestKind, number>>;
   /** For a skipped or light station: why. */
   reason?: string;
   log: LogLine[];

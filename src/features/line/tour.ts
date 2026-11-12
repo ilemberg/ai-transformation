@@ -50,7 +50,7 @@ export const TOUR: TourStop[] = [
     ticketId: "upgrade",
     cursor: { step: 5, shown: 3 },
     title: "The line stops",
-    body: "BW-158 swaps the model behind the rebooking assistant. Evals fall to 89.4%, under the 92% threshold. The ticket goes back to Build.",
+    body: "BW-158 swaps the model behind the rebooking assistant. Evals fall to 89.4% against the old model's 93.1%, with loyalty answers 9 points worse. The ticket goes back to Build.",
   },
   {
     ticketId: "upgrade",

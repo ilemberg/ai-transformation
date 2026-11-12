@@ -26,6 +26,11 @@ import {
   WORK_TYPES,
   shippedTotal,
   type WorkType,
+  CHECKOUT_CONVERSION,
+  comprehensionAt,
+  DUPLICATE_CHARGE_INCIDENTS,
+  REBOOK_SUCCESS,
+  SUCCESSFUL_BOOKINGS,
 } from "@/features/metrics/delivery";
 import {
   ENGINEERS,
@@ -694,7 +699,7 @@ function RequestToLive({ month }: GadgetBodyProps) {
   const weeks = days / 7;
   return (
     <SeriesStat
-      label="Median, accepted to live"
+      label="Median, accepted to live, incl. backlog wait"
       value={days.toFixed(1)}
       unit="days"
       spec={REQUEST_SPEC}
@@ -727,6 +732,89 @@ function ShippedPerEngineer({ month }: GadgetBodyProps) {
       colorClass="text-speed"
     >
       {shippedTotal(month)} tickets across {ENGINEERS} engineers · baseline {baselineOf(PER_ENGINEER_SPEC.series).toFixed(2)}
+    </SeriesStat>
+  );
+}
+
+// Customer outcomes
+
+const REBOOK_SPEC: SeriesSpec = { series: REBOOK_SUCCESS, lowerIsBetter: false, tolerance: 1, deltaMode: "absolute", deltaUnit: " pts", decimals: 0 };
+const CONVERSION_SPEC: SeriesSpec = {
+  series: CHECKOUT_CONVERSION,
+  lowerIsBetter: false,
+  tolerance: 0.03,
+  deltaMode: "absolute",
+  deltaUnit: " pts",
+  decimals: 2,
+};
+
+function Outcomes({ month }: GadgetBodyProps) {
+  const dup = DUPLICATE_CHARGE_INCIDENTS[month];
+  const dupYear = DUPLICATE_CHARGE_INCIDENTS.slice(Math.max(0, month - 11), month + 1).reduce((a, b) => a + b, 0);
+  const check = comprehensionAt(month);
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      <SeriesStat
+        label="Rebooked within policy, 2 h"
+        value={`${REBOOK_SUCCESS[month]}`}
+        unit="% of cancellations"
+        spec={REBOOK_SPEC}
+        month={month}
+        colorClass="text-quality"
+      />
+      <SeriesStat
+        label="Checkout conversion"
+        value={CHECKOUT_CONVERSION[month].toFixed(2)}
+        unit="%"
+        spec={CONVERSION_SPEC}
+        month={month}
+        colorClass="text-quality"
+      />
+      <div className="flex flex-col gap-1">
+        <div className="text-xs font-medium text-dim">Duplicate-charge incidents</div>
+        <BigNumber value={`${dup}`} unit="this month" />
+        <span className={`text-xs ${dup > 0 ? "text-fail-text" : "text-faint"}`}>
+          {dupYear} in the last 12 months{dup > 0 ? " · see BW-311" : ""}
+        </span>
+      </div>
+      <div className="flex flex-col gap-1">
+        <div className="text-xs font-medium text-dim">Engineers own agent-written code</div>
+        {check ? (
+          <>
+            <BigNumber value={`${check.passed} of ${check.sessions}`} unit={`checks, month ${check.month}`} />
+            <span className="text-xs text-faint">{check.note}</span>
+          </>
+        ) : (
+          <span className="text-xs text-faint">First quarterly check in month 3.</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// AI cost per booking
+
+const COST_PER_BOOKING = ALL_MONTHS.map((m) => monthlySpend(m) / SUCCESSFUL_BOOKINGS[m]);
+const COST_PER_BOOKING_SPEC: SeriesSpec = {
+  series: COST_PER_BOOKING,
+  lowerIsBetter: true,
+  tolerance: 0.005,
+  deltaMode: "absolute",
+  decimals: 3,
+  prefix: "$",
+};
+
+function CostPerBooking({ month }: GadgetBodyProps) {
+  return (
+    <SeriesStat
+      label="AI spend per completed booking"
+      value={`$${COST_PER_BOOKING[month].toFixed(3)}`}
+      spec={COST_PER_BOOKING_SPEC}
+      month={month}
+      colorClass="text-system"
+      compare="peak"
+    >
+      {SUCCESSFUL_BOOKINGS[month].toLocaleString("en-US")} bookings this month
     </SeriesStat>
   );
 }
@@ -1019,6 +1107,8 @@ function Risk({ month }: GadgetBodyProps) {
 
 export const GADGET_BODIES: Record<GadgetId, (props: GadgetBodyProps) => React.ReactNode> = {
   shipped: Shipped,
+  outcomes: Outcomes,
+  costPerBooking: CostPerBooking,
   requestToLive: RequestToLive,
   shippedPerEngineer: ShippedPerEngineer,
   aiBudget: AiBudget,

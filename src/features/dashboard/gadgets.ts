@@ -4,10 +4,12 @@ import type { Layout, Width } from "./layout";
 export const GADGET_IDS = [
   // Getting done
   "shipped",
+  "outcomes",
   "requestToLive",
   "shippedPerEngineer",
   "velocity",
   // Spend
+  "costPerBooking",
   "aiBudget",
   "costPerTicket",
   "spendByTeam",
@@ -63,6 +65,22 @@ export const GADGETS: Record<GadgetId, GadgetInfo> = {
     defaultWidth: 2,
     footnote: "Tickets live for customers, all six teams",
   },
+  outcomes: {
+    id: "outcomes",
+    title: "Customer outcomes",
+    description: "Rebookings that succeed, checkout conversion, duplicate charges, and whether engineers can own agent-written code.",
+    group: "done",
+    defaultWidth: 2,
+    footnote: "Rebooking assistant live from month 9, search speed fix from month 10",
+  },
+  costPerBooking: {
+    id: "costPerBooking",
+    title: "AI cost per booking",
+    description: "Monthly AI spend over completed bookings.",
+    group: "spend",
+    defaultWidth: 1,
+    footnote: "Monthly AI spend ÷ completed bookings",
+  },
   requestToLive: {
     id: "requestToLive",
     title: "Request to live",
@@ -73,10 +91,10 @@ export const GADGETS: Record<GadgetId, GadgetInfo> = {
   shippedPerEngineer: {
     id: "shippedPerEngineer",
     title: "Shipped per engineer",
-    description: "Tickets that reached customers per engineer per month.",
+    description: "Team capacity: tickets that reached customers per engineer per month. Never an individual target.",
     group: "done",
     defaultWidth: 1,
-    footnote: "Shipped tickets ÷ 40 engineers",
+    footnote: "Team capacity, never an individual target · shipped tickets ÷ 40 engineers",
   },
   velocity: {
     id: "velocity",
@@ -230,18 +248,20 @@ export function isGadgetId(id: string): id is GadgetId {
 export const DEFAULT_IDS: readonly GadgetId[] = [
   "shipped",
   "requestToLive",
+  "outcomes",
   "shippedPerEngineer",
   "velocity",
   "costPerTicket",
-  "aiBudget",
   "payrollShare",
-  "tokenSpend",
+  "aiBudget",
   "spendByTeam",
+  "tokenSpend",
   "forecast",
   "risk",
+  "costPerBooking",
 ];
 
 export const DEFAULT_LAYOUT: Layout = DEFAULT_IDS.map((id) => ({ id, width: GADGETS[id].defaultWidth }));
 
-/** v2 holds the executive set; a layout saved under v1 is no longer read. */
-export const STORAGE_KEY = "bookwell.dashboard.layout.v2";
+/** v3 adds customer outcomes; layouts saved under earlier keys are no longer read. */
+export const STORAGE_KEY = "bookwell.dashboard.layout.v3";

@@ -5,7 +5,14 @@ import {
   CAUGHT,
   COHORT_CYCLE,
   containment,
+  CHECKOUT_CONVERSION,
+  codingCycleTime,
+  comprehensionAt,
+  DUPLICATE_CHARGE_INCIDENTS,
+  REBOOK_SUCCESS,
+  SUCCESSFUL_BOOKINGS,
   cycleStages,
+  leadTime,
   ESCAPED_BY_SEVERITY,
   REQUEST_TO_LIVE_DAYS,
   SHIPPED,
@@ -32,11 +39,13 @@ describe("delivery detail", () => {
     for (const s of all) expect(s).toHaveLength(MONTHS);
   });
 
-  it("splits cycle time into stages that add up to it", () => {
+  it("keeps coding cycle time (first commit on) apart from lead time (spec included)", () => {
     for (const m of months) {
       const st = cycleStages(m);
-      const sum = STAGES.reduce((n, k) => n + st[k], 0);
-      expect(sum).toBeCloseTo(cycle[m], 6);
+      const coding = STAGES.filter((k) => k !== "plan").reduce((n, k) => n + st[k], 0);
+      expect(coding).toBeCloseTo(cycle[m], 6);
+      expect(codingCycleTime(m)).toBe(cycle[m]);
+      expect(leadTime(m)).toBeCloseTo(coding + st.plan, 6);
       expect(st.release).toBeGreaterThan(2);
     }
   });
@@ -71,5 +80,20 @@ describe("delivery detail", () => {
   it("stops most problems before customers see them, more so over time", () => {
     expect(containment(12)).toBeGreaterThan(containment(0));
     expect(containment(12)).toBeLessThan(1);
+  });
+
+  it("has customer outcomes that move after the features that should move them", () => {
+    for (const s of [REBOOK_SUCCESS, CHECKOUT_CONVERSION, DUPLICATE_CHARGE_INCIDENTS, SUCCESSFUL_BOOKINGS]) {
+      expect(s).toHaveLength(MONTHS);
+    }
+    expect(REBOOK_SUCCESS[9] - REBOOK_SUCCESS[8]).toBeGreaterThan(4);
+    expect(CHECKOUT_CONVERSION[10]).toBeGreaterThan(CHECKOUT_CONVERSION[9]);
+    expect(DUPLICATE_CHARGE_INCIDENTS[12]).toBe(1);
+  });
+
+  it("reports the latest code-comprehension check, and none before the first", () => {
+    expect(comprehensionAt(2)).toBeNull();
+    expect(comprehensionAt(7)?.month).toBe(6);
+    expect(comprehensionAt(12)).toMatchObject({ passed: 9, sessions: 10 });
   });
 });

@@ -63,7 +63,7 @@ export const METRICS: readonly Metric[] = [
     id: "cycleTime",
     group: "speed",
     kind: "speed",
-    name: "Cycle time (median)",
+    name: "Coding cycle time (median)",
     short: "Cycle time",
     definition: "First commit to running in production, median across merged changes.",
     lowerIsBetter: true,
@@ -568,7 +568,7 @@ export const RULES: readonly Rule[] = [
     id: "review",
     when: "Review latency over one day for two weeks",
     then: "Review is the bottleneck: cap PR size, add AI first-pass review, rebalance reviewers",
-    response: "PR size capped at 400 lines, an AI reviewer took the first pass, and reviewers were shared across teams.",
+    response: "Change-size v3 replaced the flat 500-line cap: 400 lines for standard changes, 250 for high-risk ones. An AI reviewer took the first pass, and reviewers were shared across teams.",
     test: { kind: "above", series: "reviewLatency", threshold: 24 },
   },
   {

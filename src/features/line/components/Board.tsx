@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { assigneeAt, isStepDone, stationOf, testState, type BoardEvent, type Cursor } from "../logic";
+import { assigneeAt, isStepDone, stationOf, testState, testTally, type BoardEvent, type Cursor } from "../logic";
 import { STATIONS, TEST_KINDS } from "../stations";
 import type { Ticket } from "../types";
 import { Avatar, IssueTypeIcon, PriorityIcon } from "./jira";
@@ -102,10 +102,9 @@ function Card({
   // This step is a move backwards: a gate or a rollback sent the ticket back.
   const sentBack = cursor.step > 0 && STATIONS.findIndex((x) => x.id === step.station) < STATIONS.findIndex((x) => x.id === ticket.steps[cursor.step - 1].station);
   const progress = step.log.length ? cursor.shown / step.log.length : 1;
-  const tally = (state: "red" | "green") =>
-    TEST_KINDS.filter((k) => testState(ticket, k.id, cursor) === state).reduce((n, k) => n + (ticket.tests[k.id]?.count ?? 0), 0);
-  const failing = tally("red");
-  const passing = tally("green");
+  const tallies = TEST_KINDS.map((k) => testTally(ticket, k.id, cursor));
+  const failing = tallies.reduce((n, t) => n + t.failing, 0);
+  const passing = tallies.reduce((n, t) => n + t.passing, 0);
 
   return (
     <button

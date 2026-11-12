@@ -88,7 +88,7 @@ export const TICKETS: Ticket[] = [
             text: "Approved amend-request #12: the test was wrong, not the code. Reason recorded; manifest re-locked.",
             tone: "pass",
           },
-          { who: "builder", text: "Loop 4: all 63 code tests green. Diff: 412 lines, under the 500 cap.", tone: "pass" },
+          { who: "builder", text: "Loop 4: all 63 code tests green. Diff 412 lines: over the 250-line cap for high-risk changes (change-size v3). Split into two pull requests, 238 and 174 lines.", tone: "pass" },
           { who: "builder", text: "Opened a pull request labelled agent-written. Sandbox torn down after 38 minutes." },
         ],
         usage: { ktokens: { medium: 5800 }, computeMinutes: 38, wallMinutes: 65, humanMinutes: 6 },
@@ -448,8 +448,11 @@ export const TICKETS: Ticket[] = [
         mode: "light",
         reason: "A model swap gets a short spec: what must not get worse.",
         log: [
-          { who: "planner", text: "Spec: same answers or better on the eval set, p95 latency under 1.2 s, cost per answer not up." },
-          { who: "owner", text: "Signed. Release threshold stays at 92%.", tone: "pass" },
+          {
+            who: "planner",
+            text: "Spec: beat the old model on the same cases, not just the 92% floor. No category more than 2 points worse. Data leak and injection at 100%. A 40-case holdout the prompt is never tuned on. p95 under 1.2 s, cost per answer not up.",
+          },
+          { who: "owner", text: "Signed. A gain under 1 point counts as noise at 160 cases; it must hold on the holdout too.", tone: "pass" },
         ],
         usage: { ktokens: { large: 400 }, computeMinutes: 3, wallMinutes: 20, humanMinutes: 10 },
       },
@@ -459,7 +462,7 @@ export const TICKETS: Ticket[] = [
         log: [
           { who: "tester", text: "Eval set grown to 160 cases: 40 new ones from last month's real conversations." },
           { who: "tester", text: "Latency budget script: p95 under 1.2 s at the storm peak." },
-          { who: "ci", text: "Old model on the new set: 93.1%. That is the bar to beat.", tone: "info" },
+          { who: "ci", text: "Old model on the same 160 cases: 93.1%; on the 40-case holdout: 37 of 40. That is the bar to beat.", tone: "info" },
         ],
         usage: { ktokens: { medium: 900 }, computeMinutes: 20, wallMinutes: 35, humanMinutes: 10 },
       },
@@ -486,12 +489,13 @@ export const TICKETS: Ticket[] = [
         station: "gates",
         mode: "full",
         sets: { evals: "red" },
+        passing: { evals: 143 },
         log: [
           { who: "ci", text: "Lint, types, unit, contract, end-to-end: green.", tone: "pass" },
-          { who: "ci", text: "Evals: 143 of 160 (89.4%). Release threshold 92%.", tone: "fail" },
+          { who: "ci", text: "Evals: 143 of 160 (89.4%) against the old model's 93.1%, and under the 92% floor.", tone: "fail" },
           {
             who: "ci",
-            text: "17 misses: 11 loyalty tiers, 6 non-USD prices, 0 in blocking categories. Under threshold: line stopped. Back to Build.",
+            text: "Loyalty tiers 9 points worse, non-USD prices 4 points worse: both over the 2-point category limit. Blocking categories 100%. Line stopped. Back to Build.",
             tone: "fail",
           },
         ],
@@ -516,8 +520,8 @@ export const TICKETS: Ticket[] = [
         station: "gates",
         mode: "full",
         log: [
-          { who: "ci", text: "Evals: 151 of 160 (94.4%). Threshold 92%. Better than the old model's 93.1%.", tone: "pass" },
-          { who: "ci", text: "Cost per answer down 31%. All other checks green.", tone: "pass" },
+          { who: "ci", text: "Evals: 151 of 160 (94.4%) against 93.1%. Holdout 38 of 40 against 37. No category down more than 1 point.", tone: "pass" },
+          { who: "ci", text: "Blocking categories 100%. p95 1.05 s, cost per answer down 31%. All other checks green.", tone: "pass" },
         ],
         usage: { ktokens: { small: 200, large: 900 }, computeMinutes: 40, wallMinutes: 25, humanMinutes: 0 },
       },

@@ -19,7 +19,7 @@ export const STAGES = ["plan", "build", "review", "gates", "release"] as const;
 export type Stage = (typeof STAGES)[number];
 
 export const STAGE_LABEL: Record<Stage, string> = {
-  plan: "Plan and spec",
+  plan: "Spec, before first commit",
   build: "Build",
   review: "Waiting for review",
   gates: "Pipeline gates",
@@ -27,13 +27,17 @@ export const STAGE_LABEL: Record<Stage, string> = {
 };
 
 /**
- * Hours in each stage. Build shrinks first (agents), review waiting swells in
- * months 4-5 when agent output outran reviewers, then shrinks after smaller
- * changes and a first-pass AI review. Release takes whatever is left, so the
- * stages always add up to the cycle time in data.ts.
+ * Hours in each stage. Two clocks are kept apart:
+ * - coding cycle time (data.ts `cycleTime`) runs from first commit to
+ *   production: build, review, gates and release;
+ * - lead time adds the spec work before the first commit.
+ * Build shrinks first (agents), review waiting swells in months 4-5 when agent
+ * output outran reviewers, then shrinks after smaller changes and a first-pass
+ * AI review. Release takes whatever is left, so build to release always adds
+ * up to the cycle time in data.ts.
  */
 const PLAN = [8, 8, 8, 7.5, 7.5, 7, 7, 6.5, 6.5, 6.5, 6, 6, 6];
-const BUILD = [18, 18, 15, 13, 11, 10.5, 10.5, 10, 9.5, 9.5, 9, 9, 9];
+const BUILD = [26, 26, 23, 20.5, 18.5, 17.5, 17.5, 16.5, 16, 16, 15, 15, 15];
 const REVIEW = [16, 16, 17, 18, 22, 23, 18, 16, 14.5, 13.5, 12.5, 12, 11];
 const GATES = [4, 4, 4, 4.5, 4.5, 4.5, 5, 5, 5, 5, 5, 5, 5];
 
@@ -43,7 +47,17 @@ export function cycleStages(month: number): Record<Stage, number> {
   const build = BUILD[month];
   const review = REVIEW[month];
   const gates = GATES[month];
-  return { plan, build, review, gates, release: Math.max(0, total - plan - build - review - gates) };
+  return { plan, build, review, gates, release: Math.max(0, total - build - review - gates) };
+}
+
+/** Coding cycle time: first commit to production (the cycleTime series). */
+export function codingCycleTime(month: number): number {
+  return series("cycleTime")[month];
+}
+
+/** Lead time: work started (spec begins) to production. */
+export function leadTime(month: number): number {
+  return codingCycleTime(month) + PLAN[month];
 }
 
 // --------------------------------------------------------------------- teams
@@ -184,3 +198,41 @@ export const CHANGES: readonly { month: number; label: string }[] = [
   { month: 7, label: "Model routing by job" },
   { month: 8, label: "Model upgrade held back by evals" },
 ];
+
+// ------------------------------------------------------- customer outcomes
+
+/**
+ * Whether the software got better for travellers, not just faster to ship.
+ * The rebooking assistant (BW-142) reaches everyone in month 9; the search
+ * speed fix (BW-87) in month 10; the double charge (BW-311) is month 12.
+ */
+/** Share of hotel cancellations rebooked within policy within two hours, %. */
+export const REBOOK_SUCCESS = [58, 58, 58, 59, 58, 59, 60, 60, 61, 67, 71, 73, 74];
+
+/** Searches that end in a completed booking, %. */
+export const CHECKOUT_CONVERSION = [3.1, 3.1, 3.12, 3.11, 3.05, 3.04, 3.12, 3.15, 3.17, 3.21, 3.31, 3.36, 3.38];
+
+/** Incidents where a traveller was charged twice. */
+export const DUPLICATE_CHARGE_INCIDENTS = [1, 0, 0, 1, 1, 2, 0, 0, 0, 0, 0, 0, 1];
+
+/** Completed bookings per month, all channels. */
+export const SUCCESSFUL_BOOKINGS = [
+  180_000, 181_000, 183_000, 185_000, 184_000, 186_000, 189_000, 191_000, 193_000, 196_000, 201_000, 205_000, 208_000,
+];
+
+/**
+ * Can engineers explain, change and debug critical agent-written code without
+ * the agent? Each quarter, sampled modules are worked on by an engineer who
+ * did not write them, with no agent help.
+ */
+export const COMPREHENSION_CHECKS: readonly { month: number; passed: number; sessions: number; note: string }[] = [
+  { month: 3, passed: 5, sessions: 8, note: "Search ranking and the rate cache were hard to follow; context files added." },
+  { month: 6, passed: 7, sessions: 10, note: "Two failures in Booking; pairing sessions and module guides written." },
+  { month: 9, passed: 8, sessions: 10, note: "Rebooking assistant prompt handling needed its designer to explain it." },
+  { month: 12, passed: 9, sessions: 10, note: "One failure on the payments retry module; pairing session and docs added." },
+];
+
+/** The latest comprehension check at or before a month, if any. */
+export function comprehensionAt(month: number) {
+  return [...COMPREHENSION_CHECKS].reverse().find((c) => c.month <= month) ?? null;
+}

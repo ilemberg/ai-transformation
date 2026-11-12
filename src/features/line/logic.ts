@@ -169,6 +169,33 @@ export function testState(ticket: Ticket, kind: TestKind, cursor: Cursor): TestS
   return state;
 }
 
+export interface TestTally {
+  state: TestState;
+  /** Individual checks passing and failing at this point. */
+  passing: number;
+  failing: number;
+  /** The suite as a whole is failing a release bar: it blocks, whatever the count. */
+  blocking: boolean;
+}
+
+/** Counts of individual checks, not whole suites: a failed eval run still has the cases that passed. */
+export function testTally(ticket: Ticket, kind: TestKind, cursor: Cursor): TestTally {
+  const state = testState(ticket, kind, cursor);
+  const count = ticket.tests[kind]?.count ?? 0;
+  if (state !== "red") {
+    return { state, passing: state === "green" ? count : 0, failing: 0, blocking: false };
+  }
+  let partial: number | undefined;
+  for (let i = 0; i <= cursor.step; i++) {
+    const step = ticket.steps[i];
+    const done = i < cursor.step || isStepDone(ticket, cursor);
+    if (!done) continue;
+    if (step.sets?.[kind]) partial = step.passing?.[kind];
+  }
+  const passing = Math.min(count, partial ?? 0);
+  return { state, passing, failing: count - passing, blocking: partial !== undefined };
+}
+
 export interface Totals {
   ktokens: Record<Tier, number>;
   aiUsd: number;

@@ -13,6 +13,7 @@ import {
   stationOf,
   stepAt,
   testState,
+  testTally,
   totalsAt,
   totalsFor,
   type BoardEvent,
@@ -62,9 +63,11 @@ export function IssuePanel({
   const tests = TEST_KINDS.map((k) => ({ k, state: testState(ticket, k.id, cursor), t: ticket.tests[k.id] })).filter(
     (r) => r.state !== "na",
   );
-  const count = (s: TestState) => tests.filter((r) => r.state === s).reduce((n, r) => n + (r.t?.count ?? 0), 0);
+  const tallies = tests.map((r) => ({ ...r, tally: testTally(ticket, r.k.id, cursor) }));
   const total = tests.reduce((n, r) => n + (r.t?.count ?? 0), 0);
-  const [green, red] = [count("green"), count("red")];
+  const green = tallies.reduce((n, r) => n + r.tally.passing, 0);
+  const red = tallies.reduce((n, r) => n + r.tally.failing, 0);
+  const blockingSuites = tallies.filter((r) => r.tally.blocking);
 
   const details = (
     <dl className="grid grid-cols-[110px_minmax(0,1fr)] content-start gap-x-3 gap-y-2.5 rounded-md border border-edge p-3 text-sm">
@@ -136,7 +139,10 @@ export function IssuePanel({
         <div className="flex items-baseline justify-between">
           <h3 className="text-sm font-semibold">Tests</h3>
           <span className="text-xs text-faint">
-            {green} of {total} passing
+            {green} of {total} checks passing
+            {blockingSuites.length > 0 && (
+              <span className="ml-2 font-semibold text-fail-text">· {blockingSuites.map((r) => r.k.name).join(", ")} suite blocking</span>
+            )}
           </span>
         </div>
         <div className="flex h-2 overflow-hidden rounded-full bg-neutral-bg" aria-hidden>
@@ -144,8 +150,10 @@ export function IssuePanel({
           <span className="bg-fail transition-[width] duration-500" style={{ width: `${(red / total) * 100}%` }} />
         </div>
         <ul className="grid overflow-hidden rounded-md border border-edge sm:grid-cols-2 [&>li]:border-b [&>li]:border-edge sm:[&>li:nth-child(odd)]:border-r">
-          {tests.map(({ k, state, t }) => {
-            const l = TEST_LOZENGE[state as Exclude<TestState, "na">];
+          {tallies.map(({ k, state, t, tally }) => {
+            const l = tally.blocking
+              ? { tone: "danger" as const, label: "Blocking" }
+              : TEST_LOZENGE[state as Exclude<TestState, "na">];
             return (
               <li
                 key={event?.tests.includes(k.id) ? `${k.id}-${seq}` : k.id}
@@ -154,7 +162,7 @@ export function IssuePanel({
               >
                 <span className="min-w-0 flex-1 truncate">{k.name}</span>
                 <span className="text-xs text-faint">
-                  {t?.count} {t?.unit}
+                  {tally.blocking ? `${tally.passing} of ${t?.count} ${t?.unit}` : `${t?.count} ${t?.unit}`}
                 </span>
                 <span className="w-16 text-right">
                   <Lozenge tone={l.tone}>{l.label}</Lozenge>

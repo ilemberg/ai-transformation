@@ -138,19 +138,21 @@ describe("parseLayout", () => {
 });
 
 describe("the executive default layout", () => {
-  it("is what is getting done, then spend, then one risk gadget", () => {
+  it("is what is getting done and for whom, then spend, then one risk gadget", () => {
     expect(DEFAULT_LAYOUT.map((s) => s.id)).toEqual([
       "shipped",
       "requestToLive",
+      "outcomes",
       "shippedPerEngineer",
       "velocity",
       "costPerTicket",
-      "aiBudget",
       "payrollShare",
-      "tokenSpend",
+      "aiBudget",
       "spendByTeam",
+      "tokenSpend",
       "forecast",
       "risk",
+      "costPerBooking",
     ]);
     const groups = DEFAULT_LAYOUT.map((s) => (isGadgetId(s.id) ? GADGETS[s.id].group : "unknown"));
     expect(groups.filter((g) => g === "risk")).toHaveLength(1);
@@ -176,7 +178,7 @@ describe("the executive default layout", () => {
   });
 
   it("is stored under a new key, so a layout saved before the change does not hide it", () => {
-    expect(STORAGE_KEY).toBe("bookwell.dashboard.layout.v2");
+    expect(STORAGE_KEY).toBe("bookwell.dashboard.layout.v3");
     const v1 = JSON.stringify([{ id: "rules", width: 1 }]);
     // A v2 read of nothing gives the new default.
     expect(parseLayout(null, GADGET_IDS, DEFAULT_LAYOUT)).toEqual(DEFAULT_LAYOUT);

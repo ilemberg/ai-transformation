@@ -14,6 +14,7 @@ import {
   stepAt,
   stepOne,
   testState,
+  testTally,
   tick,
   tierShares,
   totalsAt,
@@ -136,6 +137,17 @@ describe("the ticket that gets stopped", () => {
     const secondGate = route.indexOf("gates", firstGate + 1);
     expect(testState(upgrade, "evals", jumpTo(upgrade, firstGate))).toBe("red");
     expect(testState(upgrade, "evals", jumpTo(upgrade, secondGate))).toBe("green");
+  });
+
+  it("counts the eval cases that passed when the suite fails, and marks the suite blocking", () => {
+    const failedGate = route.indexOf("gates");
+    const t = testTally(upgrade, "evals", jumpTo(upgrade, failedGate));
+    expect(t).toEqual({ state: "red", passing: 143, failing: 17, blocking: true });
+    const total = (Object.keys(upgrade.tests) as (keyof typeof upgrade.tests)[]).reduce(
+      (n, k) => n + testTally(upgrade, k, jumpTo(upgrade, failedGate)).passing,
+      0,
+    );
+    expect(total).toBe(153);
   });
 
   it("turns the load test red when the canary rolls back, and green after the fix", () => {

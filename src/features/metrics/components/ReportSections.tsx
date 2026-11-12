@@ -2,9 +2,15 @@ import { MONTHS, SIGNALS, type Metric } from "../data";
 import {
   CAUGHT,
   CHANGES,
+  CHECKOUT_CONVERSION,
+  comprehensionAt,
+  DUPLICATE_CHARGE_INCIDENTS,
+  REBOOK_SUCCESS,
   COHORT_CYCLE,
   containment,
+  codingCycleTime,
   cycleStages,
+  leadTime,
   ESCAPED_BY_SEVERITY,
   GATE_KINDS,
   GATE_LABEL,
@@ -120,13 +126,22 @@ export function VelocitySection({ month }: { month: number }) {
       <SectionHeading id="velocity-heading" kicker="" title="Velocity: how fast work reaches customers" />
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
         <div className="flex flex-col gap-1">
-          <div className="text-sm font-semibold">Where cycle time goes</div>
+          <div className="text-sm font-semibold">Where the time goes</div>
+          <div className="flex flex-wrap gap-x-4 text-xs text-dim">
+            <span>
+              Lead time, spec started to production: <span className="font-mono font-semibold text-ink">{leadTime(month).toFixed(1)} h</span>
+            </span>
+            <span>
+              Coding cycle time, first commit to production:{" "}
+              <span className="font-mono font-semibold text-ink">{codingCycleTime(month).toFixed(0)} h</span>
+            </span>
+          </div>
           <div className="text-xs text-dim">
-            Median hours from first commit to production, by stage. Biggest stage in month {month}:{" "}
+            Median hours by stage. Biggest stage in month {month}:{" "}
             <span className="font-semibold text-ink">{STAGE_LABEL[biggest].toLowerCase()}</span>.
           </div>
           <StackedBars
-            title="Cycle time by stage, months 0 to 12"
+            title="Lead time by stage, months 0 to 12"
             month={month}
             unit="h"
             segments={STAGES.map((s) => ({
@@ -142,7 +157,7 @@ export function VelocitySection({ month }: { month: number }) {
           <MetricTile id="throughput" month={month} />
           <MetricTile id="deployFreq" month={month} />
           <MetricTile id="reviewLatency" month={month} />
-          <MetricTile id="prSize" month={month} note="Capped from month 6" />
+          <MetricTile id="prSize" month={month} note="change-size v3 from month 6" />
         </div>
       </div>
     </Gadget>
@@ -294,12 +309,73 @@ function CohortChart({ month }: { month: number }) {
   );
 }
 
+function OutcomeTile({
+  label,
+  value,
+  series,
+  month,
+  note,
+}: {
+  label: string;
+  value: string;
+  series?: readonly number[];
+  month: number;
+  note: string;
+}) {
+  return (
+    <div className="flex min-w-0 flex-col gap-1 rounded-md border border-edge bg-card p-3">
+      <div className="text-xs text-dim">{label}</div>
+      <div className="font-mono text-lg font-semibold text-quality">{value}</div>
+      {series && <Sparkline series={series} month={month} label={label} colorClass="text-quality" />}
+      <div className="text-[11px] text-faint">{note}</div>
+    </div>
+  );
+}
+
+/** Did the product get better for travellers, and can engineers still own the code? */
+function OutcomesRow({ month }: { month: number }) {
+  const check = comprehensionAt(month);
+  const dupYear = DUPLICATE_CHARGE_INCIDENTS.slice(Math.max(0, month - 11), month + 1).reduce((a, b) => a + b, 0);
+  return (
+    <div className="mb-5 grid grid-cols-2 gap-2 xl:grid-cols-4">
+      <OutcomeTile
+        label="Rebooked within policy, 2 h"
+        value={`${REBOOK_SUCCESS[month]}%`}
+        series={REBOOK_SUCCESS}
+        month={month}
+        note={`Baseline ${REBOOK_SUCCESS[0]}% · assistant live from month 9`}
+      />
+      <OutcomeTile
+        label="Checkout conversion"
+        value={`${CHECKOUT_CONVERSION[month].toFixed(2)}%`}
+        series={CHECKOUT_CONVERSION}
+        month={month}
+        note={`Baseline ${CHECKOUT_CONVERSION[0].toFixed(2)}% · search fix from month 10`}
+      />
+      <OutcomeTile
+        label="Duplicate-charge incidents"
+        value={`${DUPLICATE_CHARGE_INCIDENTS[month]} this month`}
+        series={DUPLICATE_CHARGE_INCIDENTS}
+        month={month}
+        note={`${dupYear} in the last 12 months`}
+      />
+      <OutcomeTile
+        label="Engineers own agent-written code"
+        value={check ? `${check.passed} of ${check.sessions}` : "—"}
+        month={month}
+        note={check ? `Quarterly check, month ${check.month}: ${check.note}` : "First quarterly check in month 3"}
+      />
+    </div>
+  );
+}
+
 export function ImprovingSection({ month }: { month: number }) {
   const share = metricById("agentShare");
   const changes = CHANGES.filter((c) => c.month <= month);
   return (
     <Gadget>
-      <SectionHeading id="improving-heading" kicker="" title="Improving: against baseline, and against teams not yet changed" />
+      <SectionHeading id="improving-heading" kicker="" title="Improving: for travellers, against baseline, and against teams not yet changed" />
+      <OutcomesRow month={month} />
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[520px] text-sm">

@@ -59,7 +59,7 @@ export const STATIONS: Station[] = [
     whatWeDo:
       "A coding agent works in a throwaway cloud sandbox: a container with the repo, a seeded database and no production secrets. It loops (edit, run the tests, read the failures) until everything is green. A rule rejects any edit to the locked tests and the run records the attempt; if a test really is wrong, the agent files an amendment that a person approves separately.",
     catches: "An agent that passes by weakening the tests.",
-    gate: "Every locked test is green and the change is under the size cap, or it is split.",
+    gate: "Every locked test is green and the change is under the size cap for its risk tier (change-size v3: 400 lines standard, 250 high risk), or it is split.",
     outputs: ["Pull request labelled agent-written", "Run trace", "Sandbox torn down"],
     actors: ["builder"],
     environment: "Cloud sandbox",

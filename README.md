@@ -41,6 +41,11 @@ service and model call, a filterable log of model calls with cost, cache and fal
 with error budget and burn rate, alerts and on-call with an incident timeline, and weekly quality scoring of real AI
 answers. Board activity links straight to the matching trace.
 
+**Harness** is everything that steers the agents, versioned and tested: repository instructions, prompts, skills,
+tools, policies, eval sets and guardrails with owners and change histories; a nightly harness test against
+representative tasks; architecture rules enforced in CI; risk tiers with their size caps and approvals; and the
+scheduled cleanup of stale instructions and code, with a quarterly check that engineers can own agent-written code.
+
 The **Executive dashboard** is the stakeholder view, for any month of the rollout: token spend, velocity, cycle time, deploys, uptime and error budget, delivery health, AI adoption and decision rules. Gadgets can be added, removed, resized and dragged into a new order; the layout is saved in your browser.
 
 Model prices are blended per million tokens (most input served from the prompt cache), in line with late-2026 list
