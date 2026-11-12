@@ -22,7 +22,7 @@ function Select({ label, value, options, onChange }: { label: string; value: str
   const id = useId();
   return (
     <div className="flex min-w-0 flex-col gap-1">
-      <label htmlFor={id} className="truncate text-[11px] font-semibold text-dim sm:text-xs">
+      <label htmlFor={id} className="truncate text-2xs font-semibold text-dim sm:text-xs">
         {label}
       </label>
       <select

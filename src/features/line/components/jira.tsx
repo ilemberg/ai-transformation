@@ -95,7 +95,7 @@ const LOZENGE: Record<LozengeTone, string> = {
 /** The small uppercase status pill. */
 export function Lozenge({ tone, children }: { tone: LozengeTone; children: React.ReactNode }) {
   return (
-    <span className={`inline-flex h-4 items-center whitespace-nowrap rounded-[3px] px-1 text-[11px] font-bold uppercase leading-none ${LOZENGE[tone]}`}>
+    <span className={`inline-flex h-4 items-center whitespace-nowrap rounded-[3px] px-1 text-2xs font-bold uppercase leading-none ${LOZENGE[tone]}`}>
       {children}
     </span>
   );

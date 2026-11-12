@@ -17,35 +17,60 @@ function useActive() {
   return (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
 }
 
-/** The top bar of a project-tracker app. On a phone it also carries the page links. */
+/**
+ * The top bar of a project-tracker app. On phones and tablets it only says
+ * the product and the project; the page links are in the tab bar at the bottom.
+ */
 export function TopBar() {
-  const isActive = useActive();
   return (
-    <header className="sticky top-0 z-30 flex h-12 items-center gap-3 border-b border-edge bg-panel px-3">
-      <span aria-hidden className="hidden h-8 w-8 grid-cols-3 place-content-center sm:grid gap-[3px] rounded p-2 text-faint">
+    <header className="sticky top-0 z-30 flex h-12 items-center gap-3 border-b border-edge bg-panel px-4 sm:px-3">
+      <span aria-hidden className="hidden h-8 w-8 grid-cols-3 place-content-center gap-[3px] rounded p-2 text-faint lg:grid">
         {Array.from({ length: 9 }).map((_, i) => (
           <span key={i} className="h-[3px] w-[3px] rounded-full bg-current" />
         ))}
       </span>
       <Link href="/" className="flex items-center gap-2 font-semibold text-ink">
         <Logo />
-        <span className="hidden text-base tracking-tight sm:inline">
+        <span className="text-base tracking-tight">
           adevs<span className="text-brand">world</span>
         </span>
       </Link>
-      <nav className="ml-1 flex min-w-0 gap-0.5 overflow-x-auto lg:hidden">
-        {LINKS.map((l) => (
+      <span className="ml-auto flex items-center gap-2 text-sm text-dim lg:hidden">
+        <span aria-hidden className="grid h-6 w-6 place-items-center rounded bg-purple text-[10px] font-bold text-white">BW</span>
+        Bookwell
+      </span>
+    </header>
+  );
+}
+
+/**
+ * The page links on phones and tablets: a tab bar within reach of a thumb,
+ * every destination visible at once with an icon and a label.
+ */
+export function TabBar() {
+  const isActive = useActive();
+  return (
+    <nav
+      aria-label="Pages"
+      className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-6 border-t border-edge bg-panel pb-[env(safe-area-inset-bottom)] lg:hidden"
+    >
+      {LINKS.map((l) => {
+        const active = isActive(l.href);
+        const Icon = l.icon;
+        return (
           <Link
             key={l.href}
             href={l.href}
-            aria-current={isActive(l.href) ? "page" : undefined}
-            className={`shrink-0 whitespace-nowrap rounded px-1.5 py-1 text-sm font-medium ${isActive(l.href) ? "bg-selected text-brand" : "text-dim hover:bg-hover"}`}
+            aria-current={active ? "page" : undefined}
+            className={`relative flex h-14 min-w-0 flex-col items-center justify-center gap-1 ${active ? "font-semibold text-brand" : "text-dim"}`}
           >
-            {l.label}
+            {active && <span aria-hidden className="absolute top-0 h-[3px] w-8 rounded-b bg-brand" />}
+            <Icon className="h-5 w-5" />
+            <span className="max-w-full truncate px-0.5 text-[11px] leading-none">{l.label}</span>
           </Link>
-        ))}
-      </nav>
-    </header>
+        );
+      })}
+    </nav>
   );
 }
 
@@ -64,7 +89,7 @@ export function Sidebar() {
           <div className="text-xs text-faint">Travel booking · 6 teams</div>
         </div>
       </div>
-      <div className="hidden px-2 pb-1 text-[11px] font-bold uppercase text-faint 2xl:block">Planning</div>
+      <div className="hidden px-2 pb-1 text-2xs font-bold uppercase text-faint 2xl:block">Planning</div>
       {LINKS.map((l) => {
         const active = isActive(l.href);
         const Icon = l.icon;
@@ -103,9 +128,9 @@ export function Logo({ className = "h-7 w-7" }: { className?: string }) {
   );
 }
 
-function BoardIcon() {
+function BoardIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 16 16" className="h-4 w-4" aria-hidden>
+    <svg viewBox="0 0 16 16" className={className} aria-hidden>
       <rect x="1.5" y="2" width="3.5" height="12" rx="1" fill="none" stroke="currentColor" strokeWidth="1.4" />
       <rect x="6.25" y="2" width="3.5" height="8" rx="1" fill="none" stroke="currentColor" strokeWidth="1.4" />
       <rect x="11" y="2" width="3.5" height="10" rx="1" fill="none" stroke="currentColor" strokeWidth="1.4" />
@@ -113,26 +138,26 @@ function BoardIcon() {
   );
 }
 
-function HarnessIcon() {
+function HarnessIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 16 16" className="h-4 w-4" aria-hidden>
+    <svg viewBox="0 0 16 16" className={className} aria-hidden>
       <path d="M8 1.5 13.5 4v4c0 3.2-2.3 5.6-5.5 6.5C4.8 13.6 2.5 11.2 2.5 8V4Z" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
       <path d="m5.5 8 1.8 1.8 3.2-3.6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
-function ObserveIcon() {
+function ObserveIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 16 16" className="h-4 w-4" aria-hidden>
+    <svg viewBox="0 0 16 16" className={className} aria-hidden>
       <path d="M1 9h3l2-5 3 9 2-6 1 2h3" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
-function RunsIcon() {
+function RunsIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 16 16" className="h-4 w-4" aria-hidden>
+    <svg viewBox="0 0 16 16" className={className} aria-hidden>
       <path d="M2 4h8M2 8h12M2 12h6" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
       <circle cx="13" cy="4" r="1.6" fill="currentColor" />
       <circle cx="11" cy="12" r="1.6" fill="currentColor" />
@@ -140,9 +165,9 @@ function RunsIcon() {
   );
 }
 
-function DashboardIcon() {
+function DashboardIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 16 16" className="h-4 w-4" aria-hidden>
+    <svg viewBox="0 0 16 16" className={className} aria-hidden>
       <rect x="1.5" y="1.5" width="5.5" height="7" rx="1" fill="none" stroke="currentColor" strokeWidth="1.4" />
       <rect x="9" y="1.5" width="5.5" height="4" rx="1" fill="none" stroke="currentColor" strokeWidth="1.4" />
       <rect x="1.5" y="10.5" width="5.5" height="4" rx="1" fill="none" stroke="currentColor" strokeWidth="1.4" />
@@ -151,9 +176,9 @@ function DashboardIcon() {
   );
 }
 
-function ReportsIcon() {
+function ReportsIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 16 16" className="h-4 w-4" aria-hidden>
+    <svg viewBox="0 0 16 16" className={className} aria-hidden>
       <path d="M2 14h12M4 11V7m4 4V3m4 8V6" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
   );

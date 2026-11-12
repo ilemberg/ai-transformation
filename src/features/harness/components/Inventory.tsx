@@ -24,7 +24,7 @@ function KindLozenge({ kind }: { kind: HarnessKind }) {
 function Name({ item }: { item: HarnessItem }) {
   return (
     <>
-      <span className="font-mono text-[13px]">{item.name}</span>
+      <span className="font-mono text-[0.929rem]">{item.name}</span>
       {item.note && <span className="ml-1.5 text-xs text-faint">{item.note}</span>}
     </>
   );

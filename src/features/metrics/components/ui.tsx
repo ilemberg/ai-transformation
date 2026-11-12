@@ -20,7 +20,7 @@ export function KindTag({ kind }: { kind: MetricKind }) {
     other: "bg-neutral-bg text-dim",
   };
   return (
-    <span className={`inline-flex h-4 items-center rounded-[3px] px-1 text-[11px] font-bold uppercase leading-none ${styles[kind]}`}>
+    <span className={`inline-flex h-4 items-center rounded-[3px] px-1 text-2xs font-bold uppercase leading-none ${styles[kind]}`}>
       {KIND_LABEL[kind]}
     </span>
   );
@@ -36,7 +36,7 @@ export function VerdictChip({ verdict }: { verdict: Verdict }) {
   const s = VERDICT_STYLE[verdict];
   return (
     <span
-      className={`inline-flex h-5 items-center gap-1 rounded-[3px] px-1.5 text-[11px] font-bold uppercase leading-none motion-safe:transition-colors ${s.cls}`}
+      className={`inline-flex h-5 items-center gap-1 rounded-[3px] px-1.5 text-2xs font-bold uppercase leading-none motion-safe:transition-colors ${s.cls}`}
     >
       <span aria-hidden className="font-mono">
         {s.icon}
@@ -60,7 +60,7 @@ export function DeltaText({ delta, text, className = "" }: { delta: Delta; text:
           : "within noise";
   return (
     <span className={`inline-flex items-baseline gap-1 font-mono text-xs ${tone} ${className}`}>
-      <span aria-hidden className="text-[9px]">
+      <span aria-hidden className="text-4xs">
         {arrow}
       </span>
       <span>{text}</span>

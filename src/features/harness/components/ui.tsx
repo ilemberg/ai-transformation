@@ -4,7 +4,7 @@ import { ticketHref, type TicketKey } from "../data";
 
 export function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
-    <section id={id} aria-labelledby={`${id}-h`} className="mt-6 scroll-mt-20 rounded-md border border-edge bg-panel p-4 shadow-card sm:p-5">
+    <section id={id} aria-labelledby={`${id}-h`} className="mt-4 scroll-mt-28 md:mt-6 md:scroll-mt-20 md:rounded-md md:border md:border-edge md:bg-panel md:p-5 md:shadow-card">
       <h2 id={`${id}-h`} className="text-lg font-semibold">
         {title}
       </h2>

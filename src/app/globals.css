@@ -94,6 +94,14 @@
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 
+  /* Sizes below text-xs, in rem so they grow with the phone's larger base size. */
+  --text-2xs: 0.786rem;
+  --text-2xs--line-height: 1.35;
+  --text-3xs: 0.714rem;
+  --text-3xs--line-height: 1.3;
+  --text-4xs: 0.643rem;
+  --text-4xs--line-height: 1.2;
+
   --color-bg: var(--j-bg);
   --color-panel: var(--j-panel);
   --color-panel-2: var(--j-panel-2);
@@ -144,7 +152,15 @@
 html {
   background: var(--j-bg);
   color: var(--j-ink);
-  font-size: 14px;
+  /* Phones read at arm's length: a 16px base there, the denser 14px from tablets up. */
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (min-width: 640px) {
+  html {
+    font-size: 14px;
+  }
 }
 
 body {

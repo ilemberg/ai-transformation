@@ -72,7 +72,7 @@ const LOZENGE: Record<Tone, string> = {
 export function Lozenge({ tone, children }: { tone: Tone; children: React.ReactNode }) {
   return (
     <span
-      className={`inline-flex h-4 shrink-0 items-center whitespace-nowrap rounded-[3px] px-1 text-[11px] font-bold uppercase leading-none ${LOZENGE[tone]}`}
+      className={`inline-flex h-4 shrink-0 items-center whitespace-nowrap rounded-[3px] px-1 text-2xs font-bold uppercase leading-none ${LOZENGE[tone]}`}
     >
       {children}
     </span>
@@ -195,7 +195,7 @@ function TokenSpend({ month }: GadgetBodyProps) {
             </div>
           ))}
         </div>
-        <div aria-hidden className="mt-1 flex gap-1 text-center text-[10px] tabular-nums text-faint">
+        <div aria-hidden className="mt-1 flex gap-1 text-center text-3xs tabular-nums text-faint">
           {spends.map((s) => (
             <span key={s.month} className={`flex-1 ${s.month === month ? "font-bold text-ink" : ""}`}>
               {s.month}
@@ -540,7 +540,7 @@ function PeakDelta({ series, month }: { series: readonly number[]; month: number
   if (p.atPeak) {
     return (
       <span className="inline-flex items-baseline gap-1 font-mono text-xs text-dim">
-        <span aria-hidden className="text-[9px]">
+        <span aria-hidden className="text-4xs">
           ■
         </span>
         <span className="font-sans">highest month so far</span>
@@ -550,7 +550,7 @@ function PeakDelta({ series, month }: { series: readonly number[]; month: number
   return (
     <span className="flex flex-wrap items-baseline gap-x-1">
       <span className="inline-flex items-baseline gap-1 font-mono text-xs text-pass">
-        <span aria-hidden className="text-[9px]">
+        <span aria-hidden className="text-4xs">
           ▼
         </span>
         <span>−{Math.abs(p.relative).toFixed(0)}%</span>
@@ -601,7 +601,7 @@ function SeriesStat({
 /** Month numbers under a bar chart, the selected one in bold. */
 function MonthAxis({ month }: { month: number }) {
   return (
-    <div aria-hidden className="mt-1 flex gap-1 text-center text-[10px] tabular-nums text-faint">
+    <div aria-hidden className="mt-1 flex gap-1 text-center text-3xs tabular-nums text-faint">
       {ALL_MONTHS.map((m) => (
         <span key={m} className={`flex-1 ${m === month ? "font-bold text-ink" : ""}`}>
           {m}

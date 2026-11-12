@@ -126,14 +126,14 @@ export function CostSection({ month }: { month: number }) {
               {formatValue(spend, spendNow)}
             </span>
           </div>
-          <div className="mt-2 flex font-mono text-[10px] text-faint" aria-hidden>
+          <div className="mt-2 flex font-mono text-3xs text-faint" aria-hidden>
             {TIER_SHARES.map((_, i) => (
               <span key={i} className={`flex-1 text-center ${i === month ? "font-semibold text-ink" : ""}`}>
                 {i}
               </span>
             ))}
           </div>
-          <p className="mt-1 text-center text-[11px] text-faint">Month</p>
+          <p className="mt-1 text-center text-2xs text-faint">Month</p>
         </figure>
 
         <div className="flex flex-col gap-4">

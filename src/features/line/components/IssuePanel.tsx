@@ -212,7 +212,7 @@ function StatusMenu({
         }`}
       >
         {finished ? "Done" : STATIONS[current].name}
-        <span aria-hidden className="text-[10px]">▼</span>
+        <span aria-hidden className="text-3xs">▼</span>
       </button>
       {open && (
         <ul role="listbox" className="absolute left-0 top-9 z-20 w-56 rounded-[3px] bg-card py-1 shadow-raised">

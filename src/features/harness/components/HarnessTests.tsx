@@ -23,7 +23,7 @@ function Trend() {
     <figure>
       <SubHeading>Pass rate, last 14 nights</SubHeading>
       <div className="flex gap-2">
-        <div className="flex h-24 flex-col justify-between text-right text-[11px] text-faint tabular-nums" aria-hidden>
+        <div className="flex h-24 flex-col justify-between text-right text-2xs text-faint tabular-nums" aria-hidden>
           <span>100%</span>
           <span>{FLOOR}%</span>
         </div>
@@ -42,7 +42,7 @@ function Trend() {
           })}
         </ol>
       </div>
-      <figcaption className="mt-1 flex justify-between pl-10 text-[11px] text-faint">
+      <figcaption className="mt-1 flex justify-between pl-10 text-2xs text-faint">
         <span>{formatDate(NIGHTS[0]!.date, true)}</span>
         <span>Average {avg}%</span>
         <span>{formatDate(NIGHTS.at(-1)!.date, true)}</span>

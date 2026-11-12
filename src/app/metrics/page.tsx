@@ -11,10 +11,10 @@ export const metadata: Metadata = {
 export default function MetricsPage() {
   return (
     <main className="bg-panel-2 px-4 pb-10 pt-4 sm:px-6">
-      <nav aria-label="Breadcrumb" className="text-sm text-dim">
+      <nav aria-label="Breadcrumb" className="hidden text-sm text-dim sm:block">
         Projects <span className="text-faint">/</span> Bookwell <span className="text-faint">/</span> Reports
       </nav>
-      <h1 className="mt-3 text-2xl font-medium">Engineering reports</h1>
+      <h1 className="text-2xl font-medium sm:mt-3">Engineering reports</h1>
       <p className="mb-4 mt-1 text-sm text-dim">
         For engineering leads: velocity, quality, and whether the rollout is what is improving them.
       </p>

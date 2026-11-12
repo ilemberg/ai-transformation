@@ -70,7 +70,7 @@ export function Quality() {
             <circle key={i} cx={i * colW + colW / 2} cy={y(r)} r="3.5" className="fill-pass stroke-card" strokeWidth="1.5" />
           ))}
         </svg>
-        <ol className="mt-1 grid text-center text-[11px] tabular-nums" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }} aria-label="Weeks">
+        <ol className="mt-1 grid text-center text-2xs tabular-nums" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }} aria-label="Weeks">
           {QUALITY_WEEKS.map((w, i) => (
             <li key={w.week} className={w.week === DRIFT_WEEK ? "font-semibold text-purple" : "text-dim"}>
               <span className="block">{w.week}</span>

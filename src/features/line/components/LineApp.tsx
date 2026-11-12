@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   describeChange,
   isFinished,
@@ -172,25 +172,28 @@ export function LineApp({ initialTicketId, initialStep }: { initialTicketId: str
     return () => window.removeEventListener("keydown", onKey);
   }, [stepBy]);
 
+  const detailsRef = useRef<HTMLElement>(null);
+  const openDetails = useCallback(() => detailsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), []);
+
   const station = STATIONS[stationOf(ticket, cursor)];
   const stop = TOUR[tourIndex];
 
   return (
-    <main className="flex flex-col gap-3 px-4 pb-24 pt-4 sm:px-6">
-      <nav aria-label="Breadcrumb" className="text-sm text-dim">
+    <main className="flex flex-col gap-3 px-4 pb-10 pt-4 sm:px-6 sm:pb-24">
+      <nav aria-label="Breadcrumb" className="hidden text-sm text-dim sm:block">
         Projects <span className="text-faint">/</span> Bookwell
       </nav>
       <div className="flex flex-wrap items-end gap-3">
         <div className="w-full min-w-0 sm:w-auto sm:flex-1">
           <h1 className="text-2xl font-medium text-ink">Delivery board</h1>
-          <p className="mt-0.5 max-w-3xl text-sm text-dim">
+          <p className="mt-0.5 hidden max-w-3xl text-sm leading-snug text-dim sm:block">
             Agents write the code. Tests written first, a second model, and gates nobody can talk past decide what ships.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
           {mode === "run" && (
             <>
-              <label className="flex cursor-pointer items-center gap-2 text-sm text-dim">
+              <label className="flex h-10 flex-1 cursor-pointer items-center gap-2 text-sm text-dim sm:h-auto sm:flex-none">
                 <span
                   role="switch"
                   aria-checked={follow}
@@ -202,7 +205,7 @@ export function LineApp({ initialTicketId, initialStep }: { initialTicketId: str
                       setFollow((f) => !f);
                     }
                   }}
-                  className={`relative inline-block h-4 w-8 rounded-full transition-colors ${follow ? "bg-pass" : "bg-edge-2"}`}
+                  className={`relative inline-block h-4 w-8 shrink-0 rounded-full transition-colors ${follow ? "bg-pass" : "bg-edge-2"}`}
                 >
                   <span
                     className={`absolute top-0.5 h-3 w-3 rounded-full bg-white transition-[left] ${follow ? "left-[18px]" : "left-0.5"}`}
@@ -217,7 +220,7 @@ export function LineApp({ initialTicketId, initialStep }: { initialTicketId: str
                     type="button"
                     onClick={() => setSpeed(s)}
                     aria-pressed={speed === s}
-                    className={`h-7 rounded-[3px] px-2 text-xs font-medium ${speed === s ? "bg-card text-brand shadow-card" : "text-dim"}`}
+                    className={`h-9 rounded-[3px] px-3 text-sm font-medium sm:h-7 sm:px-2 sm:text-xs ${speed === s ? "bg-card text-brand shadow-card" : "text-dim"}`}
                   >
                     {s}×
                   </button>
@@ -229,7 +232,7 @@ export function LineApp({ initialTicketId, initialStep }: { initialTicketId: str
             <button
               type="button"
               onClick={startTour}
-              className="h-8 rounded-[3px] bg-neutral-bg px-3 text-sm font-medium text-ink hover:bg-hover"
+              className="h-10 flex-1 rounded-[3px] bg-neutral-bg px-3 text-sm font-medium text-ink hover:bg-hover sm:h-8 sm:flex-none"
             >
               Take the tour
             </button>
@@ -237,7 +240,7 @@ export function LineApp({ initialTicketId, initialStep }: { initialTicketId: str
           <button
             type="button"
             onClick={runAll}
-            className={`h-8 min-w-28 rounded-[3px] px-3 text-sm font-medium ${
+            className={`h-10 min-w-28 flex-1 rounded-[3px] px-3 text-sm font-medium sm:h-8 sm:flex-none ${
               mode === "tour" ? "bg-neutral-bg text-ink hover:bg-hover" : "bg-brand text-white hover:bg-brand-hover"
             }`}
           >
@@ -261,7 +264,7 @@ export function LineApp({ initialTicketId, initialStep }: { initialTicketId: str
       )}
 
       <Board tickets={TICKETS} cursors={cursors} selectedId={ticket.id} onSelect={select} event={event} />
-      <PhoneBoard tickets={TICKETS} cursors={cursors} selectedId={ticket.id} onSelect={select} event={event} />
+      <PhoneBoard tickets={TICKETS} cursors={cursors} selectedId={ticket.id} onSelect={select} onOpen={openDetails} event={event} />
 
       <p key={station.id} className="flash rounded-[3px] border-l-4 border-brand bg-panel-2 px-3 py-2 text-sm text-ink">
         <span className="font-semibold">
@@ -270,7 +273,7 @@ export function LineApp({ initialTicketId, initialStep }: { initialTicketId: str
         <span className="text-dim">{station.brief}</span>
       </p>
 
-      <section aria-label="Ticket details" className="overflow-hidden rounded-md border-2 border-brand shadow-raised">
+      <section ref={detailsRef} aria-label="Ticket details" className="scroll-mt-14 overflow-hidden rounded-md border-2 border-brand shadow-raised">
         <header className="flex flex-wrap items-center gap-x-3 gap-y-2 bg-selected px-4 py-2.5">
           <h2 className="text-xs font-bold uppercase tracking-wide text-brand">Ticket details</h2>
           <div className="flex flex-wrap gap-1" role="tablist" aria-label="Ticket">
@@ -281,7 +284,7 @@ export function LineApp({ initialTicketId, initialStep }: { initialTicketId: str
                 role="tab"
                 aria-selected={t.id === ticket.id}
                 onClick={() => select(t.id)}
-                className={`flex h-7 items-center gap-1.5 rounded-[3px] px-2 text-xs font-semibold ${
+                className={`flex h-9 items-center gap-1.5 rounded-[3px] px-2 text-xs font-semibold sm:h-7 ${
                   t.id === ticket.id ? "bg-brand text-white" : "bg-card text-dim shadow-card hover:text-ink"
                 }`}
               >
@@ -336,31 +339,32 @@ function TourCallout({
         <div className="font-semibold text-ink">{title}</div>
         <p className="text-sm text-dim">{body}</p>
       </div>
-      <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
+      <div className="flex shrink-0 flex-col gap-2 sm:items-end">
         <div className="flex gap-1" aria-hidden>
           {TOUR.map((_, i) => (
-            <span key={i} className={`h-1.5 w-4 rounded-full ${i <= index ? "bg-purple" : "bg-edge"}`} />
+            <span key={i} className={`h-1.5 flex-1 rounded-full sm:w-4 sm:flex-none ${i <= index ? "bg-purple" : "bg-edge"}`} />
           ))}
         </div>
         <div className="flex gap-1.5">
-          <button type="button" onClick={onExit} className="h-8 rounded-[3px] px-2 text-sm text-dim hover:bg-hover">
-            Exit tour
+          <button type="button" onClick={onExit} className="h-10 rounded-[3px] px-2 text-sm text-dim hover:bg-hover sm:h-8">
+            Exit
+            <span className="hidden sm:inline"> tour</span>
           </button>
           <button
             type="button"
             onClick={onBack}
             disabled={index === 0}
-            className="h-8 rounded-[3px] bg-card px-3 text-sm text-ink shadow-card disabled:opacity-40"
+            className="h-10 flex-1 rounded-[3px] bg-card px-3 text-sm text-ink shadow-card disabled:opacity-40 sm:h-8 sm:flex-none"
           >
             Back
           </button>
-          <button type="button" onClick={onToggle} className="h-8 rounded-[3px] bg-card px-3 text-sm text-ink shadow-card">
+          <button type="button" onClick={onToggle} className="h-10 flex-1 rounded-[3px] bg-card px-3 text-sm text-ink shadow-card sm:h-8 sm:flex-none">
             {playing ? "Pause" : "Play"}
           </button>
           <button
             type="button"
             onClick={onNext}
-            className="h-8 rounded-[3px] bg-purple px-3 text-sm font-medium text-white hover:opacity-90"
+            className="h-10 flex-[2] rounded-[3px] bg-purple px-3 text-sm font-medium text-white hover:opacity-90 sm:h-8 sm:flex-none"
           >
             {last ? "Finish" : "Next"}
           </button>
@@ -379,7 +383,7 @@ function Flag({ event }: { event: BoardEvent }) {
     <div
       key={event.seq}
       role="status"
-      className="flag-in fixed bottom-4 left-4 right-4 z-40 flex max-w-md gap-3 rounded-[3px] bg-card p-3 shadow-raised sm:right-auto lg:left-20 2xl:left-64"
+      className="flag-in fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-4 right-4 z-40 flex max-w-md lg:bottom-4 gap-3 rounded-[3px] bg-card p-3 shadow-raised sm:right-auto lg:left-20 2xl:left-64"
     >
       <Avatar id={who} size={28} />
       <div className="min-w-0 text-sm">

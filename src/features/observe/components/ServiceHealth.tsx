@@ -98,7 +98,7 @@ function JourneyChart({ journey, day, seed }: { journey: Journey; day: DayId; se
           );
         })}
       </svg>
-      <div className="mt-1 flex justify-between text-[11px] tabular-nums text-faint" aria-hidden>
+      <div className="mt-1 flex justify-between text-2xs tabular-nums text-faint" aria-hidden>
         <span>00:00</span>
         <span>06:00</span>
         <span>12:00</span>

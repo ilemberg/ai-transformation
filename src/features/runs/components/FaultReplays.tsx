@@ -88,34 +88,55 @@ function FaultCard({ fault }: { fault: FaultCase }) {
 
 function AttemptTable() {
   return (
-    <div className="mb-3 mt-2 overflow-x-auto rounded-[3px] border border-edge" tabIndex={0} role="region" aria-label="Attempts recorded for the timed-out call, scrolls sideways">
-      <table className="w-full min-w-[420px] text-left text-xs">
-        <caption className="sr-only">Each attempt with provider, outcome, latency, tokens and cost.</caption>
-        <thead className="bg-panel-2 text-dim">
-          <tr>
-            <th scope="col" className="px-2 py-1">#</th>
-            <th scope="col" className="px-2 py-1">Provider</th>
-            <th scope="col" className="px-2 py-1">Outcome</th>
-            <th scope="col" className="px-2 py-1 text-right">Latency</th>
-            <th scope="col" className="px-2 py-1 text-right">Tokens in / out</th>
-            <th scope="col" className="px-2 py-1 text-right">Cost</th>
-          </tr>
-        </thead>
-        <tbody>
-          {RETRY_ATTEMPTS.map((a) => (
-            <tr key={a.attempt} className="border-t border-edge">
-              <td className="px-2 py-1">{a.attempt}</td>
-              <td className="px-2 py-1 capitalize">{a.provider}</td>
-              <td className={`px-2 py-1 ${a.outcome === "ok" ? "text-pass-text" : "text-fail-text"}`}>{a.outcome === "ok" ? "Answered" : "Timed out"}</td>
-              <td className="px-2 py-1 text-right tabular-nums">{a.latencyS} s</td>
-              <td className="px-2 py-1 text-right tabular-nums">
-                {a.inputTokens / 1000}k / {a.outputTokens ? `${(a.outputTokens / 1000).toFixed(1)}k` : "0"}
-              </td>
-              <td className="px-2 py-1 text-right tabular-nums">{formatUsd(costUsd(a.inputTokens + a.outputTokens, MEDIUM_USD_PER_M))}</td>
+    <>
+      {/* On a phone the six columns become one short line per attempt. */}
+      <ol className="mb-3 mt-2 divide-y divide-edge rounded-[3px] border border-edge text-sm sm:hidden" aria-label="Attempts recorded for the timed-out call">
+        {RETRY_ATTEMPTS.map((a) => (
+          <li key={a.attempt} className="px-3 py-2">
+            <div className="flex items-baseline justify-between gap-2">
+              <span className="font-medium capitalize">
+                {a.attempt}. {a.provider}
+              </span>
+              <span className={a.outcome === "ok" ? "text-pass-text" : "text-fail-text"}>
+                {a.outcome === "ok" ? "Answered" : "Timed out"} · <span className="tabular-nums">{a.latencyS} s</span>
+              </span>
+            </div>
+            <div className="text-xs tabular-nums text-dim">
+              {a.inputTokens / 1000}k in / {a.outputTokens ? `${(a.outputTokens / 1000).toFixed(1)}k` : "0"} out ·{" "}
+              {formatUsd(costUsd(a.inputTokens + a.outputTokens, MEDIUM_USD_PER_M))}
+            </div>
+          </li>
+        ))}
+      </ol>
+      <div className="mb-3 mt-2 hidden overflow-x-auto rounded-[3px] border border-edge sm:block" tabIndex={0} role="region" aria-label="Attempts recorded for the timed-out call, scrolls sideways">
+        <table className="w-full min-w-[420px] text-left text-xs">
+          <caption className="sr-only">Each attempt with provider, outcome, latency, tokens and cost.</caption>
+          <thead className="bg-panel-2 text-dim">
+            <tr>
+              <th scope="col" className="px-2 py-1">#</th>
+              <th scope="col" className="px-2 py-1">Provider</th>
+              <th scope="col" className="px-2 py-1">Outcome</th>
+              <th scope="col" className="px-2 py-1 text-right">Latency</th>
+              <th scope="col" className="px-2 py-1 text-right">Tokens in / out</th>
+              <th scope="col" className="px-2 py-1 text-right">Cost</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {RETRY_ATTEMPTS.map((a) => (
+              <tr key={a.attempt} className="border-t border-edge">
+                <td className="px-2 py-1">{a.attempt}</td>
+                <td className="px-2 py-1 capitalize">{a.provider}</td>
+                <td className={`px-2 py-1 ${a.outcome === "ok" ? "text-pass-text" : "text-fail-text"}`}>{a.outcome === "ok" ? "Answered" : "Timed out"}</td>
+                <td className="px-2 py-1 text-right tabular-nums">{a.latencyS} s</td>
+                <td className="px-2 py-1 text-right tabular-nums">
+                  {a.inputTokens / 1000}k / {a.outputTokens ? `${(a.outputTokens / 1000).toFixed(1)}k` : "0"}
+                </td>
+                <td className="px-2 py-1 text-right tabular-nums">{formatUsd(costUsd(a.inputTokens + a.outputTokens, MEDIUM_USD_PER_M))}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }

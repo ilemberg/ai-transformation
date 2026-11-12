@@ -41,7 +41,7 @@ export function RunRecord() {
           <span className="font-mono text-sm font-semibold">{RUN.id}</span>
           <span className="inline-flex min-w-0 items-center gap-1.5 text-sm">
             <IssueTypeIcon kind={ticket.kind} />
-            <span className="font-medium text-brand">{ticket.key}</span>
+            <span className="whitespace-nowrap font-medium text-brand">{ticket.key}</span>
             <span className="truncate text-dim">{ticket.title}</span>
           </span>
           <span className="ml-auto">

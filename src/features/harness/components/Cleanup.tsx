@@ -16,7 +16,7 @@ function WeeklySweep() {
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <span className="text-xs tabular-nums text-dim">{formatDate(s.date)}</span>
               <Lozenge tone={ACTION_TONE[s.action]}>{s.action}</Lozenge>
-              <span className="font-mono text-[13px]">{s.item}</span>
+              <span className="font-mono text-[0.929rem]">{s.item}</span>
             </div>
             <p className="mt-0.5 text-xs text-dim">{s.reason}</p>
           </li>
@@ -72,7 +72,7 @@ function Comprehension() {
         {COMPREHENSION.map((s) => (
           <li key={s.module} className={`min-w-0 border-b border-edge py-1.5 last:border-0 ${s.note ? "sm:col-span-2" : ""}`}>
             <div className="flex items-center justify-between gap-2">
-              <span className="min-w-0 truncate font-mono text-[13px]">{s.module}</span>
+              <span className="min-w-0 truncate font-mono text-[0.929rem]">{s.module}</span>
               <span className="flex shrink-0 items-center gap-2">
                 <span className="text-xs text-faint">{s.team}</span>
                 <Result pass={s.passed} />

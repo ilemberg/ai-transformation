@@ -14,7 +14,7 @@ export function RiskTiers() {
   return (
     <div>
       <p className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
-        <span className="font-mono text-[13px] font-semibold">{p.version}</span>
+        <span className="font-mono text-[0.929rem] font-semibold">{p.version}</span>
         <Lozenge tone="success">In force</Lozenge>
         <span className="text-dim">
           since month {p.effectiveMonth}; replaced {p.previous.version}, a flat {p.previous.cap}-line cap

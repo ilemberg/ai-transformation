@@ -23,7 +23,7 @@ export function AdoptionTable() {
               <div className="flex items-baseline justify-between gap-2">
                 <span className="font-semibold">
                   {t.team}
-                  {t.joinedMonth === 2 && <span className="ml-1.5 rounded-[3px] bg-info-bg px-1 text-[11px] font-bold uppercase text-info-text">Pilot</span>}
+                  {t.joinedMonth === 2 && <span className="ml-1.5 rounded-[3px] bg-info-bg px-1 text-2xs font-bold uppercase text-info-text">Pilot</span>}
                 </span>
                 <span className="truncate text-xs text-dim">{t.owner}</span>
               </div>
@@ -89,7 +89,7 @@ export function AdoptionTable() {
                 <tr key={t.team} className="border-t border-edge align-top hover:bg-hover">
                   <th scope="row" className="whitespace-nowrap px-3 py-2 font-medium">
                     {t.team}
-                    {t.joinedMonth === 2 && <span className="ml-1.5 rounded-[3px] bg-info-bg px-1 text-[11px] font-bold uppercase text-info-text">Pilot</span>}
+                    {t.joinedMonth === 2 && <span className="ml-1.5 rounded-[3px] bg-info-bg px-1 text-2xs font-bold uppercase text-info-text">Pilot</span>}
                   </th>
                   <td className="whitespace-nowrap px-3 py-2 text-dim">{t.owner}</td>
                   <td className="whitespace-nowrap px-3 py-2 text-right tabular-nums">Month {t.joinedMonth}</td>

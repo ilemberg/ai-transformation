@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function DashboardPage() {
   return (
     <main className="bg-panel-2 px-4 pb-10 pt-4 sm:px-6">
-      <nav aria-label="Breadcrumb" className="text-sm text-dim">
+      <nav aria-label="Breadcrumb" className="hidden text-sm text-dim sm:block">
         Projects <span className="text-faint">/</span> Bookwell <span className="text-faint">/</span> Dashboard
       </nav>
       <Suspense fallback={<DashboardView month={DEFAULT_MONTH} />}>

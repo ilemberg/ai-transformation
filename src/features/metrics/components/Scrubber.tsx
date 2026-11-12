@@ -1,8 +1,8 @@
 import { EVENTS, LAST_MONTH, PHASES, type Tone } from "../data";
 import { phaseFor, type Verdict } from "../logic";
 
-/** Half the thumb width: the thumb's centre runs from 8px to (width - 8px). */
-const THUMB_INSET = "mx-2";
+/** Half the thumb width (larger on a phone), so the bands and ticks line up with the thumb's centre. */
+const THUMB_INSET = "mx-3 sm:mx-2";
 
 const TONE_DOT: Record<Tone, string> = {
   neutral: "bg-system",
@@ -27,7 +27,7 @@ export function Scrubber({ month, playing, verdicts, onMonthChange, onTogglePlay
   const watches = count("Watch");
 
   return (
-    <div className="z-20 -mx-4 sm:sticky sm:top-14 border-y border-edge/80 bg-bg/85 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-md sm:border sm:px-5">
+    <div className="sticky top-12 z-20 -mx-4 border-y border-edge/80 bg-bg/90 px-4 py-2 backdrop-blur sm:top-14 sm:mx-0 sm:rounded-md sm:border sm:px-5 sm:py-3">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <div className="flex items-center gap-1.5">
           <button
@@ -35,7 +35,7 @@ export function Scrubber({ month, playing, verdicts, onMonthChange, onTogglePlay
             onClick={() => onMonthChange(month - 1)}
             disabled={month === 0 || playing}
             aria-label="Previous month"
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-edge-2 text-dim hover:text-ink disabled:opacity-40"
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-edge-2 text-dim hover:text-ink disabled:opacity-40 sm:h-9 sm:w-9"
           >
             <span aria-hidden>‹</span>
           </button>
@@ -43,7 +43,7 @@ export function Scrubber({ month, playing, verdicts, onMonthChange, onTogglePlay
             type="button"
             onClick={onTogglePlay}
             aria-label={playing ? "Pause" : month === LAST_MONTH ? "Replay the year from month 0" : "Play the year month by month"}
-            className="flex h-9 items-center gap-2 rounded-lg bg-speed px-3.5 text-sm font-semibold text-bg hover:bg-speed/90"
+            className="flex h-10 items-center gap-2 rounded-lg bg-speed px-3.5 sm:h-9 text-sm font-semibold text-bg hover:bg-speed/90"
           >
             <span aria-hidden className="w-3 text-center">
               {playing ? "❚❚" : "▶"}
@@ -55,7 +55,7 @@ export function Scrubber({ month, playing, verdicts, onMonthChange, onTogglePlay
             onClick={() => onMonthChange(month + 1)}
             disabled={month === LAST_MONTH || playing}
             aria-label="Next month"
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-edge-2 text-dim hover:text-ink disabled:opacity-40"
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-edge-2 text-dim hover:text-ink disabled:opacity-40 sm:h-9 sm:w-9"
           >
             <span aria-hidden>›</span>
           </button>
@@ -75,7 +75,7 @@ export function Scrubber({ month, playing, verdicts, onMonthChange, onTogglePlay
         </p>
       </div>
 
-      <div className="mt-3">
+      <div className="mt-1.5 sm:mt-3">
         <label htmlFor="month-slider" className="sr-only">
           Month of the rollout, 0 to {LAST_MONTH}
         </label>
@@ -109,18 +109,18 @@ export function Scrubber({ month, playing, verdicts, onMonthChange, onTogglePlay
             value={month}
             onChange={(e) => onMonthChange(Number(e.target.value))}
             aria-valuetext={`Month ${month}, ${phase.name}`}
-            className="relative h-7 w-full cursor-pointer appearance-none bg-transparent [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-bg [&::-moz-range-thumb]:bg-ink [&::-moz-range-track]:bg-transparent [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-bg [&::-webkit-slider-thumb]:bg-ink [&::-webkit-slider-thumb]:ring-2 ring-accent/40"
+            className="relative h-9 w-full cursor-pointer appearance-none bg-transparent max-sm:[&::-moz-range-thumb]:h-6 max-sm:[&::-moz-range-thumb]:w-6 max-sm:[&::-webkit-slider-thumb]:h-6 max-sm:[&::-webkit-slider-thumb]:w-6 sm:h-7 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-bg [&::-moz-range-thumb]:bg-ink [&::-moz-range-track]:bg-transparent [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-bg [&::-webkit-slider-thumb]:bg-ink [&::-webkit-slider-thumb]:ring-2 ring-accent/40"
           />
         </div>
 
         {/* Month numbers, with a dot where something happened. */}
-        <div className={`relative ${THUMB_INSET} h-7`} aria-hidden>
+        <div className={`relative ${THUMB_INSET} h-6 sm:h-7`} aria-hidden>
           {Array.from({ length: LAST_MONTH + 1 }, (_, m) => {
             const event = EVENTS.find((e) => e.month === m);
             return (
               <span
                 key={m}
-                className={`absolute top-0 flex -translate-x-1/2 flex-col items-center gap-0.5 font-mono text-[10px] ${
+                className={`absolute top-0 flex -translate-x-1/2 flex-col items-center gap-0.5 font-mono text-3xs ${
                   m === month ? "font-semibold text-ink" : m < month ? "text-dim" : "text-faint"
                 }`}
                 style={{ left: pct(m) }}
@@ -144,7 +144,7 @@ export function Scrubber({ month, playing, verdicts, onMonthChange, onTogglePlay
             return (
               <span
                 key={p.id}
-                className={`absolute truncate text-center text-[10px] uppercase tracking-wider ${
+                className={`absolute truncate text-center text-3xs uppercase tracking-wider ${
                   p.id === phase.id ? "text-ink" : "text-faint"
                 }`}
                 style={{ left: `${left * 100}%`, width: `${(right - left) * 100}%` }}

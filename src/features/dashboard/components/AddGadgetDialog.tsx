@@ -101,7 +101,7 @@ export function AddGadgetDialog({ open, onClose, isAdded, onAdd }: Props) {
             <section key={group} aria-labelledby={`gadget-group-${group}`}>
               <h3
                 id={`gadget-group-${group}`}
-                className="pb-1 pt-3 text-[11px] font-bold uppercase tracking-wide text-dim"
+                className="pb-1 pt-3 text-2xs font-bold uppercase tracking-wide text-dim"
               >
                 {GROUP_LABEL[group]}
               </h3>

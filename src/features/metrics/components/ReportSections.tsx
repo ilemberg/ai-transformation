@@ -31,14 +31,14 @@ function MetricTile({ id, month, note }: { id: string; month: number; note?: str
   const metric = metricById(id);
   const delta = deltaVsBaseline(metric, month);
   return (
-    <div className="flex min-w-0 flex-col gap-2 rounded-md border border-edge bg-card p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+    <div className="flex min-w-0 items-center justify-between gap-3 rounded-md border border-edge bg-card p-3">
       <div className="min-w-0">
         <div className="truncate text-xs text-dim">{metric.short}</div>
         <div className={`font-mono text-lg font-semibold tabular-nums sm:text-xl ${metric.descriptive ? "text-dim" : KIND_TEXT[metric.kind]}`}>
           {formatValue(metric, valueAt(metric.series, month))}
         </div>
         <DeltaText delta={delta} text={formatDelta(metric, delta)} />
-        {note && <div className="mt-0.5 text-[11px] text-faint">{note}</div>}
+        {note && <div className="mt-0.5 text-2xs text-faint">{note}</div>}
       </div>
       <Sparkline
         series={metric.series}
@@ -63,7 +63,7 @@ function StackedBars({ segments, month, unit, title }: { segments: Segment[]; mo
   const bw = (W - PAD) / MONTHS;
   return (
     <figure className="flex flex-col gap-2">
-      <svg viewBox={`0 0 ${W} ${H + 16}`} className="h-auto max-h-60 w-full" role="img" aria-label={title}>
+      <svg viewBox={`0 0 ${W} ${H + 21}`} className="h-auto max-h-60 w-full" role="img" aria-label={title}>
         {MONTH_IDS.map((m) => {
           let y = H;
           return (
@@ -85,7 +85,7 @@ function StackedBars({ segments, month, unit, title }: { segments: Segment[]; mo
                   rx={2}
                 />
               )}
-              <text x={PAD + m * bw + bw / 2} y={H + 13} textAnchor="middle" className={`text-[10px] ${m === month ? "fill-ink font-semibold" : "fill-faint"}`}>
+              <text x={PAD + m * bw + bw / 2} y={H + 16} textAnchor="middle" className={`text-3xs max-sm:text-[17px] ${m === month ? "fill-ink font-semibold" : "fill-faint"}`}>
                 {m}
               </text>
             </g>
@@ -152,7 +152,7 @@ export function VelocitySection({ month }: { month: number }) {
             }))}
           />
         </div>
-        <div className="grid grid-cols-2 content-start gap-2 xl:grid-cols-1 2xl:grid-cols-2">
+        <div className="grid content-start gap-2 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
           <MetricTile id="cycleTime" month={month} />
           <MetricTile id="throughput" month={month} />
           <MetricTile id="deployFreq" month={month} />
@@ -189,15 +189,15 @@ function ReworkTile({ month }: { month: number }) {
       <div className="text-xs text-dim">Rewritten within 21 days</div>
       <div className="mt-1 grid grid-cols-2 gap-2">
         <div>
-          <div className="text-[11px] text-faint">Agent code</div>
+          <div className="text-2xs text-faint">Agent code</div>
           <div className={`font-mono text-xl font-semibold ${worse ? "text-fail" : "text-quality"}`}>{agent.toFixed(1)}%</div>
         </div>
         <div>
-          <div className="text-[11px] text-faint">Human code</div>
+          <div className="text-2xs text-faint">Human code</div>
           <div className="font-mono text-xl font-semibold text-dim">{human.toFixed(1)}%</div>
         </div>
       </div>
-      <div className={`mt-1 text-[11px] ${worse ? "text-fail" : "text-pass"}`}>
+      <div className={`mt-1 text-2xs ${worse ? "text-fail" : "text-pass"}`}>
         {worse ? "Agent code is reworked more: fix specs and context" : "Agent code holds up as well as human code"}
       </div>
     </div>
@@ -209,7 +209,7 @@ export function QualitySection({ month }: { month: number }) {
   return (
     <Gadget>
       <SectionHeading id="quality-heading" kicker="" title="Quality: what breaks, and where it is caught" />
-      <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
+      <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
         <MetricTile id="cfr" month={month} />
         <MetricTile id="mttr" month={month} />
         <MetricTile id="evalPass" month={month} />
@@ -259,9 +259,9 @@ function Status({ metric, month }: { metric: Metric; month: number }) {
   const ok = meetsTarget(metric.target, valueAt(metric.series, month));
   if (ok === null) return <span className="text-faint">—</span>;
   return ok ? (
-    <span className="rounded-[3px] bg-pass-bg px-1 text-[11px] font-bold uppercase text-pass-text">On target</span>
+    <span className="rounded-[3px] bg-pass-bg px-1 text-2xs font-bold uppercase text-pass-text">On target</span>
   ) : (
-    <span className="rounded-[3px] bg-warn-bg px-1 text-[11px] font-bold uppercase text-warn">Not yet</span>
+    <span className="rounded-[3px] bg-warn-bg px-1 text-2xs font-bold uppercase text-warn">Not yet</span>
   );
 }
 
@@ -277,7 +277,7 @@ function CohortChart({ month }: { month: number }) {
   const line = (s: readonly number[]) => s.map((v, m) => `${m ? "L" : "M"}${x(m)},${y(v)}`).join(" ");
   return (
     <figure className="flex flex-col gap-2">
-      <svg viewBox={`0 0 ${W} ${H + 16}`} className="h-auto w-full" role="img" aria-label="Cycle time: pilot teams against the other four teams">
+      <svg viewBox={`0 0 ${W} ${H + 21}`} className="h-auto w-full" role="img" aria-label="Cycle time: pilot teams against the other four teams">
         {CHANGES.map((c) => (
           <line key={c.month} x1={x(c.month)} x2={x(c.month)} y1={4} y2={H} strokeDasharray="3 3" className="stroke-edge-2" />
         ))}
@@ -287,7 +287,7 @@ function CohortChart({ month }: { month: number }) {
         <circle cx={x(month)} cy={y(COHORT_CYCLE.pilot[month])} r={4} className="fill-brand" />
         <circle cx={x(month)} cy={y(COHORT_CYCLE.others[month])} r={4} className="fill-edge-2" />
         {MONTH_IDS.map((m) => (
-          <text key={m} x={x(m)} y={H + 13} textAnchor="middle" className={`text-[10px] ${m === month ? "fill-ink font-semibold" : "fill-faint"}`}>
+          <text key={m} x={x(m)} y={H + 16} textAnchor="middle" className={`text-3xs max-sm:text-[17px] ${m === month ? "fill-ink font-semibold" : "fill-faint"}`}>
             {m}
           </text>
         ))}
@@ -323,11 +323,13 @@ function OutcomeTile({
   note: string;
 }) {
   return (
-    <div className="flex min-w-0 flex-col gap-1 rounded-md border border-edge bg-card p-3">
-      <div className="text-xs text-dim">{label}</div>
-      <div className="font-mono text-lg font-semibold text-quality">{value}</div>
+    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 rounded-md border border-edge bg-card p-3 sm:flex sm:flex-col sm:items-stretch">
+      <div className="min-w-0">
+        <div className="text-xs text-dim">{label}</div>
+        <div className="font-mono text-lg font-semibold text-quality">{value}</div>
+      </div>
       {series && <Sparkline series={series} month={month} label={label} colorClass="text-quality" />}
-      <div className="text-[11px] text-faint">{note}</div>
+      <div className="col-span-2 text-2xs text-faint">{note}</div>
     </div>
   );
 }
@@ -337,7 +339,7 @@ function OutcomesRow({ month }: { month: number }) {
   const check = comprehensionAt(month);
   const dupYear = DUPLICATE_CHARGE_INCIDENTS.slice(Math.max(0, month - 11), month + 1).reduce((a, b) => a + b, 0);
   return (
-    <div className="mb-5 grid grid-cols-2 gap-2 xl:grid-cols-4">
+    <div className="mb-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
       <OutcomeTile
         label="Rebooked within policy, 2 h"
         value={`${REBOOK_SUCCESS[month]}%`}
@@ -377,9 +379,31 @@ export function ImprovingSection({ month }: { month: number }) {
       <SectionHeading id="improving-heading" kicker="" title="Improving: for travellers, against baseline, and against teams not yet changed" />
       <OutcomesRow month={month} />
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[520px] text-sm">
-            <thead className="text-left text-[11px] font-bold uppercase text-faint">
+        <div>
+          <ul className="divide-y divide-edge sm:hidden">
+            {IMPROVING_IDS.map((id) => {
+              const m = metricById(id);
+              const d = deltaVsBaseline(m, month);
+              return (
+                <li key={id} className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-3 gap-y-0.5 py-2.5">
+                  <span className="font-medium">{m.short}</span>
+                  <span className="text-right font-mono font-semibold">{formatValue(m, valueAt(m.series, month))}</span>
+                  <span className="text-xs text-dim">
+                    from <span className="font-mono">{formatValue(m, m.series[0])}</span> · target{" "}
+                    <span className="font-mono">{formatTarget(m)}</span>
+                  </span>
+                  <span className="text-right">
+                    <Status metric={m} month={month} />
+                  </span>
+                  <span className="col-span-2">
+                    <DeltaText delta={d} text={formatDelta(m, d)} />
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+          <table className="hidden w-full text-sm sm:table">
+            <thead className="text-left text-2xs font-bold uppercase text-faint">
               <tr className="border-b border-edge">
                 <th className="py-2 pr-3 font-bold">Metric</th>
                 <th className="py-2 pr-3 font-bold">Baseline</th>

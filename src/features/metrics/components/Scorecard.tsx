@@ -26,7 +26,44 @@ export function Scorecard({ month }: { month: number }) {
         </span>{" "}
         are on target.
       </SectionHeading>
-      <div className="overflow-x-auto rounded-md border border-edge bg-panel" tabIndex={0} role="region" aria-labelledby="scorecard-heading">
+      {/* On a phone each metric is a card; a six-column table would only fit by scrolling sideways. */}
+      <div className="flex flex-col gap-4 sm:hidden">
+        {GROUPS.map((group) => (
+          <div key={group.id}>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-dim">{group.label}</h3>
+            {group.note && <p className="text-xs text-faint">{group.note}</p>}
+            <ul className="mt-2 flex flex-col gap-2">
+              {METRICS.filter((m) => m.group === group.id).map((m) => {
+                const value = valueAt(m.series, month);
+                const delta = deltaVsBaseline(m, month);
+                return (
+                  <li key={m.id} className="rounded-md border border-edge bg-card p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 font-medium">
+                        {m.name}
+                        {m.kind !== "other" && <KindTag kind={m.kind} />}
+                      </span>
+                      <span className="shrink-0 font-mono text-lg font-semibold leading-tight tabular-nums">{formatValue(m, value)}</span>
+                    </div>
+                    <div className="mt-1 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                      <DeltaText delta={delta} text={formatDelta(m, delta)} />
+                      <span className="text-xs font-medium">
+                        <Status ok={meetsTarget(m.target, value)} />
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs text-dim">
+                      Baseline <span className="font-mono">{formatValue(m, baselineOf(m.series))}</span> · target{" "}
+                      <span className="font-mono">{formatTarget(m)}</span>
+                    </p>
+                    <p className="mt-1.5 text-xs leading-relaxed text-dim">{m.definition}</p>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+      </div>
+      <div className="hidden overflow-x-auto rounded-md border border-edge bg-panel sm:block" tabIndex={0} role="region" aria-labelledby="scorecard-heading">
         <table className="w-full min-w-[820px] border-collapse text-left text-sm">
           <caption className="sr-only">Scorecard at month {month}: baseline, current value, target and status for each metric</caption>
           <thead>
@@ -77,7 +114,6 @@ export function Scorecard({ month }: { month: number }) {
           ))}
         </table>
       </div>
-      <p className="mt-2 text-xs text-faint sm:hidden">Scroll the table sideways to see every column.</p>
       <TierNote />
     </section>
   );

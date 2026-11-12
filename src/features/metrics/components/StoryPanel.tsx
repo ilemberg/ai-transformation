@@ -22,7 +22,7 @@ export function StoryPanel({ month }: { month: number }) {
         </p>
         <p className="mt-2 text-sm leading-relaxed text-dim">{phase.summary}</p>
         <div className="mt-4 rounded-lg border border-edge-2 bg-panel-2/70 p-3">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-faint">Exit test</p>
+          <p className="text-2xs font-semibold uppercase tracking-wider text-faint">Exit test</p>
           <p className="mt-1 text-sm">{phase.exitTest}</p>
         </div>
         <ol className="mt-4 flex gap-1.5" aria-label="Phases">
@@ -30,7 +30,7 @@ export function StoryPanel({ month }: { month: number }) {
             <li
               key={p.id}
               aria-current={p.id === phase.id ? "step" : undefined}
-              className={`flex-1 rounded-md border px-2 py-1.5 text-center text-[11px] leading-tight ${
+              className={`flex-1 rounded-md border px-2 py-1.5 text-center text-2xs leading-tight ${
                 p.id === phase.id
                   ? "border-speed/60 bg-speed/10 text-ink"
                   : p.end < month
@@ -39,7 +39,7 @@ export function StoryPanel({ month }: { month: number }) {
               }`}
             >
               {p.name}
-              <span className="block font-mono text-[10px] text-faint">
+              <span className="block font-mono text-3xs text-faint">
                 {p.start}–{p.end}
               </span>
             </li>
@@ -63,7 +63,7 @@ export function StoryPanel({ month }: { month: number }) {
                     <span className={`font-medium ${now ? "text-ink" : "text-dim"}`}>{e.title}</span>
                     <span className="sr-only"> ({TONE[e.tone].label})</span>
                     {now && (
-                      <span className="ml-2 rounded bg-speed/15 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wider text-speed">
+                      <span className="ml-2 rounded bg-speed/15 px-1.5 py-px text-3xs font-semibold uppercase tracking-wider text-speed">
                         This month
                       </span>
                     )}

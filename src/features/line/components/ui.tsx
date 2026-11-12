@@ -49,7 +49,7 @@ export const TONE_MARK: Record<Tone, { mark: string; className: string; label: s
 };
 
 export function SectionLabel({ children }: { children: React.ReactNode }) {
-  return <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-faint">{children}</span>;
+  return <span className="font-mono text-2xs uppercase tracking-[0.12em] text-faint">{children}</span>;
 }
 
 export function Panel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
